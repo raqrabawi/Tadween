@@ -49,7 +49,7 @@ export default function Listen() {
         <div className="row mt20" style={{ flexWrap: 'wrap', gap: 8 }}>
           {drafts.slice(0, 4).map((d, i) => (
             <span key={i} className="gl" style={{ minHeight: 40, padding: '0 14px 0 6px', borderRadius: 20, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="ib" style={{ width: 28, height: 28, background: d.kind === 'event' ? '#7DB4EB' : d.kind === 'reminder' ? '#E8C478' : d.kind === 'item' ? '#5BE3BE' : '#B0A0E8', color: '#16232A', boxShadow: 'none' }}>
+              <span className="ib" style={{ width: 28, height: 28, background: d.kind === 'event' ? 'var(--k-event)' : d.kind === 'reminder' ? 'var(--k-reminder)' : d.kind === 'item' ? 'var(--k-item)' : 'var(--k-note)', color: '#16232A', boxShadow: 'none' }}>
                 <I n={d.kind === 'event' ? 'cal' : d.kind === 'reminder' ? 'bell' : d.kind === 'item' ? 'bag' : d.kind === 'note' ? 'pen' : 'check'} s={13} w={2.4} />
               </span>
               {d.kind === 'event' ? describeWhen(d.start) : d.kind === 'reminder' ? (d.at ? `Remind ${describeWhen(d.at).split(' · ')[0]}` : 'Reminder') : d.kind === 'item' ? d.name : d.title}

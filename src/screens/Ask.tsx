@@ -41,11 +41,11 @@ export default function Ask() {
     const out: Hit[] = []
     for (const it of items) if (it.name.toLowerCase().includes(term)) {
       const l = lists.find((x) => x.id === it.list_id)
-      out.push({ kind: 'item', title: it.name + (it.qty ? `, ${it.qty}` : ''), meta: `${l?.title ?? 'List'} · ${it.done ? 'checked ' + new Date(it.done_at ?? it.created_at).toLocaleDateString([], { day: 'numeric', month: 'short' }) : 'to buy'}`, to: '/lists', icon: 'bag', tone: '#5BE3BE' })
+      out.push({ kind: 'item', title: it.name + (it.qty ? `, ${it.qty}` : ''), meta: `${l?.title ?? 'List'} · ${it.done ? 'checked ' + new Date(it.done_at ?? it.created_at).toLocaleDateString([], { day: 'numeric', month: 'short' }) : 'to buy'}`, to: '/lists', icon: 'bag', tone: 'var(--k-item)' })
     }
-    for (const n of notes) if ((n.title + ' ' + n.body).toLowerCase().includes(term)) out.push({ kind: 'note', title: n.title, meta: 'Journal · ' + new Date(n.updated_at).toLocaleDateString([], { day: 'numeric', month: 'short' }), to: `/note/${n.id}`, icon: 'pen', tone: '#B0A0E8' })
-    for (const e of events) if (e.title.toLowerCase().includes(term)) out.push({ kind: 'event', title: e.title, meta: new Date(e.starts_at).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + hm(e.starts_at), to: '/calendar', icon: 'cal', tone: '#7DB4EB' })
-    for (const r of reminders) if (r.title.toLowerCase().includes(term)) out.push({ kind: 'reminder', title: r.title, meta: r.done ? 'Done' : 'Open', to: '/', icon: 'bell', tone: '#E8C478' })
+    for (const n of notes) if ((n.title + ' ' + n.body).toLowerCase().includes(term)) out.push({ kind: 'note', title: n.title, meta: 'Journal · ' + new Date(n.updated_at).toLocaleDateString([], { day: 'numeric', month: 'short' }), to: `/note/${n.id}`, icon: 'pen', tone: 'var(--k-note)' })
+    for (const e of events) if (e.title.toLowerCase().includes(term)) out.push({ kind: 'event', title: e.title, meta: new Date(e.starts_at).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + hm(e.starts_at), to: '/calendar', icon: 'cal', tone: 'var(--k-event)' })
+    for (const r of reminders) if (r.title.toLowerCase().includes(term)) out.push({ kind: 'reminder', title: r.title, meta: r.done ? 'Done' : 'Open', to: '/', icon: 'bell', tone: 'var(--k-reminder)' })
     return out.slice(0, 8)
   }, [asked, q, items, lists, notes, events, reminders])
 

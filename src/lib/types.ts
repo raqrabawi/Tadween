@@ -9,7 +9,8 @@ export interface Profile {
   speak_replies: boolean
   morning_brief: boolean
   close_day: boolean
-  theme: 'dark' | 'light'
+  theme: 'dark' | 'light' | 'system'
+  palette: 'linen' | 'classic'
   onboarded: boolean
 }
 

@@ -6,8 +6,13 @@ import { speak } from '../lib/voice'
 import { I } from '../components/Icon'
 import { Avatar, Sheet, Switch } from '../components/ui'
 
+const PALETTES = [
+  { id: 'linen' as const, label: 'Linen', meta: 'Warm · new', d: ['#0F181D', '#16232A', '#5BE3BE', '#F5F2EC', '#FFFFFF', '#177A61'] },
+  { id: 'classic' as const, label: 'Classic', meta: 'Cool · original', d: ['#0F181D', '#16232A', '#5BE3BE', '#E4EEF0', '#FFFFFF', '#2FBF98'] }
+]
+
 export default function Settings() {
-  const { profile, family, members, session, updateProfile, theme, setTheme, joinFamily } = useStore()
+  const { profile, family, members, session, updateProfile, theme, setTheme, palette, setPalette, joinFamily } = useStore()
   const [sheet, setSheet] = useState<null | 'invite' | 'email' | 'join'>(null)
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
@@ -65,14 +70,31 @@ export default function Settings() {
       </div>
 
       <div className="card tone-sky mt12" style={{ padding: '16px 6px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
           <button className={profile?.morning_brief ? 'orb on' : 'orb'} aria-pressed={!!profile?.morning_brief} onClick={() => updateProfile({ morning_brief: !profile?.morning_brief })}><span className="ib plain"><I n="sun" s={21} /></span>Morning brief</button>
           <button className={profile?.close_day ? 'orb on' : 'orb'} aria-pressed={!!profile?.close_day} onClick={() => updateProfile({ close_day: !profile?.close_day })}><span className="ib plain"><I n="moon" s={21} /></span>Close the day</button>
-          <button className={theme === 'light' ? 'orb on' : 'orb'} aria-pressed={theme === 'light'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}><span className="ib plain"><I n={theme === 'dark' ? 'moon' : 'sun'} s={21} /></span>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</button>
         </div>
       </div>
 
-      <div className="card flush mt12">
+      <p className="cap" style={{ margin: '24px 8px 10px' }}>Appearance</p>
+      <div className="card" style={{ padding: 14 }}>
+        <div role="radiogroup" aria-label="Color theme" style={{ display: 'flex', gap: 10 }}>
+          {PALETTES.map((p) => (
+            <button key={p.id} role="radio" aria-checked={palette === p.id} className="thm-opt" onClick={() => setPalette(p.id)}>
+              <span className="thm-prev" aria-hidden="true">
+                <span style={{ background: p.d[0] }}><i style={{ background: p.d[1] }} /><i style={{ width: '70%', background: p.d[2] }} /></span>
+                <span style={{ background: p.d[3] }}><i style={{ background: p.d[4] }} /><i style={{ width: '70%', background: p.d[5] }} /></span>
+              </span>
+              <span className="thm-name"><span>{p.label}<small>{p.meta}</small></span>{palette === p.id && <span className="thm-ck"><I n="check" s={12} w={3.4} /></span>}</span>
+            </button>
+          ))}
+        </div>
+        <div className="seg mt12" role="group" aria-label="Mode">
+          {(['dark', 'light', 'system'] as const).map((m) => <button key={m} className={theme === m ? 'on' : ''} aria-pressed={theme === m} onClick={() => setTheme(m)}>{m === 'dark' ? 'Dark' : m === 'light' ? 'Light' : 'System'}</button>)}
+        </div>
+      </div>
+
+      <div className="card flush mt24">
         {user?.phone && <div className="rw"><span className="ib sm"><I n="phone" s={18} /></span><span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Phone</span><span className="sub num" style={{ fontSize: 13 }}>+{user.phone} · verified</span></span></div>}
         <button className="rw" onClick={() => setSheet('email')}>
           <span className="ib sm"><I n="mail" s={18} /></span>

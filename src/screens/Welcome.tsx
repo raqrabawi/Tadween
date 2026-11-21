@@ -30,11 +30,11 @@ export default function Welcome() {
         <div style={{ position: 'absolute', left: '50%', top: '50%', width: 190, height: 190, margin: '-95px 0 0 -95px', borderRadius: '50%', border: '1px solid var(--line)' }} />
         <span className="vorb" style={{ position: 'absolute', left: '50%', top: '50%', width: 104, height: 104, margin: '-52px 0 0 -52px' }}><I n="mic" s={34} w={1.8} /></span>
         <div className="gl" style={{ position: 'absolute', left: -4, top: 20, transform: 'rotate(-5deg)', borderRadius: 22, padding: '10px 16px 10px 10px', display: 'flex', gap: 10, alignItems: 'center', fontSize: 14, fontWeight: 600 }}>
-          <span className="ib sm" style={{ background: '#7DB4EB', color: '#16232A' }}><I n="cal" s={16} /></span>
+          <span className="ib sm" style={{ background: 'var(--k-event)', color: '#16232A' }}><I n="cal" s={16} /></span>
           <span style={{ display: 'flex', flexDirection: 'column' }}>Design review<span className="sub" style={{ fontSize: 12 }}>Today · 09:30</span></span>
         </div>
         <div className="gl" style={{ position: 'absolute', right: -4, top: 116, transform: 'rotate(4deg)', borderRadius: 22, padding: '10px 16px 10px 10px', display: 'flex', gap: 10, alignItems: 'center', fontSize: 14, fontWeight: 600 }}>
-          <span className="ib sm" style={{ background: '#5BE3BE', color: '#16232A' }}><I n="bag" s={16} /></span>
+          <span className="ib sm" style={{ background: 'var(--k-item)', color: '#16232A' }}><I n="bag" s={16} /></span>
           <span style={{ display: 'flex', flexDirection: 'column' }}>Bread, milk<span className="sub" style={{ fontSize: 12 }}>Family · added by Mama</span></span>
         </div>
       </div>

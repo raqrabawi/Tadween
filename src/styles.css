@@ -17,8 +17,8 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
   --bg:#0F181D; --s1:rgba(22,35,42,.78); --s1-solid:#16232A; --s2:rgba(228,238,240,.07); --s3:rgba(228,238,240,.13);
   --ink:#E4EEF0; --ink2:rgba(228,238,240,.78); --ink3:rgba(228,238,240,.62); --line:rgba(228,238,240,.13);
   --acc:#7CC6CA; --on:#16232A; --sea:#075056; --hotInk:#E4EEF0; --em:#5BE3BE;
-  --ctaFlat:#5BE3BE; --ctaInk:#0E1A1F;
-  --grn:#0A6970; --mint:#7CC6CA; --sun:#E3A857; --red:#FF7B6B;
+  --ctaFlat:#5BE3BE; --ctaInk:#16232A; --ctaPress:#4CCFAB; --ctaRing:rgba(91,227,190,.45);
+  --grn:#0A6970; --mint:#7CC6CA; --sun:#E8C478; --honey:#E8C478; --red:#FF6B6B;
   --hot:radial-gradient(260px 150px at 16% 0%,rgba(124,198,202,.28),transparent 70%),linear-gradient(160deg,#0B6B72 0%,#075056 55%,#05404A 100%);
   --edge:inset 0 1px 0 rgba(228,238,240,.1),inset 0 0 0 1px rgba(228,238,240,.05);
   --shadow:0 24px 48px -24px rgba(0,0,0,.85);
@@ -29,11 +29,11 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 }
 .light{
   color-scheme:light;
-  --bg:#E4EEF0; --s1:rgba(255,255,255,.8); --s1-solid:#FFFFFF; --s2:rgba(22,35,42,.06); --s3:rgba(22,35,42,.11);
+  --bg:#F5F2EC; --s1:rgba(255,255,255,.8); --s1-solid:#FFFFFF; --s2:rgba(22,35,42,.06); --s3:rgba(22,35,42,.11);
   --ink:#16232A; --ink2:rgba(22,35,42,.8); --ink3:rgba(22,35,42,.68); --line:rgba(22,35,42,.13);
   --acc:#075056; --on:#FFFFFF; --sea:#075056; --hotInk:#E4EEF0; --em:#075056;
-  --ctaFlat:#2FBF98; --ctaInk:#0E1A1F;
-  --grn:#075056; --mint:#075056; --sun:#8A5300; --red:#B3261E;
+  --ctaFlat:#177A61; --ctaInk:#FFFFFF; --ctaPress:#126650; --ctaRing:rgba(23,122,97,.4);
+  --grn:#075056; --mint:#075056; --sun:#8A5E00; --honey:#8A5E00; --red:#C2362B;
   --hot:radial-gradient(260px 150px at 16% 0%,rgba(124,198,202,.22),transparent 70%),linear-gradient(160deg,#0B6B72 0%,#075056 55%,#05404A 100%);
   --edge:inset 0 1px 0 #FFFFFF,inset 0 0 0 1px rgba(255,255,255,.6),0 0 0 .5px rgba(22,35,42,.08);
   --shadow:0 22px 44px -26px rgba(22,35,42,.32);
@@ -90,11 +90,11 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 .dash{border-radius:28px;border:1.5px dashed var(--line)}
 
 /* Card tones */
-.tone-mint{--tc:91,227,190;--ti:#5BE3BE}
-.tone-sky{--tc:125,180,235;--ti:#7DB4EB}
-.tone-sand{--tc:232,196,120;--ti:#E8C478}
-.tone-lilac{--tc:176,160,232;--ti:#B0A0E8}
-.tone-moss{--tc:168,208,120;--ti:#A8D078}
+.tone-mint{--tc:159,227,203;--ti:#9FE3CB}
+.tone-sky{--tc:168,205,238;--ti:#A8CDEE}
+.tone-sand{--tc:235,211,156;--ti:#EBD39C}
+.tone-lilac{--tc:198,187,240;--ti:#C6BBF0}
+.tone-moss{--tc:191,217,154;--ti:#BFD99A}
 .card[class*="tone-"]{background:linear-gradient(155deg,rgba(var(--tc),.22) 0%,rgba(var(--tc),.07) 58%,rgba(var(--tc),.02) 100%),var(--s1);box-shadow:var(--edge),inset 0 0 0 1px rgba(var(--tc),.14),var(--shadow)}
 .light .card[class*="tone-"]{background:linear-gradient(155deg,rgba(var(--tc),.42) 0%,rgba(var(--tc),.16) 60%,rgba(var(--tc),.06) 100%),#FFFFFF;box-shadow:inset 0 1px 0 #FFFFFF,inset 0 0 0 1px rgba(var(--tc),.3),var(--shadow)}
 [class*="tone-"] .ib:not(.plain){background:var(--ti);color:#16232A;box-shadow:none}
@@ -160,8 +160,10 @@ textarea.inp{resize:none;line-height:28px}
 
 /* ---------- Buttons ---------- */
 .btn{height:56px;border-radius:28px;padding:0 24px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:600;letter-spacing:-.2px;text-align:center;white-space:nowrap;width:100%}
-.btn.pri{background:var(--ctaFlat);color:var(--ctaInk);font-weight:700;outline:1.5px solid color-mix(in srgb,var(--ctaFlat) 45%,transparent);outline-offset:4px}
-.btn.pri:active,.btn:active{opacity:.85}
+.btn.pri{background:var(--ctaFlat);color:var(--ctaInk);font-weight:700;outline:1.5px solid var(--ctaRing);outline-offset:4px}
+.btn:active{opacity:.85}
+.btn.pri:active{opacity:1;background:var(--ctaPress)}
+.btn.pri:disabled{opacity:.35}
 .btn.sec{background:var(--s1);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:var(--edge)}
 .btn.ink{background:var(--inkBtn);color:var(--inkBtnText)}
 .btn.line{box-shadow:inset 0 0 0 1px var(--line);height:48px;border-radius:24px;font-size:15px}
@@ -215,3 +217,25 @@ textarea.inp{resize:none;line-height:28px}
 .empty{padding:28px 20px;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
 .spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--acc);animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
+
+/* Palette: Classic (original Wild Sand set). Linen is the default. */
+.dark.classic{--ctaFlat:#5BE3BE;--ctaInk:#0E1A1F;--ctaPress:#4FD9B3;--ctaRing:rgba(91,227,190,.45);--sun:#E3A857;--honey:#E3A857;--red:#FF7B6B}
+.light.classic{--bg:#E4EEF0;--ctaFlat:#2FBF98;--ctaInk:#0E1A1F;--ctaPress:#27A886;--ctaRing:rgba(47,191,152,.45);--sun:#8A5300;--honey:#8A5300;--red:#B3261E}
+.classic .tone-mint{--tc:91,227,190;--ti:#5BE3BE}
+.classic .tone-sky{--tc:125,180,235;--ti:#7DB4EB}
+.classic .tone-sand{--tc:232,196,120;--ti:#E8C478}
+.classic .tone-lilac{--tc:176,160,232;--ti:#B0A0E8}
+.classic .tone-moss{--tc:168,208,120;--ti:#A8D078}
+/* Kind colors (event, reminder, item, note) follow the card tones */
+:root{--k-event:#A8CDEE;--k-reminder:#EBD39C;--k-item:#9FE3CB;--k-note:#C6BBF0;--k-task:#BFD99A}
+.classic{--k-event:#7DB4EB;--k-reminder:#E8C478;--k-item:#5BE3BE;--k-note:#B0A0E8;--k-task:#A8D078}
+
+/* Theme picker */
+.thm-opt{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:22px;background:var(--s2);text-align:left;box-shadow:inset 0 0 0 1.5px transparent;transition:box-shadow .2s}
+.thm-opt[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--acc)}
+.thm-prev{display:flex;height:64px;border-radius:14px;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.thm-prev > span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:5px;padding:8px}
+.thm-prev i{display:block;height:10px;border-radius:5px}
+.thm-name{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:700}
+.thm-name small{display:block;font-size:12px;font-weight:500;color:var(--ink3)}
+.thm-ck{width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--acc);color:var(--on)}

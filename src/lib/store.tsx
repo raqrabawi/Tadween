@@ -1,3 +1,4 @@
+import { applyTheme, storedMode, storedPalette, watchSystem, type Mode, type Palette } from './theme'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
@@ -16,8 +17,10 @@ interface Store {
   reminders: Reminder[]
   notes: Note[]
   loading: boolean
-  theme: 'dark' | 'light'
-  setTheme: (t: 'dark' | 'light') => void
+  theme: Mode
+  palette: Palette
+  setTheme: (t: Mode) => void
+  setPalette: (p: Palette) => void
   updateProfile: (p: Partial<Profile>) => Promise<void>
   reload: () => Promise<void>
   addCategory: (name: string) => Promise<Category | null>
@@ -60,14 +63,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(false)
-  const [theme, setThemeState] = useState<'dark' | 'light'>(() => (localStorage.getItem('nook-theme') as 'dark' | 'light') || 'dark')
+  const [theme, setThemeState] = useState<Mode>(storedMode)
+  const [palette, setPaletteState] = useState<Palette>(storedPalette)
   const seeded = useRef(false)
 
   useEffect(() => {
-    document.documentElement.className = theme
-    document.querySelector('meta[name=theme-color]')?.setAttribute('content', theme === 'dark' ? '#0F181D' : '#E4EEF0')
-    try { localStorage.setItem('nook-theme', theme) } catch { /* private mode */ }
-  }, [theme])
+    applyTheme(theme, palette)
+    if (theme === 'system') return watchSystem(() => applyTheme(theme, palette))
+  }, [theme, palette])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true) })
@@ -93,6 +96,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (p.data) {
       setProfile(p.data as Profile)
       if ((p.data as Profile).theme) setThemeState((p.data as Profile).theme)
+      if ((p.data as Profile).palette) setPaletteState((p.data as Profile).palette)
     }
     const mine = (fm.data ?? []) as Member[]
     const fid = mine.find((m) => m.user_id === uid && m.role === 'owner')?.family_id ?? mine.find((m) => m.user_id === uid)?.family_id
@@ -154,7 +158,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(ch) }
   }, [uid, loadAll])
 
-  const setTheme = useCallback((t: 'dark' | 'light') => {
+  const setPalette = useCallback((pl: Palette) => {
+    setPaletteState(pl)
+    if (uid) supabase.from('profiles').update({ palette: pl }).eq('id', uid).then(() => undefined)
+  }, [uid])
+
+  const setTheme = useCallback((t: Mode) => {
     setThemeState(t)
     if (uid) supabase.from('profiles').update({ theme: t }).eq('id', uid).then(() => undefined)
   }, [uid])
@@ -276,11 +285,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const memberFor = useCallback((userId: string | null) => members.find((m) => m.user_id === userId), [members])
 
   const value = useMemo<Store>(() => ({
-    ready, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme,
-    setTheme, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
+    ready, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+    setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
-  }), [ready, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme,
-    setTheme, updateProfile, loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
+  }), [ready, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+    setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
