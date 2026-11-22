@@ -87,7 +87,9 @@ export async function migrateGuest(familyId: string | null): Promise<boolean> {
   const g = peekGuest()
   if (!hasGuestContent(g) || !g) { try { localStorage.removeItem(GUEST_KEY) } catch { /* ignore */ } return false }
 
-  const [{ data: rc }, { data: rl }] = await Promise.all([db.from('categories').select('*'), db.from('lists').select('*')])
+  const [{ data: rc, error: e1 }, { data: rl, error: e2 }] = await Promise.all([db.from('categories').select('*'), db.from('lists').select('*')])
+  // Can't see what the account already has: try again later rather than create duplicates
+  if (e1 || e2) return false
   const remoteCats = (rc ?? []) as Category[]
   const remoteLists = (rl ?? []) as List[]
 

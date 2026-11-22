@@ -77,6 +77,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Mode>(storedMode)
   const [palette, setPaletteState] = useState<Palette>(storedPalette)
   const seeded = useRef(false)
+  const loading_ = useRef(false)
+  const reloadAgain = useRef(false)
   const [savePrompt, setSavePromptState] = useState(false)
   const promptDismissed = useRef(false)
   const setSavePrompt = useCallback((v: boolean) => { if (!v) promptDismissed.current = true; setSavePromptState(v) }, [])
@@ -109,7 +111,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const uid = session?.user.id ?? null
 
-  const loadAll = useCallback(async () => {
+  const loadAll = useCallback(async (): Promise<void> => {
+    if (!uid) return
+    // One load at a time: overlapping loads used to seed starter data twice
+    if (loading_.current) { reloadAgain.current = true; return }
+    loading_.current = true
+    try { await loadOnce() } finally {
+      loading_.current = false
+      if (reloadAgain.current) { reloadAgain.current = false; void loadAll() }
+    }
+  }, [uid]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadOnce = async (): Promise<void> => {
     if (!uid) return
     setLoading(true)
     // Creates the profile and family on first sign-in, then returns the profile
@@ -131,7 +144,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const mine = (fm.data ?? []) as Member[]
     const fid = mine.find((m) => m.user_id === uid && m.role === 'owner')?.family_id ?? mine.find((m) => m.user_id === uid)?.family_id
     // Bring over anything added as a guest on this device, then reload
-    if (await migrateGuest(fid ?? null)) { seeded.current = true; return loadAll() }
+    // If anything failed to load, don't seed or copy guest data — that would duplicate what's already there
+    const failed = [p, fm, cats, ls, its, evs, rems, ns].some((r) => r.error)
+    if (failed) { setLoading(false); setTimeout(() => void loadAll(), 3000); return }
+    if (await migrateGuest(fid ?? null)) { seeded.current = true; return loadOnce() }
     if (fid) {
       const f = await db.from('families').select('*').eq('id', fid).single()
       setFamily(f.data as Family)
@@ -167,9 +183,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { title: 'Home Fixes', category_id: byName('Home'), tone: 'sand', verb: 'do' },
         { title: 'My To-dos', category_id: byName('Personal'), tone: 'moss', verb: 'do' }
       ])
-      await loadAll()
+      await loadOnce()
     }
-  }, [uid])
+  }
 
   useEffect(() => {
     if (!uid) {
