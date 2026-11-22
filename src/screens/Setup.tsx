@@ -5,9 +5,14 @@ import { speak } from '../lib/voice'
 import { I } from '../components/Icon'
 
 export default function Setup() {
-  const { profile, updateProfile } = useStore()
+  const { profile, updateProfile, session } = useStore()
   const nav = useNavigate()
-  const [name, setName] = useState(profile?.name ?? '')
+  const [name, setName] = useState(() => {
+    const u = (session?.user ?? {}) as { name?: string; user_metadata?: { name?: string; full_name?: string } }
+    let pending = ''
+    try { pending = sessionStorage.getItem('tadween-pending-name') ?? '' } catch { /* ignore */ }
+    return profile?.name || pending || u.name || u.user_metadata?.full_name || u.user_metadata?.name || ''
+  })
   const [mic, setMic] = useState<'idle' | 'ok' | 'denied'>('idle')
   const [notif, setNotif] = useState<'idle' | 'ok' | 'denied'>(() => ('Notification' in window && Notification.permission === 'granted' ? 'ok' : 'idle'))
   const [playing, setPlaying] = useState(false)
@@ -30,6 +35,7 @@ export default function Setup() {
   }
   const finish = async () => {
     await updateProfile({ name: name.trim() || profile?.name || 'Friend', onboarded: true })
+    try { sessionStorage.removeItem('tadween-pending-name') } catch { /* ignore */ }
     nav('/', { replace: true })
   }
 

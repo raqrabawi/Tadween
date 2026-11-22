@@ -10,7 +10,7 @@ const GOOGLE_MARK = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/goo
 // The Apple logo is a glyph in Apple's own system fonts, so it is only shown on Apple devices.
 const IS_APPLE = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
 
-export function AuthButtons({ size = 'lg' }: { size?: 'lg' | 'md' }) {
+export function AuthButtons({ size = 'lg', verb = 'Continue', email = true }: { size?: 'lg' | 'md'; verb?: 'Continue' | 'Sign in' | 'Sign up'; email?: boolean }) {
   const [busy, setBusy] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const h = size === 'lg' ? 56 : 52
@@ -30,13 +30,13 @@ export function AuthButtons({ size = 'lg' }: { size?: 'lg' | 'md' }) {
     <div className="stack" style={{ gap: 10 }}>
       {IS_APPLE && (
         <button className="btn apple" style={{ height: h }} onClick={() => oauth('apple')} disabled={!!busy}>
-          <span className="apple-mark" aria-hidden="true">{''}</span>{busy === 'apple' ? 'Opening Apple…' : 'Continue with Apple'}
+          <span className="apple-mark" aria-hidden="true">{''}</span>{busy === 'apple' ? 'Opening Apple…' : `${verb} with Apple`}
         </button>
       )}
       <button className="btn google" style={{ height: h }} onClick={() => oauth('google')} disabled={!!busy}>
-        <img src={GOOGLE_MARK} width={20} height={20} alt="" />{busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
+        <img src={GOOGLE_MARK} width={20} height={20} alt="" />{busy === 'google' ? 'Opening Google…' : `${verb} with Google`}
       </button>
-      <Link to="/auth/email" className="btn line" style={{ height: h }}><I n="mail" s={17} />Continue with email</Link>
+      {email && <Link to="/auth/register" className="btn line" style={{ height: h }}><I n="mail" s={17} />Continue with email</Link>}
       {err && <p role="alert" className="sub" style={{ textAlign: 'center', color: 'var(--red)' }}>{err}</p>}
     </div>
   )
@@ -54,7 +54,8 @@ export function SavePrompt() {
         <p className="sub" style={{ fontSize: 15, lineHeight: '22px' }}>It’s saved on this phone for now. Sign in to keep it safe, use it on any device and share lists with your family.</p>
       </div>
       <div className="mt20"><AuthButtons size="md" /></div>
-      <button className="btn" style={{ marginTop: 8, background: 'transparent', color: 'var(--ink2)' }} onClick={() => setSavePrompt(false)}>Not now</button>
+      <p className="sub mt12" style={{ textAlign: 'center', fontSize: 15 }}>Have an account? <Link to="/auth/login" onClick={() => setSavePrompt(false)} style={{ color: 'var(--acc)', fontWeight: 700 }}>Sign in</Link></p>
+      <button className="btn" style={{ marginTop: 4, background: 'transparent', color: 'var(--ink2)' }} onClick={() => setSavePrompt(false)}>Not now</button>
     </Sheet>
   )
 }

@@ -31,7 +31,8 @@ export default function Welcome() {
       <p className="sub mt12" style={{ fontSize: 16, lineHeight: '23px' }}>Your calendar, lists, family groceries and notes — by voice, in English or Arabic.</p>
 
       <div className="mt24"><AuthButtons /></div>
-      <Link to="/" className="btn mt8" style={{ background: 'transparent', color: 'var(--ink2)', height: 48 }}>Look around first<I n="next" s={15} w={2.4} /></Link>
+      <p className="sub mt16" style={{ textAlign: 'center', fontSize: 15 }}>Have an account? <Link to="/auth/login" style={{ color: 'var(--acc)', fontWeight: 700 }}>Sign in</Link></p>
+      <Link to="/" className="btn" style={{ marginTop: 4, background: 'transparent', color: 'var(--ink2)', height: 44 }}>Look around first<I n="next" s={15} w={2.4} /></Link>
       {authError && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>Can’t reach sign-in right now ({authError}). Check your connection and try again.</p>}
     </main>
   )
