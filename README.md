@@ -2,7 +2,7 @@
 
 A voice-first everyday app: calendar, reminders, lists, family groceries and notes. Speak in English or Arabic and Tadween turns it into events, reminders, list items and notes.
 
-- **Live:** https://raqrabawi.github.io/Tadween/
+- **Live:** https://raqrabawi.github.io/tadween/
 - **Stack:** React + Vite + TypeScript, installable PWA, Supabase (auth, Postgres with row-level security, realtime).
 - **Sign-in:** Apple, Google, phone code or email code.
 
