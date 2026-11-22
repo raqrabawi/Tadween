@@ -35,13 +35,21 @@ export default function Listen() {
   const text = supported ? v.text : typed
   const drafts = useMemo(() => understandIn(text, scope, { listHint }), [text, scope, listHint])
   const noteCategory = (() => { try { return sessionStorage.getItem('tadween-notecat') } catch { return null } })()
+  const [empty, setEmpty] = useState(false)
+  const back = page === 'all' ? '/' : `/${page}`
+  const cancel = () => { v.stop(); v.reset(); nav(back) }
+  // Stop is always available: with words it moves on to review, without them it just stops
+  const stop = () => {
+    if (!text) { v.stop(); setEmpty(true); return }
+    done()
+  }
   const done = () => { v.stop(); nav('/review', { state: { text, scope, listHint, from: page, noteCategory: page === 'notes' ? noteCategory : null } }) }
 
   return (
     <div className="lvw" style={{ minHeight: '100dvh', color: 'var(--ink)' }}>
       <main className="screen col" style={{ background: 'transparent' }}>
         <div className="hd">
-          <Link to={page === 'all' ? '/' : `/${page}`} className="ib" aria-label="Cancel" onClick={() => v.stop()}><I n="close" s={15} w={2.6} /></Link>
+          <Link to={scope === 'calendar' ? '/add?type=Event' : scope === 'lists' ? '/add?type=Shopping' : scope === 'notes' ? '/note/new' : '/add'} className="ib" aria-label="Type instead" onClick={() => v.stop()}><I n="keyboard" s={18} w={1.8} /></Link>
           <span role="status" className="ib wide num" style={{ height: 40 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: v.listening ? 'var(--red)' : 'var(--ink3)', boxShadow: v.listening ? '0 0 10px var(--red)' : 'none' }} />{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}</span>
           <span className="bi" style={{ height: 40, borderRadius: 20, padding: '0 12px 0 8px' }}><b>EN</b><b>AR</b>Auto</span>
         </div>
@@ -92,17 +100,21 @@ export default function Listen() {
 
         <div className="vwave">
           <VoiceWave level={level} height={240} muted={!v.listening} />
-          <button className="vorb" onClick={done} disabled={!text} aria-label="Done speaking">
-            <I n={text ? 'check' : 'mic'} s={30} w={2.4} />
-            <span>{text ? 'Tap when done' : v.listening ? 'Listening' : 'Paused'}</span>
+          <button className="vorb" onClick={() => (v.listening ? stop() : (setEmpty(false), v.start()))} aria-label={v.listening ? 'Stop recording' : 'Start recording'}>
+            <I n={v.listening ? 'stop' : 'mic'} s={26} w={2.4} />
+            <span>{v.listening ? 'Tap to stop' : 'Tap to talk'}</span>
           </button>
         </div>
 
+        {empty && <p role="status" className="sub" style={{ textAlign: 'center', marginTop: 12 }}>I didn’t catch anything. Tap the mic to try again.</p>}
+
         <div className="spread mt24" style={{ alignItems: 'flex-start' }}>
-          <Link to={scope === 'calendar' ? '/add?type=Event' : scope === 'lists' ? '/add?type=Shopping' : scope === 'notes' ? '/note/new' : '/add'} className="orb" onClick={() => v.stop()}><span className="ib lg"><I n="keyboard" s={22} w={1.8} /></span>Type</Link>
-          <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!text} onClick={done}><I n="stop" s={14} />Done</button>
+          <button className="orb" onClick={cancel}><span className="ib lg"><I n="close" s={18} w={2.6} /></span>Cancel</button>
+          {v.listening || !supported
+            ? <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!supported && !text} onClick={stop}><I n="stop" s={14} />Stop</button>
+            : <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!text} onClick={done}><I n="check" s={16} w={2.6} />Save</button>}
           {supported ? (
-            <button className="orb" onClick={() => (v.listening ? v.stop() : v.start())}><span className="ib lg"><I n={v.listening ? 'pause' : 'mic'} s={20} /></span>{v.listening ? 'Pause' : 'Resume'}</button>
+            <button className="orb" onClick={() => { if (v.listening) v.stop(); else { setEmpty(false); v.start() } }}><span className="ib lg"><I n={v.listening ? 'pause' : 'mic'} s={20} /></span>{v.listening ? 'Pause' : 'Resume'}</button>
           ) : <span style={{ width: 56 }} />}
         </div>
       </main>
