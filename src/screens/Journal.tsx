@@ -34,7 +34,7 @@ export default function Journal() {
 
       <Link to="/listen" className="card hot mt16" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <span className="vorb" style={{ width: 52, height: 52, boxShadow: 'none' }}><I n="mic" s={22} /></span>
-        <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span className="ttl">Say what’s on your mind</span><span className="sub">Start with “note that…” and Nook files it here.</span></span>
+        <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span className="ttl">Say what’s on your mind</span><span className="sub">Start with “note that…” and Tadween files it here.</span></span>
         <span className="arr"><I n="arrow" s={16} /></span>
       </Link>
 

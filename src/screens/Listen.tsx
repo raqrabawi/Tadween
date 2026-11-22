@@ -41,8 +41,8 @@ export default function Listen() {
           </p>
         ) : (
           <div className="mt24">
-            <p className="sub">Voice isn’t available in this browser. Type it instead — Nook understands it the same way.</p>
-            <label className="fld focus mt12"><span className="sr">What should Nook do?</span><input autoFocus className="inp" placeholder="Dentist Monday at 5, remind me the day before" value={typed} onChange={(e) => setTyped(e.target.value)} /></label>
+            <p className="sub">Voice isn’t available in this browser. Type it instead — Tadween understands it the same way.</p>
+            <label className="fld focus mt12"><span className="sr">What should Tadween do?</span><input autoFocus className="inp" placeholder="Dentist Monday at 5, remind me the day before" value={typed} onChange={(e) => setTyped(e.target.value)} /></label>
           </div>
         )}
         {v.error === 'denied' && <p role="alert" className="sub mt12" style={{ color: 'var(--red)' }}>Microphone access is blocked. Allow it in your browser settings, then try again.</p>}

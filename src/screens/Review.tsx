@@ -49,7 +49,7 @@ export default function Review() {
       <main className="screen col">
         <div className="hd"><Link to="/" className="ib" aria-label="Close"><I n="close" s={15} w={2.6} /></Link></div>
         <div className="card empty mt24"><span className="ttl">Nothing to review</span><span className="sub">Tap the mic and say what you need.</span></div>
-        <Link to="/listen" className="btn pri mtauto">Speak to Nook<I n="mic" s={16} /></Link>
+        <Link to="/listen" className="btn pri mtauto">Speak to Tadween<I n="mic" s={16} /></Link>
       </main>
     )
   }
@@ -63,11 +63,11 @@ export default function Review() {
 
       <div className="spread" style={{ margin: '24px 4px 10px' }}>
         <span className="cap">You said</span>
-        <button className={reading ? 'tag acc' : 'tag'} style={{ minHeight: 36 }} onClick={readBack} aria-label={reading ? 'Stop reading back' : 'Hear Nook read this back'}><I n="speaker" s={15} w={2.2} />{reading ? 'Reading…' : 'Read back'}</button>
+        <button className={reading ? 'tag acc' : 'tag'} style={{ minHeight: 36 }} onClick={readBack} aria-label={reading ? 'Stop reading back' : 'Hear Tadween read this back'}><I n="speaker" s={15} w={2.2} />{reading ? 'Reading…' : 'Read back'}</button>
       </div>
       <p style={{ margin: '0 4px', fontSize: 22, lineHeight: '31px', fontWeight: 500, letterSpacing: -.4 }}>“{text}”</p>
 
-      <div className="sec" style={{ marginTop: 24 }}><h2>{drafts.length ? (chosen.length === drafts.length ? `Nook found ${drafts.length} ${drafts.length === 1 ? 'thing' : 'things'}` : `${chosen.length} of ${drafts.length} selected`) : 'Nook didn’t catch anything'}</h2><span className="sub">Tap to include</span></div>
+      <div className="sec" style={{ marginTop: 24 }}><h2>{drafts.length ? (chosen.length === drafts.length ? `Tadween found ${drafts.length} ${drafts.length === 1 ? 'thing' : 'things'}` : `${chosen.length} of ${drafts.length} selected`) : 'Tadween didn’t catch anything'}</h2><span className="sub">Tap to include</span></div>
 
       <div className="stack" style={{ gap: 10 }}>
         {drafts.map((d, i) => {

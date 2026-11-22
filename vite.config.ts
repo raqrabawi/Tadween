@@ -13,8 +13,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
       manifest: {
-        name: 'Nook — just say it',
-        short_name: 'Nook',
+        name: 'Tadween — just say it',
+        short_name: 'Tadween',
         description: 'Voice-first calendar, lists, family groceries and journal.',
         theme_color: '#FAF8F5',
         background_color: '#FAF8F5',

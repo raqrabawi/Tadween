@@ -77,7 +77,7 @@ export default function NoteScreen() {
 
       {(summary || actions.length > 0) && (
         <div className="card hot mt16">
-          <div className="row" style={{ gap: 10 }}><span className="ib sm"><I n="spark" s={16} /></span><span style={{ fontSize: 15, fontWeight: 700 }}>Nook summary</span>{actions.length > 0 && <span className="sub" style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700 }}>{actions.length} action{actions.length > 1 ? 's' : ''} found</span>}</div>
+          <div className="row" style={{ gap: 10 }}><span className="ib sm"><I n="spark" s={16} /></span><span style={{ fontSize: 15, fontWeight: 700 }}>Tadween summary</span>{actions.length > 0 && <span className="sub" style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700 }}>{actions.length} action{actions.length > 1 ? 's' : ''} found</span>}</div>
           {summary && <p className="mt12" style={{ fontSize: 16, lineHeight: '23px', fontWeight: 500 }}>{summary}</p>}
           {actions.length > 0 && <button className="tag mt12" onClick={async () => { const n = await saveDrafts(actions); setToast(`${n} ${n === 1 ? 'item' : 'items'} added from this note`) }}><I n="plus" s={14} w={2.6} />Add {actions.length} to calendar & lists</button>}
         </div>

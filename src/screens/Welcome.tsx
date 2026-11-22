@@ -21,7 +21,7 @@ export default function Welcome() {
   return (
     <main className="screen col">
       <div className="hd">
-        <span className="row" style={{ gap: 10 }}><span className="vorb" style={{ width: 32, height: 32, boxShadow: 'none' }} /><span style={{ fontSize: 20, fontWeight: 700, letterSpacing: -.4 }}>nook</span></span>
+        <span className="row" style={{ gap: 10 }}><span className="vorb" style={{ width: 32, height: 32, boxShadow: 'none' }} /><span style={{ fontSize: 20, fontWeight: 700, letterSpacing: -.4 }}>tadween</span></span>
         <span className="bi"><b>EN</b><b>AR</b>Bilingual</span>
       </div>
 
@@ -39,7 +39,7 @@ export default function Welcome() {
         </div>
       </div>
 
-      <h1 className="h1 mtauto" style={{ fontSize: 38, lineHeight: '44px', letterSpacing: -1.2 }}>Just say it.<br /><em>Nook keeps it.</em></h1>
+      <h1 className="h1 mtauto" style={{ fontSize: 38, lineHeight: '44px', letterSpacing: -1.2 }}>Just say it.<br /><em>Tadween keeps it.</em></h1>
       <p className="sub mt12" style={{ fontSize: 16, lineHeight: '23px' }}>Your calendar, lists, family groceries and journal — by voice, in English or Arabic.</p>
 
       <div className="stack mt24" style={{ gap: 10 }}>

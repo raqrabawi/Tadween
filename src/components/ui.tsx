@@ -26,7 +26,7 @@ export function TabBar() {
         {tab('/lists', 'Lists', 'list')}
         {tab('/journal', 'Journal', 'book')}
       </nav>
-      <Link to="/listen" className="mic" aria-label="Speak to Nook">
+      <Link to="/listen" className="mic" aria-label="Speak to Tadween">
         <span className="vorb"><I n="mic" s={26} /></span>
       </Link>
     </div>

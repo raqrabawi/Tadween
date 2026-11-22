@@ -74,7 +74,7 @@ export default function Ask() {
       {answer && (
         <div className="card mt12">
           <div className="spread">
-            <span className="row" style={{ gap: 10 }}><span className="vorb" style={{ width: 32, height: 32, boxShadow: 'none' }} /><span style={{ fontSize: 15, fontWeight: 700 }}>Nook</span></span>
+            <span className="row" style={{ gap: 10 }}><span className="vorb" style={{ width: 32, height: 32, boxShadow: 'none' }} /><span style={{ fontSize: 15, fontWeight: 700 }}>Tadween</span></span>
             <button className={speaking ? 'tag acc' : 'tag'} style={{ minHeight: 36 }} onClick={listen} aria-label={speaking ? 'Stop' : 'Read the answer out loud'}><I n="speaker" s={15} w={2.2} />{speaking ? 'Speaking…' : 'Listen'}</button>
           </div>
           <div className="row mt16" style={{ alignItems: 'baseline', gap: 10 }}>

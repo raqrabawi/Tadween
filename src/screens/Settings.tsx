@@ -22,7 +22,7 @@ export default function Settings() {
   const name = profile?.name ?? 'You'
   const link = `${location.origin}${import.meta.env.BASE_URL}`
 
-  const inviteText = `Join my family space on Nook: open ${link} , sign in, then Settings › Join a family with code ${family?.invite_code}`
+  const inviteText = `Join my family space on Tadween: open ${link} , sign in, then Settings › Join a family with code ${family?.invite_code}`
 
   const saveEmail = async () => {
     setMsg(null)
@@ -58,11 +58,11 @@ export default function Settings() {
       <div className="card tone-mint mt12">
         <div className="row" style={{ gap: 14 }}>
           <span className="vorb" style={{ width: 48, height: 48 }}><I n="mic" /></span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><span className="ttl">Nook Voice</span><span className="bi" style={{ alignSelf: 'flex-start' }}><b>EN</b><b>AR</b>Auto</span></span>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><span className="ttl">Tadween Voice</span><span className="bi" style={{ alignSelf: 'flex-start' }}><b>EN</b><b>AR</b>Auto</span></span>
           <button className="ib plain" aria-label="Hear a sample" onClick={() => speak(`Hi ${name}, this is my ${profile?.voice_style?.toLowerCase()} voice.`, profile?.voice_style)}><I n="speaker" s={18} /></button>
         </div>
         <div className="spread mt16">
-          <span style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Speak replies</span><span className="sub" style={{ fontSize: 13 }}>{profile?.speak_replies ? 'Nook answers out loud' : 'Answers on screen only'}</span></span>
+          <span style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Speak replies</span><span className="sub" style={{ fontSize: 13 }}>{profile?.speak_replies ? 'Tadween answers out loud' : 'Answers on screen only'}</span></span>
           <Switch on={!!profile?.speak_replies} onChange={(v) => updateProfile({ speak_replies: v })} label="Speak replies" />
         </div>
         <div className="seg mt16" role="group" aria-label="Voice style">
@@ -113,9 +113,9 @@ export default function Settings() {
           <div className="card hot mt20" style={{ textAlign: 'center' }}>
             <p className="cap">Your family code</p>
             <p className="num" style={{ fontSize: 44, fontWeight: 700, letterSpacing: 8, marginTop: 8 }}>{family?.invite_code}</p>
-            <p className="sub mt8">They sign in to Nook, then Settings › Join and enter this code. Shared lists update live for everyone.</p>
+            <p className="sub mt8">They sign in to Tadween, then Settings › Join and enter this code. Shared lists update live for everyone.</p>
           </div>
-          <button className="btn pri mt20" onClick={() => (typeof navigator.share === 'function' ? navigator.share({ title: 'Join me on Nook', text: inviteText }).catch(() => undefined) : navigator.clipboard.writeText(inviteText).then(() => setMsg('Invite copied')))}>Share invite<I n="share" s={16} /></button>
+          <button className="btn pri mt20" onClick={() => (typeof navigator.share === 'function' ? navigator.share({ title: 'Join me on Tadween', text: inviteText }).catch(() => undefined) : navigator.clipboard.writeText(inviteText).then(() => setMsg('Invite copied')))}>Share invite<I n="share" s={16} /></button>
           {msg && <p className="ffoot" role="status">{msg}</p>}
         </Sheet>
       )}

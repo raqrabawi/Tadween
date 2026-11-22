@@ -1,6 +1,6 @@
 import type { Draft } from './types'
 
-/* Nook's on-device understanding: turns one spoken or typed sentence into drafts
+/* Tadween's on-device understanding: turns one spoken or typed sentence into drafts
    (events, reminders, list items, tasks, notes). English first, common Arabic words too.
    It runs instantly with no network; the person always reviews before anything is saved. */
 

@@ -1,6 +1,6 @@
-# Nook — just say it
+# Tadween — just say it
 
-A voice-first everyday app: calendar, reminders, lists, family groceries and a journal. Speak in English or Arabic and Nook turns it into events, reminders, list items and notes.
+A voice-first everyday app: calendar, reminders, lists, family groceries and a journal. Speak in English or Arabic and Tadween turns it into events, reminders, list items and notes.
 
 - **Live:** https://raqrabawi.github.io/nook/
 - **Stack:** React + Vite + TypeScript, installable PWA, Supabase (auth, Postgres with row-level security, realtime).

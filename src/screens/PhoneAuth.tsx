@@ -36,7 +36,7 @@ export default function PhoneAuth() {
     setBusy(false)
     if (error) {
       setErr(/provider|sms|phone.*(disabled|not enabled)|unsupported/i.test(error.message)
-        ? 'Text-message codes aren’t switched on for Nook yet. Use Google, Apple or email for now.'
+        ? 'Text-message codes aren’t switched on for Tadween yet. Use Google, Apple or email for now.'
         : error.message)
       return
     }

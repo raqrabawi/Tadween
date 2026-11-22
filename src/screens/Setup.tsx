@@ -26,7 +26,7 @@ export default function Setup() {
   }
   const sample = () => {
     setPlaying(true)
-    speak(`Good ${new Date().getHours() < 12 ? 'morning' : 'evening'}, ${name || 'there'}. I'm Nook. Just tell me what's on your mind.`, profile?.voice_style, () => setPlaying(false))
+    speak(`Good ${new Date().getHours() < 12 ? 'morning' : 'evening'}, ${name || 'there'}. I'm Tadween. Just tell me what's on your mind.`, profile?.voice_style, () => setPlaying(false))
   }
   const finish = async () => {
     await updateProfile({ name: name.trim() || profile?.name || 'Friend', onboarded: true })
@@ -43,17 +43,17 @@ export default function Setup() {
   return (
     <main className="screen col">
       <div className="hd"><span className="cap">Last step</span><button className="ib wide" onClick={finish}>Skip</button></div>
-      <h1 className="h1 mt20" style={{ fontSize: 34, lineHeight: '40px' }}>Tune your<br /><em>nook.</em></h1>
+      <h1 className="h1 mt20" style={{ fontSize: 34, lineHeight: '40px' }}>Set up<br /><em>Tadween.</em></h1>
 
-      <div className="form mt20"><label className="frow"><span className="fl">Name</span><input className="inp" value={name} onChange={(e) => setName(e.target.value)} placeholder="What should Nook call you?" autoComplete="given-name" /></label></div>
+      <div className="form mt20"><label className="frow"><span className="fl">Name</span><input className="inp" value={name} onChange={(e) => setName(e.target.value)} placeholder="What should Tadween call you?" autoComplete="given-name" /></label></div>
 
       <div className="card hot mt16">
         <div className="spread">
           <span className="vorb" style={{ width: 52, height: 52, boxShadow: 'none' }}><I n="mic" s={22} /></span>
-          <button className="ib" onClick={sample} aria-label="Hear Nook speak"><I n={playing ? 'pause' : 'speaker'} s={18} /></button>
+          <button className="ib" onClick={sample} aria-label="Hear Tadween speak"><I n={playing ? 'pause' : 'speaker'} s={18} /></button>
         </div>
         <p className="ttl mt16" style={{ fontSize: 20 }}>Talk the way you talk.</p>
-        <p className="sub mt8">Nook understands English and Arabic and answers you out loud. Tap the speaker to hear it.</p>
+        <p className="sub mt8">Tadween understands English and Arabic and answers you out loud. Tap the speaker to hear it.</p>
       </div>
 
       <div className="card tone-sky mt12" style={{ padding: '20px 8px 18px' }}>
@@ -64,7 +64,7 @@ export default function Setup() {
         </div>
       </div>
 
-      <button className="btn pri mtauto" onClick={finish} style={{ marginTop: 24 }}>Start using Nook<I n="next" s={16} w={2.6} /></button>
+      <button className="btn pri mtauto" onClick={finish} style={{ marginTop: 24 }}>Start using Tadween<I n="next" s={16} w={2.6} /></button>
     </main>
   )
 }
