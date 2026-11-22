@@ -6,6 +6,7 @@ import type { Category, Draft, EventRow, Family, Item, List, Member, Note, Profi
 
 interface Store {
   ready: boolean
+  authError: string | null
   session: Session | null
   profile: Profile | null
   family: Family | null
@@ -52,6 +53,7 @@ const iso = (d: Date) => d.toISOString()
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [family, setFamily] = useState<Family | null>(null)
@@ -73,7 +75,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [theme, palette])
 
   useEffect(() => {
-    db.auth.getSession().then(({ data }) => { setSession(data.session); setReady(true) })
+    // Never leave people on a spinner: if sign-in can't be reached, show Welcome with the reason
+    const giveUp = setTimeout(() => setReady(true), 8000)
+    db.auth.getSession()
+      .then(({ data, error }: { data: { session: Session | null }; error: { message: string } | null }) => {
+        if (error) setAuthError(error.message)
+        setSession(data.session)
+      })
+      .catch((e: unknown) => setAuthError(e instanceof Error ? e.message : String(e)))
+      .finally(() => { clearTimeout(giveUp); setReady(true) })
     const { data } = db.auth.onAuthStateChange((_e, s) => setSession(s))
     return () => data.subscription.unsubscribe()
   }, [])
@@ -277,10 +287,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const memberFor = useCallback((userId: string | null) => members.find((m) => m.user_id === userId), [members])
 
   const value = useMemo<Store>(() => ({
-    ready, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+    ready, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
-  }), [ready, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+  }), [ready, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 

@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db, redirectTo } from '../lib/db'
+import { useStore } from '../lib/store'
 import { I, Logo } from '../components/Icon'
 
 export default function Welcome() {
+  const { authError } = useStore()
   const [busy, setBusy] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
 
@@ -51,6 +53,7 @@ export default function Welcome() {
         </button>
         <Link to="/auth/email" className="btn line"><I n="mail" s={17} />Continue with email</Link>
       </div>
+      {authError && !err && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>Can’t reach sign-in right now ({authError}). Check your connection and try again.</p>}
       {err && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>{err}</p>}
     </main>
   )
