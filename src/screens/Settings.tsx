@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { supabase } from '../lib/supabase'
+import { db } from '../lib/db'
 import { speak } from '../lib/voice'
 import { I } from '../components/Icon'
 import { Avatar, Sheet, Switch } from '../components/ui'
@@ -14,8 +14,7 @@ const PALETTES = [
 
 export default function Settings() {
   const { profile, family, members, session, updateProfile, theme, setTheme, palette, setPalette, joinFamily } = useStore()
-  const [sheet, setSheet] = useState<null | 'invite' | 'email' | 'join'>(null)
-  const [email, setEmail] = useState('')
+  const [sheet, setSheet] = useState<null | 'invite' | 'join'>(null)
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
   const user = session?.user
@@ -23,12 +22,6 @@ export default function Settings() {
   const link = `${location.origin}${import.meta.env.BASE_URL}`
 
   const inviteText = `Join my family space on Tadween: open ${link} , sign in, then Settings › Join a family with code ${family?.invite_code}`
-
-  const saveEmail = async () => {
-    setMsg(null)
-    const { error } = await supabase.auth.updateUser({ email })
-    setMsg(error ? error.message : `Check ${email} to confirm it.`)
-  }
 
   return (
     <main className="screen notab">
@@ -96,13 +89,11 @@ export default function Settings() {
       </div>
 
       <div className="card flush mt24">
-        {user?.phone && <div className="rw"><span className="ib sm"><I n="phone" s={18} /></span><span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Phone</span><span className="sub num" style={{ fontSize: 13 }}>+{user.phone} · verified</span></span></div>}
-        <button className="rw" onClick={() => setSheet('email')}>
+        <div className="rw">
           <span className="ib sm"><I n="mail" s={18} /></span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column', textAlign: 'left' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Email</span><span className="sub" style={{ fontSize: 13 }}>{user?.email ?? 'Optional · for receipts and backups'}</span></span>
-          {!user?.email && <span className="tag sm acc">Add</span>}
-        </button>
-        <button className="rw" style={{ color: 'var(--red)' }} onClick={() => supabase.auth.signOut()}>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Signed in as</span><span className="sub" style={{ fontSize: 13 }}>{user?.email ?? profile?.email ?? '—'}</span></span>
+        </div>
+        <button className="rw" style={{ color: 'var(--red)' }} onClick={() => db.auth.signOut()}>
           <span className="ib sm"><I n="out" s={18} /></span><span className="grow" style={{ fontSize: 16, fontWeight: 600, textAlign: 'left' }}>Sign out</span>
         </button>
       </div>
@@ -129,15 +120,6 @@ export default function Settings() {
         </Sheet>
       )}
 
-      {sheet === 'email' && (
-        <Sheet label="Email" onClose={() => setSheet(null)}>
-          <div className="hd3 mt12"><button className="ib" aria-label="Close" onClick={() => setSheet(null)}><I n="close" s={15} w={2.6} /></button><h1>Email</h1><span /></div>
-          <div className="form mt20"><label className="frow"><span className="fl">Email</span><input autoFocus type="email" className="inp" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} /></label></div>
-          <p className="ffoot">Optional. Used for receipts, backups and signing in on a new device.</p>
-          {msg && <p className="ffoot" role="status">{msg}</p>}
-          <button className="btn pri mt20" disabled={!/.+@.+\..+/.test(email)} onClick={saveEmail}>Save email<I n="next" s={16} w={2.6} /></button>
-        </Sheet>
-      )}
     </main>
   )
 }

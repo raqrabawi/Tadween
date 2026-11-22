@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase, redirectTo } from '../lib/supabase'
+import { db, redirectTo } from '../lib/db'
 import { Back } from '../components/ui'
 import { I } from '../components/Icon'
 
@@ -12,22 +12,22 @@ export default function EmailAuth() {
 
   const send = async () => {
     setErr(null); setBusy(true)
-    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo() } })
+    const { error } = await db.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo() } })
     setBusy(false)
     if (error) setErr(error.message); else setSent(true)
   }
   const verify = async () => {
     setErr(null); setBusy(true)
-    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })
+    const { error } = await db.auth.verifyOtp({ email, token: code, type: 'email' })
     setBusy(false)
-    if (error) setErr('That code didn’t work. Try again, or tap the link in the email.')
+    if (error) setErr('That code didn’t work. Check it and try again.')
   }
 
   return (
     <main className="screen col">
       <div className="hd"><Back to="/" /></div>
       <h1 className="h1 mt24" style={{ fontSize: 34, lineHeight: '40px' }}>{sent ? <>Check your <em>inbox.</em></> : <>Sign in with <em>email.</em></>}</h1>
-      <p className="sub mt8" style={{ fontSize: 16 }}>{sent ? `We sent a code and a sign-in link to ${email}.` : 'We’ll email you a one-time code.'}</p>
+      <p className="sub mt8" style={{ fontSize: 16 }}>{sent ? `We sent a 6-digit code to ${email}.` : 'We’ll email you a one-time code.'}</p>
 
       {!sent ? (
         <>

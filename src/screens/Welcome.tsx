@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase, redirectTo } from '../lib/supabase'
+import { db, redirectTo } from '../lib/db'
 import { I, Logo } from '../components/Icon'
 
 export default function Welcome() {
@@ -9,11 +9,11 @@ export default function Welcome() {
 
   const oauth = async (provider: 'apple' | 'google') => {
     setErr(null); setBusy(provider)
-    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: redirectTo() } })
+    const { error } = await db.auth.signInWithOAuth({ provider, options: { redirectTo: redirectTo() } })
     if (error) {
       setBusy(null)
       setErr(/not enabled|unsupported/i.test(error.message)
-        ? `${provider === 'apple' ? 'Apple' : 'Google'} sign-in isn’t switched on yet. Use your phone or email for now.`
+        ? `${provider === 'apple' ? 'Apple' : 'Google'} sign-in isn’t switched on yet. Use email for now.`
         : error.message)
     }
   }
@@ -49,10 +49,9 @@ export default function Welcome() {
         <button className="btn sec" style={{ height: 60, borderRadius: 30, fontSize: 18 }} onClick={() => oauth('google')} disabled={!!busy}>
           <Logo />{busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
         </button>
-        <Link to="/auth/phone" className="btn line"><I n="phone" s={17} />Use phone number</Link>
+        <Link to="/auth/email" className="btn line"><I n="mail" s={17} />Continue with email</Link>
       </div>
       {err && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>{err}</p>}
-      <p className="sub mt16" style={{ textAlign: 'center', fontSize: 15 }}>Prefer email? <Link to="/auth/email" className="lnk">Get a sign-in code</Link></p>
     </main>
   )
 }

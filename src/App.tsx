@@ -2,7 +2,6 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useStore } from './lib/store'
 import { Spinner, TabBar } from './components/ui'
 import Welcome from './screens/Welcome'
-import PhoneAuth from './screens/PhoneAuth'
 import EmailAuth from './screens/EmailAuth'
 import Setup from './screens/Setup'
 import Today from './screens/Today'
@@ -28,7 +27,6 @@ export default function App() {
     return (
       <div className="app">
         <Routes>
-          <Route path="/auth/phone" element={<PhoneAuth />} />
           <Route path="/auth/email" element={<EmailAuth />} />
           <Route path="*" element={<Welcome />} />
         </Routes>

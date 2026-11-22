@@ -18,17 +18,14 @@ npm run dev
 Every push to `main` builds and publishes to GitHub Pages (`.github/workflows/deploy.yml`).
 In the repo, set **Settings → Pages → Source** to **GitHub Actions** once.
 
-## Supabase setup (one time)
+## Backend: Neon (project "Tadween")
 
-**Authentication → URL Configuration**
-- Site URL: `https://raqrabawi.github.io/tadween/`
-- Redirect URLs: `https://raqrabawi.github.io/tadween/**` and `http://localhost:5173/**`
+- **Database:** Neon Postgres, project `soft-mud-10655524`, database `tadween`, region EU Central (Frankfurt).
+- **Sign-in:** Neon Managed Better Auth: Google (works now with Neon's shared credentials), email code, Apple (needs your Apple Developer keys).
+- **Data access:** Neon Data API from the browser with `@neon/neon-js` (Supabase-compatible client). Row-level security on every table; `public.ensure_me()` creates the profile and family on first sign-in; `public.join_family(code)` joins a family.
+- **Base URL** (public): `https://ep-icy-frost-b9znduk1.c-7.eu-central-1.aws.neon.tech/tadween`, override with `VITE_NEON_URL`.
 
-**Authentication → Sign In / Providers**
-- **Google:** create an OAuth client (Web) in Google Cloud, add the redirect URI
-  `https://xqwbzymgtbnxyeeyurfq.supabase.co/auth/v1/callback`, then paste the Client ID and secret into Supabase.
-- **Apple:** needs an Apple Developer account — a Services ID, a Sign in with Apple key, and the same callback URL.
-- **Phone:** connect an SMS provider (e.g. Twilio).
-- **Email:** on by default.
-
-The publishable key in `src/lib/supabase.ts` is safe in the browser — all data is protected by row-level security.
+**Neon Console settings**
+- Auth › Domains: `https://raqrabawi.github.io` is trusted; localhost is allowed.
+- Auth › OAuth: add your own Google client for production, and Apple keys to enable Apple.
+- Family lists refresh every 15 seconds and when the app regains focus. Turn on Neon Realtime later for instant updates.
