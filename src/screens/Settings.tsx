@@ -19,7 +19,7 @@ export default function Settings() {
   const [msg, setMsg] = useState<string | null>(null)
   const user = session?.user
   const name = profile?.name ?? 'You'
-  const link = `${location.origin}${import.meta.env.BASE_URL}`
+  const link = `${location.origin}${location.pathname}`
 
   const inviteText = `Join my family space on Tadween: open ${link} , sign in, then Settings › Join a family with code ${family?.invite_code}`
 

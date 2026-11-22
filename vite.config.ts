@@ -2,8 +2,9 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Served from https://<user>.github.io/tadween/ by default; override with BASE_PATH for other hosts.
-const base = process.env.BASE_PATH ?? '/tadween/'
+// Relative paths, so the app works at any address: /Tadween/, /tadween/, a custom domain or localhost.
+// Override with BASE_PATH only if a host needs an absolute path.
+const base = process.env.BASE_PATH ?? './'
 
 export default defineConfig({
   base,
@@ -28,7 +29,7 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
-      workbox: { navigateFallback: base + 'index.html', globPatterns: ['**/*.{js,css,html,svg,png,woff2}'] }
+      workbox: { navigateFallback: 'index.html', globPatterns: ['**/*.{js,css,html,svg,png,woff2}'] }
     })
   ]
 })

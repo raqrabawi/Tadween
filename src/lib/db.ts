@@ -7,4 +7,4 @@ const url = import.meta.env.VITE_NEON_URL ?? 'https://ep-icy-frost-b9znduk1.c-7.
 export const db = createClient(url)
 
 /** Where OAuth providers send people back to: the app's own root (works on GitHub Pages and locally). */
-export const redirectTo = () => window.location.origin + import.meta.env.BASE_URL
+export const redirectTo = () => window.location.origin + window.location.pathname
