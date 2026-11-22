@@ -293,5 +293,11 @@ textarea.inp{resize:none;line-height:28px}
 .marigold .ring{border-color:var(--orbMid)}
 
 /* Listening screen backdrop */
-.lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(7,80,86,.7),transparent 70%),radial-gradient(440px 360px at 108% -12%,rgba(7,80,86,.6),transparent 66%),#0F181D}
-.marigold .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(240,168,67,.22),transparent 70%),#181A19}
+.lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(7,80,86,.5),transparent 70%),var(--bg)}
+.light .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(7,80,86,.16),transparent 70%),var(--bg)}
+.marigold .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(224,142,38,.16),transparent 70%),var(--bg)}
+.marigold.dark .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(240,168,67,.2),transparent 70%),var(--bg)}
+
+/* Flat mic buttons: no 3D shading */
+.vorb{background:var(--sea);color:#E4EEF0;box-shadow:0 0 0 1px rgba(124,198,202,.35)}
+.marigold .vorb{background:var(--cta);color:var(--ctaInk);box-shadow:none}
