@@ -75,16 +75,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [theme, palette])
 
   useEffect(() => {
-    // Never leave people on a spinner: if sign-in can't be reached, show Welcome with the reason
-    const giveUp = setTimeout(() => setReady(true), 8000)
+    // Show Welcome straight away for people who aren't signed in; returning users wait (at most 10 s) for their session
+    const known = (() => { try { return localStorage.getItem('tadween-signed-in') === '1' } catch { return false } })()
+    if (!known) setReady(true)
+    const giveUp = setTimeout(() => setReady(true), 10000)
     db.auth.getSession()
       .then(({ data, error }: { data: { session: Session | null }; error: { message: string } | null }) => {
         if (error) setAuthError(error.message)
         setSession(data.session)
+        try { if (data.session) localStorage.setItem('tadween-signed-in', '1'); else localStorage.removeItem('tadween-signed-in') } catch { /* private mode */ }
       })
       .catch((e: unknown) => setAuthError(e instanceof Error ? e.message : String(e)))
       .finally(() => { clearTimeout(giveUp); setReady(true) })
-    const { data } = db.auth.onAuthStateChange((_e, s) => setSession(s))
+    const { data } = db.auth.onAuthStateChange((e: string, s: Session | null) => {
+      setSession(s)
+      if (s) setReady(true)
+      try { if (s) localStorage.setItem('tadween-signed-in', '1'); else if (e === 'SIGNED_OUT') localStorage.removeItem('tadween-signed-in') } catch { /* private mode */ }
+    })
     return () => data.subscription.unsubscribe()
   }, [])
 

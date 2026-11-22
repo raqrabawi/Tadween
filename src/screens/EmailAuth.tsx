@@ -41,7 +41,6 @@ export default function EmailAuth() {
             <span className="sr">Code from the email</span>
             <input className="inp num" inputMode="numeric" autoComplete="one-time-code" maxLength={8} placeholder="Code" style={{ fontSize: 26, letterSpacing: 8, textAlign: 'center' }} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
           </label>
-          <p className="ffoot">Or just tap the link in the email on this device.</p>
           {err && <p role="alert" className="sub mt12" style={{ color: 'var(--red)' }}>{err}</p>}
           <button className="btn pri mtauto" disabled={code.length < 6 || busy} onClick={verify}>{busy ? 'Checking…' : 'Verify'}<I n="next" s={16} w={2.6} /></button>
         </>
