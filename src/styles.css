@@ -281,7 +281,7 @@ textarea.inp{resize:none;line-height:28px}
 .marigold .tone-moss{--tc:247,223,212;--ti:#F7DFD4}
 /* Flat surfaces: hairline borders, no glass */
 .marigold .card,.marigold .gl,.marigold .tabbar nav{-webkit-backdrop-filter:none;backdrop-filter:none}
-.marigold.light .card[class*="tone-"],.marigold .light .card[class*="tone-"]{background:rgb(var(--tc));box-shadow:inset 0 0 0 1px rgba(35,39,42,.06),var(--shadow)}
+.marigold.light .card[class*="tone-"],.marigold .light .card[class*="tone-"]{background:color-mix(in srgb,rgb(var(--tc)) 42%,#FFFFFF);box-shadow:inset 0 0 0 1px rgb(var(--tc)),var(--shadow)}
 .marigold.dark .card[class*="tone-"],.marigold .dark .card[class*="tone-"]{background:linear-gradient(rgba(var(--tc),.14),rgba(var(--tc),.14)),var(--s1);box-shadow:inset 0 0 0 1px rgba(var(--tc),.32),var(--shadow)}
 .marigold.dark [class*="tone-"] .ttl,.marigold .dark [class*="tone-"] .ttl{color:rgb(var(--tc))}
 .marigold .hot .pw.on{background:#F0A843}
