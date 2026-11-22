@@ -22,9 +22,10 @@ export default function Listen() {
   const drafts = useMemo(() => understand(text), [text])
   const done = () => { v.stop(); nav('/review', { state: { text } }) }
   const lit = Math.min(60, secs * 2)
+  const mg = document.documentElement.classList.contains('marigold')
 
   return (
-    <div className="dark" style={{ minHeight: '100dvh', background: 'radial-gradient(420px 380px at 50% 74%,rgba(7,80,86,.7),transparent 70%),radial-gradient(440px 360px at 108% -12%,rgba(7,80,86,.6),transparent 66%),#0F181D', color: 'var(--ink)' }}>
+    <div className="dark lvw" style={{ minHeight: '100dvh', color: 'var(--ink)' }}>
       <main className="screen col" style={{ background: 'transparent' }}>
         <div className="hd">
           <Link to="/" className="ib" aria-label="Cancel" onClick={() => v.stop()}><I n="close" s={15} w={2.6} /></Link>
@@ -60,13 +61,13 @@ export default function Listen() {
         <div style={{ position: 'relative', margin: 'auto auto 0', width: 300, height: 300 }}>
           <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
             {Array.from({ length: 60 }, (_, i) => (
-              <span key={i} style={{ position: 'absolute', left: 149, top: 0, width: 2, borderRadius: 1, transformOrigin: '1px 150px', height: i % 5 === 0 ? 16 : 10, transform: `rotate(${i * 6}deg)`, background: i < lit ? (i % 5 === 0 ? '#E4EEF0' : 'rgba(124,198,202,.85)') : 'rgba(228,238,240,.14)' }} />
+              <span key={i} style={{ position: 'absolute', left: 149, top: 0, width: 2, borderRadius: 1, transformOrigin: '1px 150px', height: i % 5 === 0 ? 16 : 10, transform: `rotate(${i * 6}deg)`, background: i < lit ? (i % 5 === 0 ? 'var(--ink)' : mg ? 'rgba(240,168,67,.9)' : 'rgba(124,198,202,.85)') : 'rgba(228,238,240,.14)' }} />
             ))}
           </div>
           <span className="cap" style={{ position: 'absolute', left: 0, right: 0, top: 26, textAlign: 'center' }}>{v.listening ? 'Understanding · on device' : 'Paused'}</span>
           <div style={{ position: 'absolute', left: 60, top: 60, width: 180, height: 180 }}>
             {v.listening && <><span className="ring" /><span className="ring" style={{ animationDelay: '1s' }} /></>}
-            <button className="vorb" style={{ position: 'absolute', inset: 0, flexDirection: 'column', gap: 12, boxShadow: '0 0 0 1px rgba(124,198,202,.45), 0 0 70px rgba(7,80,86,.75)' }} onClick={done} disabled={!text} aria-label="Done speaking">
+            <button className="vorb" style={{ position: 'absolute', inset: 0, flexDirection: 'column', gap: 12, boxShadow: mg ? '0 0 0 1px rgba(240,168,67,.5), 0 0 70px rgba(240,168,67,.35)' : '0 0 0 1px rgba(124,198,202,.45), 0 0 70px rgba(7,80,86,.75)' }} onClick={done} disabled={!text} aria-label="Done speaking">
               <span aria-hidden="true" style={{ height: 44, display: 'flex', alignItems: 'center', gap: 4 }}>
                 {Array.from({ length: 9 }, (_, i) => <span key={i} style={{ width: 4, borderRadius: 2, background: '#fff', height: v.listening ? 10 + Math.abs(Math.sin(secs * 1.7 + i * 1.3)) * 28 * (1 - Math.abs(i - 4) / 6) : 6, transition: 'height .3s' }} />)}
               </span>

@@ -239,3 +239,59 @@ textarea.inp{resize:none;line-height:28px}
 .thm-name{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:700}
 .thm-name small{display:block;font-size:12px;font-weight:500;color:var(--ink3)}
 .thm-ck{width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--acc);color:var(--on)}
+
+/* ── Palette: Marigold & Sage (default). Family organizer spec: warm neutrals, Deep Sage structure, Marigold CTAs only ── */
+.marigold.light,.marigold .light{
+  color-scheme:light;
+  --bg:#FAF8F5; --s1:#FFFFFF; --s1-solid:#FFFFFF; --s2:#F3EFEA; --s3:#E8E4DD;
+  --ink:#23272A; --ink2:rgba(35,39,42,.82); --ink3:#646E73; --line:#E8E4DD;
+  --acc:#3D6B5E; --on:#FFFFFF; --sea:#3D6B5E; --hotInk:#FFFFFF; --em:#3D6B5E;
+  --cta:#E08E26; --ctaFlat:#E08E26; --ctaInk:#1E201F; --ctaPress:#C97B18; --ctaRing:rgba(224,142,38,.4); --ctaEdge:#C97B18; --ctaGlow:rgba(224,142,38,.3);
+  --grn:#3D6B5E; --mint:#3D6B5E; --teal:#3D6B5E; --sun:#9A5A0A; --honey:#9A5A0A; --red:#B8573A; --urgent:#D97757;
+  --hot:linear-gradient(160deg,#4A7C6E 0%,#3D6B5E 55%,#33594E 100%);
+  --edge:inset 0 0 0 1px #E8E4DD; --shadow:0 18px 36px -28px rgba(35,39,42,.28);
+  --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
+  --inkBtn:#23272A; --inkBtnText:#FAF8F5;
+  --field:#FFFFFF; --fieldSep:#E8E4DD;
+  --swOn:#3D6B5E; --swOff:#E8E4DD; --segTrack:#F3EFEA; --segOn:#FFFFFF;
+  --orbHi:#FDE9C6; --orbMid:#F0A843; --orbLo:#E08E26; --orbDeep:#A8620F; --orbInk:#1E201F; --orbRing:rgba(224,142,38,.45);
+  --k-event:#D6E6F2; --k-reminder:#F6ECC9; --k-item:#CFE3DB; --k-note:#E4DFF2; --k-task:#F7DFD4;
+}
+.marigold.dark,.marigold .dark{
+  color-scheme:dark;
+  --bg:#181A19; --s1:#232625; --s1-solid:#232625; --s2:#2C302E; --s3:#343836;
+  --ink:#F2EFE9; --ink2:rgba(242,239,233,.82); --ink3:#9CA3A8; --line:#343836;
+  --acc:#5C9484; --on:#181A19; --sea:#3D6B5E; --hotInk:#F2EFE9; --em:#5C9484;
+  --cta:#F0A843; --ctaFlat:#F0A843; --ctaInk:#181A19; --ctaPress:#F5B861; --ctaRing:rgba(240,168,67,.45); --ctaEdge:#F5B861; --ctaGlow:rgba(240,168,67,.3);
+  --grn:#5C9484; --mint:#5C9484; --teal:#5C9484; --sun:#F0A843; --honey:#F0A843; --red:#E38E71; --urgent:#E38E71;
+  --hot:linear-gradient(160deg,#3F6F62 0%,#335A4F 55%,#2A4A41 100%);
+  --edge:inset 0 0 0 1px #343836; --shadow:0 20px 40px -26px rgba(0,0,0,.7);
+  --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
+  --inkBtn:#F2EFE9; --inkBtnText:#181A19;
+  --field:#2C302E; --fieldSep:#343836;
+  --swOn:#5C9484; --swOff:#3A3F3C; --segTrack:#2C302E; --segOn:#434946;
+  --orbHi:#FDE9C6; --orbMid:#F0A843; --orbLo:#E08E26; --orbDeep:#9A5A0A; --orbInk:#181A19; --orbRing:rgba(240,168,67,.45);
+  --k-event:#D6E6F2; --k-reminder:#F6ECC9; --k-item:#CFE3DB; --k-note:#E4DFF2; --k-task:#F7DFD4;
+}
+/* Family pastels for the five card tones */
+.marigold .tone-mint{--tc:207,227,219;--ti:#CFE3DB}
+.marigold .tone-sky{--tc:214,230,242;--ti:#D6E6F2}
+.marigold .tone-sand{--tc:246,236,201;--ti:#F6ECC9}
+.marigold .tone-lilac{--tc:228,223,242;--ti:#E4DFF2}
+.marigold .tone-moss{--tc:247,223,212;--ti:#F7DFD4}
+/* Flat surfaces: hairline borders, no glass */
+.marigold .card,.marigold .gl,.marigold .tabbar nav{-webkit-backdrop-filter:none;backdrop-filter:none}
+.marigold.light .card[class*="tone-"],.marigold .light .card[class*="tone-"]{background:rgb(var(--tc));box-shadow:inset 0 0 0 1px rgba(35,39,42,.06),var(--shadow)}
+.marigold.dark .card[class*="tone-"],.marigold .dark .card[class*="tone-"]{background:linear-gradient(rgba(var(--tc),.14),rgba(var(--tc),.14)),var(--s1);box-shadow:inset 0 0 0 1px rgba(var(--tc),.32),var(--shadow)}
+.marigold.dark [class*="tone-"] .ttl,.marigold .dark [class*="tone-"] .ttl{color:rgb(var(--tc))}
+.marigold .hot .pw.on{background:#F0A843}
+.marigold .hot .arr{box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+/* Voice orb is the app's main action: Marigold */
+.marigold .vorb{background:radial-gradient(circle at 32% 26%,var(--orbHi) 0,var(--orbMid) 34%,var(--orbLo) 66%,var(--orbDeep) 100%);color:var(--orbInk);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.6),inset 0 -8px 16px rgba(120,60,0,.25),0 0 0 1px var(--orbRing),0 12px 28px -12px rgba(160,90,10,.6)}
+.marigold .tabbar .mic .vorb::after{border-color:var(--orbRing)}
+.marigold .ring{border-color:var(--orbMid)}
+
+/* Listening screen backdrop */
+.lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(7,80,86,.7),transparent 70%),radial-gradient(440px 360px at 108% -12%,rgba(7,80,86,.6),transparent 66%),#0F181D}
+.marigold .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(240,168,67,.22),transparent 70%),#181A19}

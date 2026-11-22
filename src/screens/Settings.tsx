@@ -7,7 +7,8 @@ import { I } from '../components/Icon'
 import { Avatar, Sheet, Switch } from '../components/ui'
 
 const PALETTES = [
-  { id: 'linen' as const, label: 'Linen', meta: 'Warm · new', d: ['#0F181D', '#16232A', '#5BE3BE', '#F5F2EC', '#FFFFFF', '#177A61'] },
+  { id: 'marigold' as const, label: 'Marigold', meta: 'Sage & sun · new', d: ['#181A19', '#232625', '#F0A843', '#FAF8F5', '#FFFFFF', '#E08E26'] },
+  { id: 'linen' as const, label: 'Linen', meta: 'Warm teal', d: ['#0F181D', '#16232A', '#5BE3BE', '#F5F2EC', '#FFFFFF', '#177A61'] },
   { id: 'classic' as const, label: 'Classic', meta: 'Cool · original', d: ['#0F181D', '#16232A', '#5BE3BE', '#E4EEF0', '#FFFFFF', '#2FBF98'] }
 ]
 
@@ -78,7 +79,7 @@ export default function Settings() {
 
       <p className="cap" style={{ margin: '24px 8px 10px' }}>Appearance</p>
       <div className="card" style={{ padding: 14 }}>
-        <div role="radiogroup" aria-label="Color theme" style={{ display: 'flex', gap: 10 }}>
+        <div role="radiogroup" aria-label="Color theme" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
           {PALETTES.map((p) => (
             <button key={p.id} role="radio" aria-checked={palette === p.id} className="thm-opt" onClick={() => setPalette(p.id)}>
               <span className="thm-prev" aria-hidden="true">

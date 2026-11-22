@@ -43,7 +43,7 @@ export default function Today() {
     <main className="screen">
       <div className="hd">
         <Link to="/settings" className="row" aria-label="Settings">
-          <span style={{ width: 48, height: 48, borderRadius: 24, background: 'linear-gradient(140deg,#0B6B72,#075056)', color: '#E4EEF0', fontSize: 19, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 2px var(--bg), 0 0 0 3.5px var(--acc)' }}>{first.charAt(0).toUpperCase()}</span>
+          <span style={{ width: 48, height: 48, borderRadius: 24, background: 'var(--hot)', color: 'var(--hotInk)', fontSize: 19, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 2px var(--bg), 0 0 0 3.5px var(--acc)' }}>{first.charAt(0).toUpperCase()}</span>
           <span style={{ display: 'flex', flexDirection: 'column' }}><span className="sub">{greeting()}</span><span className="ttl">{first}</span></span>
         </Link>
         <div className="row" style={{ gap: 8 }}>
