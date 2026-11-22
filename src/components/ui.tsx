@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { I } from './Icon'
 import { HoldMic } from './HoldMic'
@@ -70,4 +70,17 @@ export function Sheet({ children, onClose, label }: { children: ReactNode; onClo
       </div>
     </div>
   )
+}
+
+/** Shows a short message from anywhere, e.g. after saving and leaving a screen. */
+export const announce = (text: string) => window.dispatchEvent(new CustomEvent('tadween-toast', { detail: text }))
+
+export function GlobalToast() {
+  const [text, setText] = useState<string | null>(null)
+  useEffect(() => {
+    const on = (e: Event) => setText((e as CustomEvent<string>).detail)
+    window.addEventListener('tadween-toast', on)
+    return () => window.removeEventListener('tadween-toast', on)
+  }, [])
+  return text ? <Toast text={text} onDone={() => setText(null)} ms={2600} /> : null
 }

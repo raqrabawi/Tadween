@@ -361,3 +361,4 @@ textarea.inp{resize:none;line-height:28px}
 .tabbar .mic{border:0;cursor:pointer}
 .vwave{position:relative;margin:auto -20px 0}
 .vwave .vorb{position:absolute;left:50%;top:50%;width:132px;height:132px;margin:-66px 0 0 -66px;flex-direction:column;gap:6px;font-size:13px;font-weight:700}
+.toast{z-index:35}

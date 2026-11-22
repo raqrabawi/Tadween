@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { understandIn, describeWhen, type Scope } from '../lib/parse'
 import { speak, stopSpeaking } from '../lib/voice'
 import type { Draft } from '../lib/types'
 import { I } from '../components/Icon'
-import { Switch } from '../components/ui'
+import { Switch, announce } from '../components/ui'
 
 const meta = (d: Draft, listTitle?: string) => {
   switch (d.kind) {
@@ -25,7 +25,7 @@ export default function Review() {
   const loc = useLocation()
   const nav = useNavigate()
   const { saveDrafts, profile, lists, categories } = useStore()
-  const st = (loc.state ?? {}) as { text?: string; scope?: Scope; listHint?: string; from?: Scope; noteCategory?: string | null }
+  const st = (loc.state ?? {}) as { text?: string; scope?: Scope; listHint?: string; from?: Scope; noteCategory?: string | null; auto?: boolean }
   const text = st.text ?? ''
   const back = st.from && st.from !== 'all' ? `/${st.from}` : '/'
   const drafts = useMemo(() => understandIn(text, st.scope ?? 'all', { listHint: st.listHint }), [text, st.scope, st.listHint])
@@ -40,13 +40,45 @@ export default function Review() {
     return (lists.find((l) => h && l.title.toLowerCase().includes(h)) ?? (cat && lists.find((l) => l.category_id === cat.id)) ?? lists.find((l) => l.verb === 'buy') ?? lists[0])?.title
   }
 
-  const save = async () => {
+  const save = async (quiet = false) => {
     setBusy(true)
     const n = await saveDrafts(chosen, { noteCategory: st.noteCategory })
     setBusy(false)
-    if (profile?.speak_replies) speak(`Done. I saved ${n} ${n === 1 ? 'thing' : 'things'}.`, profile.voice_style)
+    if (!quiet && profile?.speak_replies) speak(`Done. I saved ${n} ${n === 1 ? 'thing' : 'things'}.`, profile.voice_style)
+    announce(n ? `Added ${n} ${n === 1 ? 'thing' : 'things'}` : 'Nothing was added')
     nav(back, { replace: true })
   }
+
+  // After Stop or release: say what will happen, then do it. "Change" pauses it into the normal review.
+  const [auto, setAuto] = useState(!!st.auto && drafts.length > 0)
+  const [left, setLeft] = useState(1)
+  const spoken = useRef(false)
+  const summary = useMemo(() => {
+    const parts = drafts.map((d) => {
+      const m = meta(d, d.kind === 'item' ? listFor(d.listHint) : undefined)
+      return d.kind === 'item' ? `${m.title} to ${listFor(d.listHint) ?? 'your list'}`
+        : d.kind === 'event' ? `${d.birthday ? '' : 'an event, '}${m.title}, ${m.detail}`
+        : d.kind === 'reminder' ? `a reminder to ${m.title.toLowerCase()}${d.at ? `, ${m.detail}` : ''}`
+        : d.kind === 'task' ? `a task, ${m.title}` : `a note, ${m.title}`
+    })
+    return parts.length > 1 ? `${parts.slice(0, -1).join('; ')}; and ${parts[parts.length - 1]}` : parts[0] ?? ''
+  }, [drafts]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!auto) { stopSpeaking(); return }
+    let talking = !!profile?.speak_replies
+    let timeUp = false
+    const go = () => { if (!talking && timeUp) save(true) }
+    if (talking && !spoken.current) { spoken.current = true; speak(`Adding ${summary.replace(/ · /g, ' at ')}.`, profile?.voice_style, () => { talking = false; go() }) } else talking = false
+    const start = Date.now(), ms = 3000
+    const tick = setInterval(() => {
+      const p = Math.max(0, 1 - (Date.now() - start) / ms)
+      setLeft(p)
+      if (p === 0) { clearInterval(tick); timeUp = true; go() }
+    }, 50)
+    // Never wait forever on speech
+    const guard = setTimeout(() => { talking = false; go() }, 12000)
+    return () => { clearInterval(tick); clearTimeout(guard) }
+  }, [auto]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const readBack = () => {
     if (reading) { stopSpeaking(); setReading(false); return }
@@ -72,6 +104,17 @@ export default function Review() {
         <Link to={back} className="ib" aria-label="Cancel"><I n="close" s={15} w={2.6} /></Link>
       </div>
 
+      {auto && (
+        <div className="card tight hot mt16" role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 17, fontWeight: 600 }}><I n="spark" s={18} />Got it — adding {drafts.length === 1 ? 'this' : `these ${drafts.length}`} now</span>
+          <span aria-hidden="true" style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,.25)', overflow: 'hidden' }}><span style={{ display: 'block', height: '100%', width: `${(1 - left) * 100}%`, background: 'currentColor', transition: 'width .05s linear' }} /></span>
+          <div className="row" style={{ gap: 8 }}>
+            <button className="tag" style={{ minHeight: 40, background: 'rgba(255,255,255,.18)', color: 'inherit' }} onClick={() => setAuto(false)}><I n="pen" s={14} />Change</button>
+            <button className="tag" style={{ minHeight: 40, background: 'rgba(255,255,255,.18)', color: 'inherit' }} onClick={() => { setAuto(false); stopSpeaking(); nav(back, { replace: true }) }}><I n="close" s={13} w={2.6} />Cancel</button>
+          </div>
+        </div>
+      )}
+
       <div className="spread" style={{ margin: '24px 4px 10px' }}>
         <span className="cap">You said</span>
         <button className={reading ? 'tag acc' : 'tag'} style={{ minHeight: 36 }} onClick={readBack} aria-label={reading ? 'Stop reading back' : 'Hear Tadween read this back'}><I n="speaker" s={15} w={2.2} />{reading ? 'Reading…' : 'Read back'}</button>
@@ -92,15 +135,15 @@ export default function Review() {
                 <span className="ttl" style={{ fontSize: 17, lineHeight: '22px' }}>{m.title}</span>
                 <span className="sub" style={{ fontSize: 13, lineHeight: '18px' }}>{m.detail}</span>
               </span>
-              <Switch on={on} onChange={() => setOff({ ...off, [i]: on })} label={`Include ${m.title}`} />
+              <Switch on={on} onChange={() => { setAuto(false); setOff({ ...off, [i]: on }) }} label={`Include ${m.title}`} />
             </div>
           )
         })}
         {!drafts.length && <div className="card empty"><span className="sub">Try “dentist Monday at 5” or “add milk to groceries”.</span></div>}
       </div>
 
-      <div className="stack mtauto" style={{ gap: 10, paddingTop: 24 }}>
-        <button className="btn pri" disabled={!chosen.length || busy} onClick={save}>{busy ? 'Saving…' : chosen.length ? `Save ${chosen.length} ${chosen.length === 1 ? 'item' : 'items'}` : 'Nothing selected'}<I n="next" s={16} w={2.6} /></button>
+      <div className="stack mtauto" style={{ gap: 10, paddingTop: 24, visibility: auto ? 'hidden' : undefined }}>
+        <button className="btn pri" disabled={!chosen.length || busy} onClick={() => save()}>{busy ? 'Saving…' : chosen.length ? `Save ${chosen.length} ${chosen.length === 1 ? 'item' : 'items'}` : 'Nothing selected'}<I n="next" s={16} w={2.6} /></button>
         <Link to="/add" className="btn line"><I n="plus" s={15} w={2.4} />Add something else</Link>
       </div>
     </main>

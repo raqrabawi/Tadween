@@ -43,7 +43,7 @@ export default function Listen() {
     if (!text) { v.stop(); setEmpty(true); return }
     done()
   }
-  const done = () => { v.stop(); nav('/review', { state: { text, scope, listHint, from: page, noteCategory: page === 'notes' ? noteCategory : null } }) }
+  const done = () => { v.stop(); nav('/review', { state: { auto: true, text, scope, listHint, from: page, noteCategory: page === 'notes' ? noteCategory : null } }) }
 
   return (
     <div className="lvw" style={{ minHeight: '100dvh', color: 'var(--ink)' }}>

@@ -68,7 +68,7 @@ export function HoldMic({ from }: { from?: string }) {
       if (!text) { setToast('I didn’t catch that. Hold the mic and speak.'); return }
       let listHint: string | undefined, noteCategory: string | null = null
       try { listHint = sessionStorage.getItem('tadween-cat') ?? undefined; noteCategory = sessionStorage.getItem('tadween-notecat') } catch { /* ignore */ }
-      nav('/review', { state: { text, scope, listHint, from: scope, noteCategory: scope === 'notes' ? noteCategory : null } })
+      nav('/review', { state: { auto: true, text, scope, listHint, from: scope, noteCategory: scope === 'notes' ? noteCategory : null } })
     }, 450)
   }
 

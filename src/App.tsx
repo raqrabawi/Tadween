@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useStore } from './lib/store'
-import { Spinner, TabBar } from './components/ui'
+import { Spinner, TabBar, GlobalToast } from './components/ui'
 import { SavePrompt } from './components/SignIn'
 import Welcome from './screens/Welcome'
 import { Login, Register, Verify } from './screens/Auth'
@@ -50,6 +50,7 @@ export default function App() {
       </Routes>
       {TAB_ROUTES.includes(loc.pathname) && <TabBar />}
       <SavePrompt />
+      <GlobalToast />
     </div>
   )
 }
