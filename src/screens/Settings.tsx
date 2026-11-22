@@ -13,7 +13,7 @@ const PALETTES = [
 ]
 
 export default function Settings() {
-  const { profile, family, members, session, updateProfile, theme, setTheme, palette, setPalette, joinFamily } = useStore()
+  const { profile, family, members, session, updateProfile, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt } = useStore()
   const [sheet, setSheet] = useState<null | 'invite' | 'join'>(null)
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
@@ -36,14 +36,14 @@ export default function Settings() {
           <span className="ib lg" style={{ fontSize: 22, fontWeight: 700 }}>{name.charAt(0).toUpperCase()}</span>
           <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span style={{ fontSize: 21, lineHeight: '26px', fontWeight: 700, letterSpacing: -.4 }}>{name}</span>
-            <span className="sub">{family?.name ?? 'Family space'} · {members.length} {members.length === 1 ? 'person' : 'people'}</span>
+            <span className="sub">{guest ? 'Saved on this phone only' : `${family?.name ?? 'Family space'} · ${members.length} ${members.length === 1 ? 'person' : 'people'}`}</span>
           </span>
         </div>
         <div className="spread mt16" style={{ paddingTop: 14, borderTop: '1px solid rgba(228,238,240,.16)' }}>
           <span className="avs">{members.map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} />)}</span>
           <span className="row" style={{ gap: 8 }}>
-            <button className="tag" onClick={() => setSheet('join')}>Join</button>
-            <button className="tag" style={{ background: 'var(--hotInk)', color: 'var(--sea)' }} onClick={() => setSheet('invite')}>Invite</button>
+            <button className="tag" onClick={() => (guest ? setSavePrompt(true) : setSheet('join'))}>Join</button>
+            <button className="tag" style={{ background: 'var(--hotInk)', color: 'var(--sea)' }} onClick={() => (guest ? setSavePrompt(true) : setSheet('invite'))}>Invite</button>
           </span>
         </div>
       </div>
@@ -88,15 +88,25 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="card flush mt24">
-        <div className="rw">
-          <span className="ib sm"><I n="mail" s={18} /></span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Signed in as</span><span className="sub" style={{ fontSize: 13 }}>{user?.email ?? profile?.email ?? '—'}</span></span>
+      {guest ? (
+        <div className="card flush mt24">
+          <Link to="/welcome" className="rw">
+            <span className="ib sm"><I n="mail" s={18} /></span>
+            <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Sign in to save</span><span className="sub" style={{ fontSize: 13 }}>Keep your lists safe and share with family</span></span>
+            <I n="next" s={15} w={2.4} />
+          </Link>
         </div>
-        <button className="rw" style={{ color: 'var(--red)' }} onClick={() => db.auth.signOut()}>
-          <span className="ib sm"><I n="out" s={18} /></span><span className="grow" style={{ fontSize: 16, fontWeight: 600, textAlign: 'left' }}>Sign out</span>
-        </button>
-      </div>
+      ) : (
+      <div className="card flush mt24">
+          <div className="rw">
+            <span className="ib sm"><I n="mail" s={18} /></span>
+            <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Signed in as</span><span className="sub" style={{ fontSize: 13 }}>{user?.email ?? profile?.email ?? '—'}</span></span>
+          </div>
+          <button className="rw" style={{ color: 'var(--red)' }} onClick={() => db.auth.signOut()}>
+            <span className="ib sm"><I n="out" s={18} /></span><span className="grow" style={{ fontSize: 16, fontWeight: 600, textAlign: 'left' }}>Sign out</span>
+          </button>
+        </div>
+      )}
 
       {sheet === 'invite' && (
         <Sheet label="Invite family" onClose={() => setSheet(null)}>

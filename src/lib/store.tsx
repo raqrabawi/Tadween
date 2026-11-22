@@ -2,10 +2,14 @@ import { applyTheme, storedMode, storedPalette, watchSystem, type Mode, type Pal
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 type Session = { user: { id: string; email?: string | null; phone?: string | null } }
 import { db } from './db'
+import { GUEST_FAMILY, guestProfile, loadGuest, migrateGuest, newId, now, saveGuest } from './guest'
 import type { Category, Draft, EventRow, Family, Item, List, Member, Note, Profile, Reminder, Tone } from './types'
 
 interface Store {
   ready: boolean
+  guest: boolean
+  savePrompt: boolean
+  setSavePrompt: (v: boolean) => void
   authError: string | null
   session: Session | null
   profile: Profile | null
@@ -68,6 +72,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Mode>(storedMode)
   const [palette, setPaletteState] = useState<Palette>(storedPalette)
   const seeded = useRef(false)
+  const [savePrompt, setSavePromptState] = useState(false)
+  const promptDismissed = useRef(false)
+  const setSavePrompt = useCallback((v: boolean) => { if (!v) promptDismissed.current = true; setSavePromptState(v) }, [])
 
   useEffect(() => {
     applyTheme(theme, palette)
@@ -118,6 +125,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
     const mine = (fm.data ?? []) as Member[]
     const fid = mine.find((m) => m.user_id === uid && m.role === 'owner')?.family_id ?? mine.find((m) => m.user_id === uid)?.family_id
+    // Bring over anything added as a guest on this device, then reload
+    if (await migrateGuest(fid ?? null)) { seeded.current = true; return loadAll() }
     if (fid) {
       const f = await db.from('families').select('*').eq('id', fid).single()
       setFamily(f.data as Family)
@@ -151,7 +160,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!uid) {
-      setProfile(null); setFamily(null); setMembers([]); setCategories([]); setLists([]); setItems([]); setEvents([]); setReminders([]); setNotes([])
+      if (!ready) return
+      // Guest mode: work from this device until the person signs in
+      const g = loadGuest()
+      setProfile(guestProfile({ ...g.profile, theme, palette })); setFamily(null); setMembers([])
+      setCategories(g.categories); setLists(g.lists); setItems(g.items); setEvents(g.events); setReminders(g.reminders); setNotes(g.notes)
       return
     }
     loadAll()
@@ -165,7 +178,17 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const onFocus = () => refresh()
     window.addEventListener('focus', onFocus)
     return () => { clearInterval(t); window.removeEventListener('focus', onFocus) }
-  }, [uid, loadAll])
+  }, [uid, loadAll, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep guest data on the device as it changes
+  const guest = ready && !uid
+  useEffect(() => {
+    if (!guest || !profile) return
+    saveGuest({ profile: { name: profile.name, voice_style: profile.voice_style, speak_replies: profile.speak_replies, morning_brief: profile.morning_brief, close_day: profile.close_day }, categories, lists, items, events, reminders, notes })
+  }, [guest, profile, categories, lists, items, events, reminders, notes])
+
+  // After a guest adds something, offer sign-in once per visit so it isn't lost
+  const nudge = useCallback(() => { if (!promptDismissed.current) setSavePromptState(true) }, [])
 
   const setPalette = useCallback((pl: Palette) => {
     setPaletteState(pl)
@@ -178,69 +201,93 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [uid])
 
   const updateProfile = useCallback(async (p: Partial<Profile>) => {
-    if (!uid) return
+    if (!uid) { setProfile((cur) => (cur ? { ...cur, ...p } : cur)); return }
     setProfile((cur) => (cur ? { ...cur, ...p } : cur))
     await db.from('profiles').update(p).eq('id', uid)
   }, [uid])
 
   const addCategory = useCallback(async (name: string) => {
+    if (!uid) { const c = { id: newId(), name, position: categories.length } as Category; setCategories((x) => [...x, c]); nudge(); return c }
     const { data } = await db.from('categories').insert({ name, position: categories.length }).select().single()
     if (data) setCategories((c) => [...c, data as Category])
     return (data as Category) ?? null
-  }, [categories.length])
+  }, [categories.length, uid, nudge])
 
   const deleteCategory = useCallback(async (id: string) => {
     setCategories((c) => c.filter((x) => x.id !== id))
     setLists((l) => l.filter((x) => x.category_id !== id))
+    if (!uid) return
     await db.from('categories').delete().eq('id', id)
-  }, [])
+  }, [uid, nudge])
 
   const addList = useCallback(async (categoryId: string, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => {
     const tone = opts?.tone ?? TONES[lists.length % TONES.length]
+    if (!uid) {
+      setLists((l) => [...l, { id: newId(), owner_id: 'guest', family_id: opts?.shared ? GUEST_FAMILY : null, category_id: categoryId, title, tone, verb: opts?.verb ?? 'do', staples: [], created_at: now() }])
+      nudge(); return
+    }
     const { data } = await db.from('lists').insert({
       title, category_id: categoryId, tone, verb: opts?.verb ?? 'do', family_id: opts?.shared ? family?.id ?? null : null
     }).select().single()
     if (data) setLists((l) => (l.some((x) => x.id === data.id) ? l : [...l, data as List]))
-  }, [lists.length, family])
+  }, [lists.length, family, uid, nudge])
 
   const deleteList = useCallback(async (id: string) => {
     setLists((l) => l.filter((x) => x.id !== id))
+    if (!uid) { setItems((xs) => xs.filter((x) => x.list_id !== id)); return }
     await db.from('lists').delete().eq('id', id)
-  }, [])
+  }, [uid, nudge])
 
   const addItem = useCallback(async (listId: string, name: string, qty?: string | null, aisle?: string | null) => {
+    if (!uid) {
+      setItems((xs) => [...xs, { id: newId(), list_id: listId, name, qty: qty ?? null, aisle: aisle ?? null, done: false, done_at: null, added_by: null, created_at: now() }])
+      nudge(); return
+    }
     const { data } = await db.from('list_items').insert({ list_id: listId, name, qty: qty ?? null, aisle: aisle ?? null }).select().single()
     if (data) setItems((xs) => (xs.some((x) => x.id === data.id) ? xs : [...xs, data as Item]))
-  }, [])
+  }, [uid, nudge])
 
   const toggleItem = useCallback(async (item: Item) => {
     const done = !item.done
     const done_at = done ? new Date().toISOString() : null
     setItems((xs) => xs.map((x) => (x.id === item.id ? { ...x, done, done_at } : x)))
+    if (!uid) return
     await db.from('list_items').update({ done, done_at }).eq('id', item.id)
-  }, [])
+  }, [uid, nudge])
 
   const resetDone = useCallback(async (listId: string) => {
     setItems((xs) => xs.map((x) => (x.list_id === listId ? { ...x, done: false, done_at: null } : x)))
+    if (!uid) return
     await db.from('list_items').update({ done: false, done_at: null }).eq('list_id', listId).eq('done', true)
-  }, [])
+  }, [uid, nudge])
 
   const addEvent = useCallback(async (e: Partial<EventRow> & { title: string; starts_at: string }) => {
+    if (!uid) {
+      const row = { id: newId(), owner_id: 'guest', family_id: null, ends_at: null, location: null, calendar: 'Personal', alert_minutes: null, source: 'manual', ...e } as EventRow
+      setEvents((xs) => [...xs, row].sort((a, b) => a.starts_at.localeCompare(b.starts_at))); nudge(); return
+    }
     const { data } = await db.from('events').insert(e).select().single()
     if (data) setEvents((xs) => [...xs, data as EventRow].sort((a, b) => a.starts_at.localeCompare(b.starts_at)))
-  }, [])
+  }, [uid, nudge])
 
   const addReminder = useCallback(async (r: { title: string; remind_at: string | null; source?: string }) => {
+    if (!uid) { setReminders((xs) => [...xs, { id: newId(), done: false, source: 'manual', ...r }]); nudge(); return }
     const { data } = await db.from('reminders').insert(r).select().single()
     if (data) setReminders((xs) => [...xs, data as Reminder])
-  }, [])
+  }, [uid, nudge])
 
   const toggleReminder = useCallback(async (r: Reminder) => {
     setReminders((xs) => xs.map((x) => (x.id === r.id ? { ...x, done: !r.done } : x)))
+    if (!uid) return
     await db.from('reminders').update({ done: !r.done }).eq('id', r.id)
-  }, [])
+  }, [uid, nudge])
 
   const saveNote = useCallback(async (n: Partial<Note> & { title: string }) => {
+    if (!uid) {
+      if (n.id) { const patch = { ...n, updated_at: now() }; setNotes((xs) => xs.map((x) => (x.id === n.id ? { ...x, ...patch } as Note : x))); return { ...patch } as Note }
+      const row = { id: newId(), body: '', kind: 'note', tags: [], opens_at: null, created_at: now(), updated_at: now(), ...n } as Note
+      setNotes((xs) => [row, ...xs]); nudge(); return row
+    }
     if (n.id) {
       const patch = { ...n, updated_at: new Date().toISOString() }
       setNotes((xs) => xs.map((x) => (x.id === n.id ? { ...x, ...patch } as Note : x)))
@@ -250,12 +297,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const { data } = await db.from('notes').insert(n).select().single()
     if (data) setNotes((xs) => [data as Note, ...xs])
     return (data as Note) ?? null
-  }, [])
+  }, [uid, nudge])
 
   const deleteNote = useCallback(async (id: string) => {
     setNotes((xs) => xs.filter((x) => x.id !== id))
+    if (!uid) return
     await db.from('notes').delete().eq('id', id)
-  }, [])
+  }, [uid, nudge])
 
   const findList = useCallback((hint?: string) => {
     const h = (hint ?? '').toLowerCase()
@@ -285,19 +333,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [addEvent, addReminder, addItem, saveNote, findList])
 
   const joinFamily = useCallback(async (code: string) => {
+    if (!uid) { setSavePromptState(true); return 'Sign in first to join a family space.' }
     const { error } = await db.rpc('join_family', { code })
     if (error) return error.message
     await loadAll()
     return null
-  }, [loadAll])
+  }, [loadAll, uid])
 
   const memberFor = useCallback((userId: string | null) => members.find((m) => m.user_id === userId), [members])
 
   const value = useMemo<Store>(() => ({
-    ready, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+    ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
-  }), [ready, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+  }), [ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 

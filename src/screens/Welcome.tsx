@@ -1,24 +1,10 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { db, redirectTo } from '../lib/db'
 import { useStore } from '../lib/store'
-import { I, Logo } from '../components/Icon'
+import { I } from '../components/Icon'
+import { AuthButtons } from '../components/SignIn'
 
 export default function Welcome() {
   const { authError } = useStore()
-  const [busy, setBusy] = useState<string | null>(null)
-  const [err, setErr] = useState<string | null>(null)
-
-  const oauth = async (provider: 'apple' | 'google') => {
-    setErr(null); setBusy(provider)
-    const { error } = await db.auth.signInWithOAuth({ provider, options: { redirectTo: redirectTo() } })
-    if (error) {
-      setBusy(null)
-      setErr(/not enabled|unsupported/i.test(error.message)
-        ? `${provider === 'apple' ? 'Apple' : 'Google'} sign-in isn’t switched on yet. Use email for now.`
-        : error.message)
-    }
-  }
 
   return (
     <main className="screen col">
@@ -44,17 +30,9 @@ export default function Welcome() {
       <h1 className="h1 mtauto" style={{ fontSize: 38, lineHeight: '44px', letterSpacing: -1.2 }}>Just say it.<br /><em>Tadween keeps it.</em></h1>
       <p className="sub mt12" style={{ fontSize: 16, lineHeight: '23px' }}>Your calendar, lists, family groceries and journal — by voice, in English or Arabic.</p>
 
-      <div className="stack mt24" style={{ gap: 10 }}>
-        <button className="btn ink" style={{ height: 60, borderRadius: 30, fontSize: 18 }} onClick={() => oauth('apple')} disabled={!!busy}>
-          <Logo />{busy === 'apple' ? 'Opening Apple…' : 'Continue with Apple'}
-        </button>
-        <button className="btn sec" style={{ height: 60, borderRadius: 30, fontSize: 18 }} onClick={() => oauth('google')} disabled={!!busy}>
-          <Logo />{busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
-        </button>
-        <Link to="/auth/email" className="btn line"><I n="mail" s={17} />Continue with email</Link>
-      </div>
-      {authError && !err && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>Can’t reach sign-in right now ({authError}). Check your connection and try again.</p>}
-      {err && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>{err}</p>}
+      <div className="mt24"><AuthButtons /></div>
+      <Link to="/" className="btn mt8" style={{ background: 'transparent', color: 'var(--ink2)', height: 48 }}>Look around first<I n="next" s={15} w={2.4} /></Link>
+      {authError && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>Can’t reach sign-in right now ({authError}). Check your connection and try again.</p>}
     </main>
   )
 }

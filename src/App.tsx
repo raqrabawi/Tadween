@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useStore } from './lib/store'
 import { Spinner, TabBar } from './components/ui'
+import { SavePrompt } from './components/SignIn'
 import Welcome from './screens/Welcome'
 import EmailAuth from './screens/EmailAuth'
 import Setup from './screens/Setup'
@@ -18,23 +19,12 @@ import Settings from './screens/Settings'
 const TAB_ROUTES = ['/', '/calendar', '/lists', '/journal']
 
 export default function App() {
-  const { ready, session, profile } = useStore()
+  const { ready, session, profile, guest } = useStore()
   const loc = useLocation()
 
   if (!ready) return <div className="app"><div className="screen"><Spinner /></div></div>
 
-  if (!session) {
-    return (
-      <div className="app">
-        <Routes>
-          <Route path="/auth/email" element={<EmailAuth />} />
-          <Route path="*" element={<Welcome />} />
-        </Routes>
-      </div>
-    )
-  }
-
-  if (profile && !profile.onboarded && loc.pathname !== '/setup') return <Navigate to="/setup" replace />
+  if (!guest && profile && !profile.onboarded && loc.pathname !== '/setup') return <Navigate to="/setup" replace />
 
   return (
     <div className="app">
@@ -50,9 +40,12 @@ export default function App() {
         <Route path="/review" element={<Review />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/setup" element={<Setup />} />
+        <Route path="/welcome" element={session ? <Navigate to="/" replace /> : <Welcome />} />
+        <Route path="/auth/email" element={session ? <Navigate to="/" replace /> : <EmailAuth />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {TAB_ROUTES.includes(loc.pathname) && <TabBar />}
+      <SavePrompt />
     </div>
   )
 }
