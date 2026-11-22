@@ -95,7 +95,6 @@ export default function Listen() {
               <span key={i} style={{ position: 'absolute', left: 149, top: 0, width: 2, borderRadius: 1, transformOrigin: '1px 150px', height: i % 5 === 0 ? 16 : 10, transform: `rotate(${i * 6}deg)`, background: i < lit ? (i % 5 === 0 ? 'var(--ink)' : mg ? 'var(--ctaFlat)' : 'var(--acc)') : 'var(--line)' }} />
             ))}
           </div>
-          <span className="cap" style={{ position: 'absolute', left: 0, right: 0, top: 26, textAlign: 'center' }}>{v.listening ? 'Understanding · on device' : 'Paused'}</span>
           <div style={{ position: 'absolute', left: 60, top: 60, width: 180, height: 180 }}>
             {v.listening && <><span className="ring" /><span className="ring" style={{ animationDelay: '1s' }} /></>}
             <button className="vorb" style={{ position: 'absolute', inset: 0, flexDirection: 'column', gap: 12, boxShadow: mg ? '0 0 0 10px rgba(224,142,38,.14)' : '0 0 0 10px rgba(7,80,86,.16)' }} onClick={done} disabled={!text} aria-label="Done speaking">
