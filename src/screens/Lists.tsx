@@ -4,6 +4,7 @@ import { useStore } from '../lib/store'
 import type { List } from '../lib/types'
 import { I } from '../components/Icon'
 import { Avatar, Sheet, Switch } from '../components/ui'
+import { Fab } from '../components/Fab'
 
 function ListCard({ list, editing }: { list: List; editing: boolean }) {
   const { items, members, addItem, toggleItem, resetDone, deleteList, memberFor } = useStore()
@@ -98,7 +99,7 @@ function ListCard({ list, editing }: { list: List; editing: boolean }) {
 }
 
 export default function Lists() {
-  const { categories, lists, items, addCategory, deleteCategory, addList } = useStore()
+  const { categories, lists, items, addCategory, deleteCategory, addList, addItem } = useStore()
   const [cat, setCat] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -106,6 +107,10 @@ export default function Lists() {
   const [newList, setNewList] = useState(false)
   const [listName, setListName] = useState('')
   const [listShared, setListShared] = useState(false)
+  const [newItem, setNewItem] = useState(false)
+  const [itemName, setItemName] = useState('')
+  const [itemQty, setItemQty] = useState('')
+  const [itemList, setItemList] = useState('')
 
   useEffect(() => { if (!cat && categories[0]) setCat(categories[0].id) }, [categories, cat])
   const current = categories.find((c) => c.id === cat) ?? categories[0]
@@ -125,6 +130,19 @@ export default function Lists() {
     setNewList(false); setListName(''); setListShared(false)
   }
 
+  const openItem = () => {
+    if (!shown.length) { setNewList(true); return }
+    setItemList(shown[0].id); setNewItem(true)
+  }
+  const saveItem = async () => {
+    const name = itemName.trim()
+    const l = shown.find((x) => x.id === itemList) ?? shown[0]
+    if (!name || !l) return
+    await addItem(l.id, name, itemQty.trim() || null, l.verb === 'buy' ? 'Other' : null)
+    setItemName(''); setItemQty('')
+    setNewItem(false)
+  }
+
   return (
     <main className="screen">
       <div className="hd" style={{ minHeight: 60 }}>
@@ -134,11 +152,14 @@ export default function Lists() {
         </div>
         <div className="row" style={{ gap: 8 }}>
           <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? 'Done' : 'Edit'}</button>
-          <button className="ib" aria-label="New list" onClick={() => setNewList(true)}><I n="plus" w={2.2} /></button>
         </div>
       </div>
 
-      <div className="chips mt20" role="tablist" aria-label="Categories">
+      <div className="rowhead">
+        <span className="cap" id="cats-label">Categories</span>
+        {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />Add category</button>}
+      </div>
+      <div className="chips" role="tablist" aria-labelledby="cats-label">
         {categories.map((c) => editing ? (
           <span key={c.id} className={c.id === current?.id ? 'chip on' : 'chip'} style={{ paddingRight: 10 }}>{c.name}
             <button aria-label={`Delete category ${c.name}`} onClick={() => confirm(`Delete “${c.name}” and its lists?`) && deleteCategory(c.id)} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
@@ -146,14 +167,12 @@ export default function Lists() {
         ) : (
           <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{c.name}<span className="n">{openCount(c.id)}</span></button>
         ))}
-        {adding ? (
+        {adding && (
           <form className="chip" style={{ width: 210, padding: '0 4px 0 18px', boxShadow: 'var(--edge), 0 0 0 2px var(--acc)' }} onSubmit={(e) => { e.preventDefault(); saveCat() }}>
             <label className="sr" htmlFor="catname">Category name</label>
             <input id="catname" autoFocus className="inp" style={{ fontSize: 15 }} placeholder="Category name" value={catName} onChange={(e) => setCatName(e.target.value)} />
             <button type="submit" className="ib sm acc" aria-label="Save category"><I n="check" s={15} w={3} /></button>
           </form>
-        ) : (
-          <button className="chip" style={{ width: 44, padding: 0, background: 'transparent', boxShadow: 'inset 0 0 0 1.5px var(--line)' }} aria-label="Add category" onClick={() => setAdding(true)}><I n="plus" s={18} w={2.2} /></button>
         )}
       </div>
 
@@ -162,6 +181,21 @@ export default function Lists() {
         {!shown.length && current && <div className="card empty"><span className="ttl">No lists in {current.name} yet</span><span className="sub">Make one, or just say “add milk to groceries”.</span></div>}
         <button className="btn dash" style={{ height: 56, color: 'var(--ink2)', fontSize: 16 }} onClick={() => setNewList(true)}><I n="plus" s={18} w={2.4} />New list{current ? ` in ${current.name}` : ''}</button>
       </div>
+
+      {newItem && current && (
+        <Sheet label={`New item in ${current.name}`} onClose={() => setNewItem(false)}>
+          <div className="hd3 mt12"><button className="ib" aria-label="Cancel" onClick={() => setNewItem(false)}><I n="close" s={15} w={2.6} /></button><h1>New item</h1><span /></div>
+          <form onSubmit={(e) => { e.preventDefault(); saveItem() }}>
+            <div className="form mt20">
+              <label className="frow"><span className="fl">Item</span><input autoFocus className="inp" placeholder={/grocer|shop/i.test(current.name) ? 'e.g. Tomatoes' : 'e.g. Fix the tap'} value={itemName} onChange={(e) => setItemName(e.target.value)} /></label>
+              <label className="frow"><span className="fl">Amount</span><input className="inp" placeholder="Optional" value={itemQty} onChange={(e) => setItemQty(e.target.value)} /></label>
+              {shown.length > 1 && <label className="frow"><span className="fl">List</span><select className="inp" style={{ background: 'transparent' }} value={itemList} onChange={(e) => setItemList(e.target.value)}>{shown.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}</select></label>}
+            </div>
+            <p className="ffoot">Adds to {shown.length > 1 ? 'the list you pick' : shown[0]?.title} in {current.name}.</p>
+            <button className="btn pri mt24" type="submit" disabled={!itemName.trim()}>Add item<I n="next" s={16} w={2.6} /></button>
+          </form>
+        </Sheet>
+      )}
 
       {newList && (
         <Sheet label="New list" onClose={() => setNewList(false)}>
@@ -174,6 +208,11 @@ export default function Lists() {
           <button className="btn pri mt24" onClick={saveList}>Create list<I n="next" s={16} w={2.6} /></button>
         </Sheet>
       )}
+      <Fab label="Add to lists" actions={[
+        { icon: 'plus', label: current ? `Item in ${current.name}` : 'New item', onSelect: openItem },
+        { icon: 'list', label: current ? `New list in ${current.name}` : 'New list', onSelect: () => setNewList(true) },
+        { icon: 'folder', label: 'New category', onSelect: () => { setAdding(true); window.scrollTo({ top: 0, behavior: 'smooth' }) } }
+      ]} />
     </main>
   )
 }

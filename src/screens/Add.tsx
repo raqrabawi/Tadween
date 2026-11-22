@@ -4,8 +4,8 @@ import { useStore } from '../lib/store'
 import { understand } from '../lib/parse'
 import { I } from '../components/Icon'
 
-type T = 'Event' | 'Reminder' | 'Task' | 'Shopping' | 'Note'
-const TYPES: { t: T; icon: string }[] = [{ t: 'Event', icon: 'cal' }, { t: 'Reminder', icon: 'bell' }, { t: 'Task', icon: 'check' }, { t: 'Shopping', icon: 'bag' }, { t: 'Note', icon: 'pen' }]
+type T = 'Event' | 'Reminder' | 'Task' | 'Birthday' | 'Shopping' | 'Note'
+const TYPES: { t: T; icon: string }[] = [{ t: 'Event', icon: 'cal' }, { t: 'Reminder', icon: 'bell' }, { t: 'Task', icon: 'check' }, { t: 'Birthday', icon: 'gift' }, { t: 'Shopping', icon: 'bag' }, { t: 'Note', icon: 'pen' }]
 const pad = (n: number) => String(n).padStart(2, '0')
 const dstr = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 const tstr = (d: Date) => `${pad(d.getHours())}:${pad(d.getMinutes())}`
@@ -18,7 +18,7 @@ export default function Add() {
   const [smart, setSmart] = useState('')
   const soon = new Date(); soon.setHours(soon.getHours() + 1, 0, 0, 0)
   const [title, setTitle] = useState('')
-  const [date, setDate] = useState(dstr(soon))
+  const [date, setDate] = useState(sp.get('date') ?? dstr(soon))
   const [time, setTime] = useState(tstr(soon))
   const [endTime, setEndTime] = useState(tstr(new Date(soon.getTime() + 3600000)))
   const [calendar, setCalendar] = useState('Personal')
@@ -51,6 +51,7 @@ export default function Add() {
       await addEvent({ title: title.trim(), starts_at: s.toISOString(), ends_at: (e > s ? e : new Date(s.getTime() + 3600000)).toISOString(), calendar, location: where || null })
     } else if (type === 'Reminder') await addReminder({ title: title.trim(), remind_at: at().toISOString() })
     else if (type === 'Task') await addReminder({ title: title.trim(), remind_at: hasTime ? at().toISOString() : null })
+    else if (type === 'Birthday') await addEvent({ title: `${title.trim()}’s birthday`, starts_at: new Date(`${date}T09:00`).toISOString(), ends_at: null, calendar: 'Birthday', source: 'birthday' })
     else if (type === 'Shopping' && listId) await addItem(listId, title.trim(), qty || null, null)
     else if (type === 'Note') await saveNote({ title: title.trim(), body })
     setBusy(false)
@@ -67,7 +68,7 @@ export default function Add() {
         <button className="ib acc" aria-label="Save" onClick={save} disabled={!title.trim() || busy}><I n="check" s={18} w={2.8} /></button>
       </div>
 
-      <div role="group" aria-label="Type" className="mt20" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0,1fr))' }}>
+      <div role="group" aria-label="Type" className="mt20" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0,1fr))' }}>
         {TYPES.map(({ t, icon }) => <button key={t} className={t === type ? 'orb on' : 'orb'} aria-pressed={t === type} onClick={() => setType(t)}><span className="ib"><I n={icon} s={21} /></span>{t}</button>)}
       </div>
 
@@ -81,13 +82,14 @@ export default function Add() {
 
       <p className="fhead mt24">Details</p>
       <div className="form">
-        {row(type === 'Shopping' ? 'Item' : 'Title', <input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={type === 'Shopping' ? 'Rice' : 'Title'} />)}
+        {row(type === 'Shopping' ? 'Item' : type === 'Birthday' ? 'Whose' : 'Title', <input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={type === 'Shopping' ? 'Rice' : type === 'Birthday' ? 'Name, e.g. Mama' : 'Title'} />)}
         {type === 'Event' && <>
           {row('Date', <input type="date" className="inp" value={date} onChange={(e) => setDate(e.target.value)} />)}
           {row('Starts', <input type="time" className="inp" value={time} onChange={(e) => setTime(e.target.value)} />)}
           {row('Ends', <input type="time" className="inp" value={endTime} onChange={(e) => setEndTime(e.target.value)} />)}
           {row('Where', <input className="inp" value={where} onChange={(e) => setWhere(e.target.value)} placeholder="Optional" />)}
         </>}
+        {type === 'Birthday' && row('Date', <input type="date" className="inp" value={date} onChange={(e) => setDate(e.target.value)} />)}
         {type === 'Reminder' && <>
           {row('Date', <input type="date" className="inp" value={date} onChange={(e) => setDate(e.target.value)} />)}
           {row('Time', <input type="time" className="inp" value={time} onChange={(e) => setTime(e.target.value)} />)}
@@ -103,6 +105,7 @@ export default function Add() {
         {type === 'Note' && <label className="frow" style={{ alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14 }}><span className="sr">Note</span><textarea className="inp" rows={5} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write it down…" /></label>}
       </div>
 
+      {type === 'Birthday' && <p className="ffoot">Shows on your calendar every year.</p>}
       {type === 'Event' && (
         <div className="seg mt16" role="group" aria-label="Calendar">
           {['Personal', 'Work', 'Family'].map((c) => <button key={c} className={c === calendar ? 'on' : ''} aria-pressed={c === calendar} onClick={() => setCalendar(c)}>{c}</button>)}

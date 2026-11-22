@@ -1,28 +1,38 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { addDays, hm, sameDay, startOfDay, weekStart } from '../lib/dates'
 import { I } from '../components/Icon'
+import { Fab } from '../components/Fab'
+import type { EventRow } from '../lib/types'
 
-const TONE: Record<string, string> = { Work: 'tone-sky', Personal: 'tone-mint', Family: 'tone-sand' }
+// Birthdays repeat every year on the same day
+const onDay = (e: EventRow, d: Date) => {
+  const s = new Date(e.starts_at)
+  if (e.source !== 'birthday') return sameDay(s, d)
+  return s.getMonth() === d.getMonth() && s.getDate() === d.getDate() && d.getFullYear() >= s.getFullYear()
+}
+
+const TONE: Record<string, string> = { Work: 'tone-sky', Personal: 'tone-mint', Family: 'tone-sand', Birthday: 'tone-lilac' }
 
 export default function Calendar() {
   const { events, reminders, toggleReminder } = useStore()
+  const nav = useNavigate()
   const [day, setDay] = useState(() => startOfDay(new Date()))
   const [week, setWeek] = useState(() => weekStart(new Date()))
   const now = new Date()
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i))
 
-  const dayEvents = useMemo(() => events.filter((e) => sameDay(new Date(e.starts_at), day)), [events, day])
+  const dayEvents = useMemo(() => events.filter((e) => onDay(e, day)), [events, day])
   const dayRems = reminders.filter((r) => r.remind_at && sameDay(new Date(r.remind_at), day))
-  const weekCount = events.filter((e) => { const d = new Date(e.starts_at); return d >= week && d < addDays(week, 7) }).length
+  const weekCount = events.filter((e) => Array.from({ length: 7 }, (_, i) => addDays(week, i)).some((d) => onDay(e, d))).length
 
   // A free window of 2h+ between 09:00 and 18:00 on the selected day
   const free = useMemo(() => {
     const open = new Date(day); open.setHours(9, 0, 0, 0)
     const close = new Date(day); close.setHours(18, 0, 0, 0)
     let cursor = sameDay(day, now) && now > open ? new Date(Math.ceil(now.getTime() / 1800000) * 1800000) : open
-    for (const e of dayEvents) {
+    for (const e of dayEvents.filter((x) => x.source !== 'birthday')) {
       const s = new Date(e.starts_at)
       if (s.getTime() - cursor.getTime() >= 2 * 3600000 && s <= close) return { from: cursor, to: s }
       const en = new Date(e.ends_at ?? e.starts_at)
@@ -44,7 +54,6 @@ export default function Calendar() {
         </div>
         <div className="row" style={{ gap: 8 }}>
           <button className="ib" aria-label="Jump to today" onClick={() => { setWeek(weekStart(now)); pick(now) }}><I n="target" /></button>
-          <Link to="/add?type=Event" className="ib" aria-label="New event"><I n="plus" w={2.2} /></Link>
         </div>
       </div>
 
@@ -57,7 +66,7 @@ export default function Calendar() {
       <div className="mt12" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0,1fr))', gap: 6 }}>
         {days.map((d) => {
           const on = sameDay(d, day)
-          const n = events.filter((e) => sameDay(new Date(e.starts_at), d)).length
+          const n = events.filter((e) => onDay(e, d)).length
           return (
             <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' })}
               className={on ? 'card' : 'card'} style={{ height: 84, borderRadius: 24, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, ...(on ? { background: 'var(--hot)', color: 'var(--hotInk)', backdropFilter: 'none' } : {}) }}>
@@ -75,12 +84,12 @@ export default function Calendar() {
         {dayEvents.map((e) => {
           const s = new Date(e.starts_at)
           const en = e.ends_at ? new Date(e.ends_at) : null
-          const live = s <= now && (en ?? s) >= now
+          const live = e.source !== 'birthday' && s <= now && (en ?? s) >= now
           return (
             <div key={e.id} className="row" style={{ alignItems: 'stretch' }}>
               <div style={{ width: 46, flexShrink: 0, paddingTop: 18, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <span className="num" style={{ fontSize: 15, fontWeight: 600 }}>{hm(s)}</span>
-                {en && <span className="sub num" style={{ fontSize: 12, lineHeight: '16px' }}>{hm(en)}</span>}
+                {e.source === 'birthday' ? <I n="gift" s={18} /> : <span className="num" style={{ fontSize: 15, fontWeight: 600 }}>{hm(s)}</span>}
+                {en && e.source !== 'birthday' && <span className="sub num" style={{ fontSize: 12, lineHeight: '16px' }}>{hm(en)}</span>}
               </div>
               {live ? (
                 <div className="card hot tight grow" style={{ paddingLeft: 20 }}>
@@ -93,7 +102,7 @@ export default function Calendar() {
               ) : (
                 <div className={`card tight grow ${TONE[e.calendar] ?? 'tone-lilac'}`} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <span className="rail" />
-                  <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="ttl" style={{ fontSize: 17 }}>{e.title}</span><span className="sub">{[e.location, e.source === 'voice' ? 'Added by voice' : null].filter(Boolean).join(' · ') || e.calendar}</span></span>
+                  <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="ttl" style={{ fontSize: 17 }}>{e.title}</span><span className="sub">{e.source === 'birthday' ? (() => { const age = day.getFullYear() - s.getFullYear(); return age > 0 && age < 120 ? `Turns ${age}` : 'All day' })() : [e.location, e.source === 'voice' ? 'Added by voice' : null].filter(Boolean).join(' · ') || e.calendar}</span></span>
                   <span className="tag sm">{e.calendar}</span>
                 </div>
               )}
@@ -123,6 +132,13 @@ export default function Calendar() {
 
         {!dayEvents.length && !dayRems.length && !free && <div className="card empty"><span className="ttl">Nothing here</span><span className="sub">Tap the mic and say what’s coming up.</span></div>}
       </div>
+      <Fab label="Add to calendar" actions={[
+        { icon: 'cal', label: 'Event', hint: 'Meeting, appointment', onSelect: () => nav(`/add?type=Event&date=${dkey(day)}`) },
+        { icon: 'bell', label: 'Task or reminder', onSelect: () => nav(`/add?type=Reminder&date=${dkey(day)}`) },
+        { icon: 'gift', label: 'Birthday', hint: 'Repeats every year', onSelect: () => nav(`/add?type=Birthday&date=${dkey(day)}`) }
+      ]} />
     </main>
   )
 }
+
+const dkey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`

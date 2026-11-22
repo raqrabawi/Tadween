@@ -49,7 +49,11 @@ function seed(): GuestData {
 export function loadGuest(): GuestData {
   try {
     const raw = localStorage.getItem(GUEST_KEY)
-    if (raw) return { ...seed(), ...(JSON.parse(raw) as GuestData) }
+    if (raw) {
+      const d = { ...seed(), ...(JSON.parse(raw) as GuestData) }
+      d.notes = d.notes.map((n) => (n.id ? n : { ...n, id: newId() })) // repair notes saved without an id
+      return d
+    }
   } catch { /* private mode or bad data: start fresh */ }
   return seed()
 }
@@ -112,7 +116,7 @@ export async function migrateGuest(familyId: string | null): Promise<boolean> {
     alert_minutes: e.alert_minutes, source: e.source
   }))
   const reminders = g.reminders.map((r) => ({ title: r.title, remind_at: r.remind_at, done: r.done, source: r.source }))
-  const notes = g.notes.map((n) => ({ title: n.title, body: n.body, kind: n.kind, tags: n.tags, opens_at: n.opens_at }))
+  const notes = g.notes.map((n) => ({ title: n.title, body: n.body, kind: n.kind, tags: n.tags, opens_at: n.opens_at, image: n.image ?? null }))
 
   await Promise.all([
     items.length ? db.from('list_items').insert(items) : null,

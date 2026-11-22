@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, Link } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { understand } from '../lib/parse'
 import { speak, stopSpeaking, useListener, canListen } from '../lib/voice'
@@ -11,6 +11,11 @@ export default function NoteScreen() {
   const nav = useNavigate()
   const { notes, saveNote, deleteNote, saveDrafts, profile } = useStore()
   const existing = notes.find((n) => n.id === id)
+  const [sp] = useSearchParams()
+  const kind = existing?.kind ?? (sp.get('kind') === 'list' ? 'list' : 'note')
+  const isList = kind === 'list'
+  const [image, setImage] = useState<string | null>(existing?.image ?? null)
+  const [newItem, setNewItem] = useState('')
   const [noteId, setNoteId] = useState<string | undefined>(existing?.id)
   const [title, setTitle] = useState(existing?.title ?? '')
   const [body, setBody] = useState(existing?.body ?? '')
@@ -20,7 +25,7 @@ export default function NoteScreen() {
   const dirty = useRef(false)
   const dictate = useListener()
 
-  useEffect(() => { if (existing && !dirty.current) { setTitle(existing.title); setBody(existing.body); setNoteId(existing.id) } }, [existing])
+  useEffect(() => { if (existing && !dirty.current) { setTitle(existing.title); setBody(existing.body); setNoteId(existing.id); setImage(existing.image ?? null) } }, [existing])
 
   // Append dictated text to the body as it finalises
   const lastFinal = useRef('')
@@ -28,7 +33,7 @@ export default function NoteScreen() {
     if (dictate.finalText && dictate.finalText !== lastFinal.current) {
       const add = dictate.finalText.slice(lastFinal.current.length).trim()
       lastFinal.current = dictate.finalText
-      if (add) { dirty.current = true; setBody((b) => (b ? b.trimEnd() + ' ' : '') + add) }
+      if (add) { dirty.current = true; setBody((b) => (isList ? (b ? b + '\n' : '') + '[ ] ' + add : (b ? b.trimEnd() + ' ' : '') + add)) }
     }
   }, [dictate.finalText])
 
@@ -36,17 +41,24 @@ export default function NoteScreen() {
   useEffect(() => {
     if (!dirty.current) return
     const t = setTimeout(async () => {
-      const saved = await saveNote({ id: noteId, title: title.trim() || body.trim().split(/[.!?\n]/)[0].slice(0, 60) || 'Untitled', body, opens_at: capsule ? new Date(capsule).toISOString() : null })
+      const saved = await saveNote({ id: noteId, title: title.trim() || (isList ? 'List' : body.trim().split(/[.!?\n]/)[0].slice(0, 60)) || 'Untitled', body, kind, image, opens_at: capsule ? new Date(capsule).toISOString() : null })
       if (saved && !noteId) { setNoteId(saved.id); history.replaceState(null, '', `#/note/${saved.id}`) }
     }, 700)
     return () => clearTimeout(t)
-  }, [title, body, capsule]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [title, body, capsule, image]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const actions = useMemo(() => understand(body).filter((d) => d.kind !== 'note'), [body])
+  const actions = useMemo(() => isList ? [] : understand(body).filter((d) => d.kind !== 'note'), [body])
   const summary = useMemo(() => {
     const s = body.split(/(?<=[.!?])\s+/).filter(Boolean)
-    return s.length > 1 ? s[0] : ''
-  }, [body])
+    return !isList && s.length > 1 ? s[0] : ''
+  }, [body]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const lines = body ? body.split('\n') : []
+  const setLines = (ls: string[]) => { dirty.current = true; setBody(ls.join('\n')) }
+  const toggleLine = (i: number) => setLines(lines.map((l, j) => (j === i ? (l.startsWith('[x] ') ? '[ ] ' + l.slice(4) : '[x] ' + l.replace(/^\[ \] /, '')) : l)))
+  const editLine = (i: number, v: string) => setLines(lines.map((l, j) => (j === i ? l.slice(0, 4) + v : l)))
+  const dropLine = (i: number) => setLines(lines.filter((_, j) => j !== i))
+  const addLine = () => { const v = newItem.trim(); if (!v) return; setLines([...lines, '[ ] ' + v]); setNewItem('') }
 
   const created = existing ? new Date(existing.created_at) : new Date()
   const locked = existing?.opens_at && new Date(existing.opens_at) > new Date()
@@ -83,8 +95,37 @@ export default function NoteScreen() {
         </div>
       )}
 
-      <label className="sr" htmlFor="nbody">Note</label>
-      <textarea id="nbody" className="inp mt16" rows={12} style={{ fontSize: 18, lineHeight: '28px', margin: '0 4px', width: 'calc(100% - 8px)' }} placeholder="Start writing, or tap the mic and talk…" value={body} onChange={(e) => { dirty.current = true; setBody(e.target.value) }} />
+      {image && (
+        <div className="mt16" style={{ position: 'relative', margin: '16px 4px 0' }}>
+          <img className="nimg" src={image} alt={title || 'Photo'} />
+          <button className="ib sm" style={{ position: 'absolute', top: 10, right: 10 }} aria-label="Remove photo" onClick={() => { dirty.current = true; setImage(null) }}><I n="close" s={14} w={2.6} /></button>
+        </div>
+      )}
+
+      {isList ? (
+        <div className="mt16" style={{ margin: '16px 4px 0' }} role="list" aria-label="List items">
+          {lines.map((l, i) => {
+            const done = l.startsWith('[x] ')
+            return (
+              <div key={i} className="ckrow" role="listitem">
+                <button className={done ? 'ck on' : 'ck'} onClick={() => toggleLine(i)} aria-label={`${done ? 'Untick' : 'Tick'} ${l.slice(4)}`}><span>{done && <I n="check" s={14} w={3} />}</span></button>
+                <input className="inp" style={{ fontSize: 17, textDecoration: done ? 'line-through' : undefined, color: done ? 'var(--ink3)' : undefined }} value={l.replace(/^\[[ x]\] /, '')} onChange={(e) => editLine(i, e.target.value)} aria-label="Item" />
+                <button className="ib sm" style={{ background: 'transparent' }} aria-label={`Remove ${l.slice(4)}`} onClick={() => dropLine(i)}><I n="close" s={13} w={2.4} /></button>
+              </div>
+            )
+          })}
+          <form className="ckrow" onSubmit={(e) => { e.preventDefault(); addLine() }}>
+            <span className="ck" aria-hidden="true" style={{ opacity: .5 }}><I n="plus" s={14} w={2.6} /></span>
+            <label className="sr" htmlFor="nitem">New item</label>
+            <input id="nitem" autoFocus={!lines.length} className="inp" style={{ fontSize: 17 }} placeholder="Add item" value={newItem} onChange={(e) => setNewItem(e.target.value)} onBlur={addLine} enterKeyHint="next" />
+          </form>
+        </div>
+      ) : (
+        <>
+          <label className="sr" htmlFor="nbody">Note</label>
+          <textarea id="nbody" className="inp mt16" rows={image ? 5 : 12} style={{ fontSize: 18, lineHeight: '28px', margin: '0 4px', width: 'calc(100% - 8px)' }} placeholder={image ? 'Add a caption or a thought…' : 'Start writing, or tap the mic and talk…'} value={body} onChange={(e) => { dirty.current = true; setBody(e.target.value) }} />
+        </>
+      )}
 
       <div className="form mt16"><label className="frow"><span className="fl" style={{ width: 'auto' }}>Time capsule</span><input type="date" className="inp" style={{ textAlign: 'right' }} value={capsule} onChange={(e) => { dirty.current = true; setCapsule(e.target.value) }} /></label></div>
       <p className="ffoot">Lock this note until a date. It stays hidden until then.</p>

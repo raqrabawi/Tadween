@@ -310,3 +310,30 @@ textarea.inp{resize:none;line-height:28px}
 .dark .btn.google{background:#131314;color:#E3E3E3;box-shadow:inset 0 0 0 1px #8E918F}
 .btn.google img{display:block;flex:none}
 .guest-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:18px;background:var(--s1);box-shadow:inset 0 0 0 1px var(--line);font-size:14px}
+
+/* Floating add button and its menu */
+.fab-wrap{position:fixed;z-index:31;right:max(16px,calc((100vw - 480px)/2 + 16px));bottom:calc(env(safe-area-inset-bottom,0px) + 112px);display:flex;flex-direction:column;align-items:flex-end;gap:14px}
+.fab{width:60px;height:60px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:var(--hot);color:var(--hotInk);box-shadow:0 6px 16px -6px rgba(0,0,0,.35);transition:transform .2s ease,border-radius .2s ease}
+.fab:active{transform:scale(.95)}
+.fab-wrap.open .fab{border-radius:30px;transform:rotate(45deg)}
+.fab-scrim{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,var(--bg) 78%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:fabIn .15s ease}
+.fab-menu{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-menu li{animation:fabUp .2s ease both}
+.fab-item{display:flex;align-items:center;gap:12px;min-height:48px}
+.fab-lbl{display:flex;flex-direction:column;align-items:flex-end;padding:8px 14px;border-radius:14px;background:var(--s1);box-shadow:var(--shadow),inset 0 0 0 1px var(--line);text-align:right}
+.fab-lbl b{font-size:15px;font-weight:600;color:var(--ink)}
+.fab-lbl span{font-size:12px;color:var(--ink2)}
+.fab-ic{width:48px;height:48px;border-radius:24px;flex:none;display:flex;align-items:center;justify-content:center;background:var(--s1);color:var(--ink);box-shadow:var(--shadow),inset 0 0 0 1px var(--line);margin-right:6px}
+@keyframes fabIn{from{opacity:0}}
+@keyframes fabUp{from{opacity:0;transform:translateY(8px)}}
+@media (prefers-reduced-motion:reduce){.fab,.fab-menu li,.fab-scrim{transition:none;animation:none}}
+
+/* Section label above the category chips */
+.rowhead{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 10px}
+.rowhead .cap{margin:0}
+.addmini{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 12px;border-radius:15px;font-size:13px;font-weight:600;color:var(--ink2);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* Photos in notes */
+.nimg{display:block;width:100%;border-radius:18px;object-fit:cover}
+.ckrow{display:flex;align-items:center;gap:10px;min-height:48px}
+.ckrow input{flex:1}

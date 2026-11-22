@@ -285,7 +285,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const saveNote = useCallback(async (n: Partial<Note> & { title: string }) => {
     if (!uid) {
       if (n.id) { const patch = { ...n, updated_at: now() }; setNotes((xs) => xs.map((x) => (x.id === n.id ? { ...x, ...patch } as Note : x))); return { ...patch } as Note }
-      const row = { id: newId(), body: '', kind: 'note', tags: [], opens_at: null, created_at: now(), updated_at: now(), ...n } as Note
+      const row = { body: '', kind: 'note', tags: [], opens_at: null, created_at: now(), updated_at: now(), ...n, id: newId() } as Note
       setNotes((xs) => [row, ...xs]); nudge(); return row
     }
     if (n.id) {
