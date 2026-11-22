@@ -9,12 +9,13 @@ import { Toast } from '../components/ui'
 export default function NoteScreen() {
   const { id } = useParams()
   const nav = useNavigate()
-  const { notes, saveNote, deleteNote, saveDrafts, profile } = useStore()
+  const { notes, saveNote, deleteNote, saveDrafts, profile, noteCategories } = useStore()
   const existing = notes.find((n) => n.id === id)
   const [sp] = useSearchParams()
   const kind = existing?.kind ?? (sp.get('kind') === 'list' ? 'list' : 'note')
   const isList = kind === 'list'
   const [image, setImage] = useState<string | null>(existing?.image ?? null)
+  const [catId, setCatId] = useState<string>(existing?.category_id ?? sp.get('cat') ?? '')
   const [newItem, setNewItem] = useState('')
   const [noteId, setNoteId] = useState<string | undefined>(existing?.id)
   const [title, setTitle] = useState(existing?.title ?? '')
@@ -25,7 +26,7 @@ export default function NoteScreen() {
   const dirty = useRef(false)
   const dictate = useListener()
 
-  useEffect(() => { if (existing && !dirty.current) { setTitle(existing.title); setBody(existing.body); setNoteId(existing.id); setImage(existing.image ?? null) } }, [existing])
+  useEffect(() => { if (existing && !dirty.current) { setTitle(existing.title); setBody(existing.body); setNoteId(existing.id); setImage(existing.image ?? null); setCatId(existing.category_id ?? '') } }, [existing])
 
   // Append dictated text to the body as it finalises
   const lastFinal = useRef('')
@@ -41,11 +42,11 @@ export default function NoteScreen() {
   useEffect(() => {
     if (!dirty.current) return
     const t = setTimeout(async () => {
-      const saved = await saveNote({ id: noteId, title: title.trim() || (isList ? 'List' : body.trim().split(/[.!?\n]/)[0].slice(0, 60)) || 'Untitled', body, kind, image, opens_at: capsule ? new Date(capsule).toISOString() : null })
+      const saved = await saveNote({ id: noteId, title: title.trim() || (isList ? 'List' : body.trim().split(/[.!?\n]/)[0].slice(0, 60)) || 'Untitled', body, kind, image, category_id: catId || null, opens_at: capsule ? new Date(capsule).toISOString() : null })
       if (saved && !noteId) { setNoteId(saved.id); history.replaceState(null, '', `#/note/${saved.id}`) }
     }, 700)
     return () => clearTimeout(t)
-  }, [title, body, capsule, image]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [title, body, capsule, image, catId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const actions = useMemo(() => isList ? [] : understand(body).filter((d) => d.kind !== 'note'), [body])
   const summary = useMemo(() => {
@@ -83,7 +84,14 @@ export default function NoteScreen() {
         </div>
       </div>
 
-      <p className="cap" style={{ margin: '24px 4px 6px' }}>{created.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })} · {created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+      <div className="row" style={{ margin: '20px 4px 0', gap: 8 }}>
+        <label className="sr" htmlFor="ncat">Category</label>
+        <select id="ncat" className="tag" style={{ appearance: 'none', border: 0, height: 36, fontFamily: 'inherit', color: 'inherit' }} value={catId} onChange={(e) => { dirty.current = true; setCatId(e.target.value) }}>
+          <option value="">No category</option>
+          {noteCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+      <p className="cap" style={{ margin: '14px 4px 6px' }}>{created.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })} · {created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
       <label className="sr" htmlFor="ntitle">Title</label>
       <input id="ntitle" className="inp h1" style={{ fontSize: 30, lineHeight: '38px', margin: '0 4px', fontWeight: 700 }} placeholder="Title" value={title} onChange={(e) => { dirty.current = true; setTitle(e.target.value) }} />
 

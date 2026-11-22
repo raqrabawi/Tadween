@@ -16,6 +16,7 @@ interface Store {
   family: Family | null
   members: Member[]
   categories: Category[]
+  noteCategories: Category[]
   lists: List[]
   items: Item[]
   events: EventRow[]
@@ -28,7 +29,7 @@ interface Store {
   setPalette: (p: Palette) => void
   updateProfile: (p: Partial<Profile>) => Promise<void>
   reload: () => Promise<void>
-  addCategory: (name: string) => Promise<Category | null>
+  addCategory: (name: string, scope?: 'lists' | 'notes') => Promise<Category | null>
   deleteCategory: (id: string) => Promise<void>
   addList: (categoryId: string, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => Promise<void>
   deleteList: (id: string) => Promise<void>
@@ -40,7 +41,7 @@ interface Store {
   toggleReminder: (r: Reminder) => Promise<void>
   saveNote: (n: Partial<Note> & { title: string }) => Promise<Note | null>
   deleteNote: (id: string) => Promise<void>
-  saveDrafts: (drafts: Draft[]) => Promise<number>
+  saveDrafts: (drafts: Draft[], opts?: { noteCategory?: string | null }) => Promise<number>
   joinFamily: (code: string) => Promise<string | null>
   memberFor: (userId: string | null) => Member | undefined
 }
@@ -62,7 +63,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [family, setFamily] = useState<Family | null>(null)
   const [members, setMembers] = useState<Member[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const [allCats, setCategories] = useState<Category[]>([])
+  // Lists and Notes each have their own categories
+  const categories = useMemo(() => allCats.filter((c) => c.scope !== 'notes'), [allCats])
+  const noteCategories = useMemo(() => allCats.filter((c) => c.scope === 'notes'), [allCats])
   const [lists, setLists] = useState<List[]>([])
   const [items, setItems] = useState<Item[]>([])
   const [events, setEvents] = useState<EventRow[]>([])
@@ -143,7 +147,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setLoading(false)
 
     // First run: starter categories and lists so the app is useful immediately.
-    if (!seeded.current && (cats.data ?? []).length === 0 && (ls.data ?? []).length === 0 && fid) {
+    // Starter note categories, once, for anyone who has none yet
+    if (!(cats.data ?? []).some((c) => c.scope === 'notes')) {
+      const { data: nc } = await db.from('categories').insert([
+        { name: 'Personal', position: 0, scope: 'notes' }, { name: 'Ideas', position: 1, scope: 'notes' }, { name: 'Work', position: 2, scope: 'notes' }
+      ]).select()
+      if (nc) setCategories((c) => [...c, ...(nc as Category[])])
+    }
+
+    if (!seeded.current && !(cats.data ?? []).some((c) => c.scope !== 'notes') && (ls.data ?? []).length === 0 && fid) {
       seeded.current = true
       const { data: made } = await db.from('categories').insert([
         { name: 'Groceries', position: 0 }, { name: 'Home', position: 1 }, { name: 'Personal', position: 2 }
@@ -184,8 +196,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const guest = ready && !uid
   useEffect(() => {
     if (!guest || !profile) return
-    saveGuest({ profile: { name: profile.name, voice_style: profile.voice_style, speak_replies: profile.speak_replies, morning_brief: profile.morning_brief, close_day: profile.close_day }, categories, lists, items, events, reminders, notes })
-  }, [guest, profile, categories, lists, items, events, reminders, notes])
+    saveGuest({ profile: { name: profile.name, voice_style: profile.voice_style, speak_replies: profile.speak_replies, morning_brief: profile.morning_brief, close_day: profile.close_day }, categories: allCats, lists, items, events, reminders, notes })
+  }, [guest, profile, allCats, lists, items, events, reminders, notes])
 
   // After a guest adds something, offer sign-in once per visit so it isn't lost
   const nudge = useCallback(() => { if (!promptDismissed.current) setSavePromptState(true) }, [])
@@ -206,16 +218,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await db.from('profiles').update(p).eq('id', uid)
   }, [uid])
 
-  const addCategory = useCallback(async (name: string) => {
-    if (!uid) { const c = { id: newId(), name, position: categories.length } as Category; setCategories((x) => [...x, c]); nudge(); return c }
-    const { data } = await db.from('categories').insert({ name, position: categories.length }).select().single()
+  const addCategory = useCallback(async (name: string, scope: 'lists' | 'notes' = 'lists') => {
+    const position = allCats.filter((c) => (c.scope ?? 'lists') === scope).length
+    if (!uid) { const c = { id: newId(), name, position, scope } as Category; setCategories((x) => [...x, c]); nudge(); return c }
+    const { data } = await db.from('categories').insert({ name, position, scope }).select().single()
     if (data) setCategories((c) => [...c, data as Category])
     return (data as Category) ?? null
-  }, [categories.length, uid, nudge])
+  }, [allCats, uid, nudge])
 
   const deleteCategory = useCallback(async (id: string) => {
     setCategories((c) => c.filter((x) => x.id !== id))
     setLists((l) => l.filter((x) => x.category_id !== id))
+    setNotes((ns) => ns.map((n) => (n.category_id === id ? { ...n, category_id: null } : n)))
     if (!uid) return
     await db.from('categories').delete().eq('id', id)
   }, [uid, nudge])
@@ -316,7 +330,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return lists[0]
   }, [lists, categories])
 
-  const saveDrafts = useCallback(async (drafts: Draft[]) => {
+  const saveDrafts = useCallback(async (drafts: Draft[], opts?: { noteCategory?: string | null }) => {
     let n = 0
     for (const d of drafts) {
       if (d.kind === 'event') {
@@ -329,8 +343,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const l = findList(d.listHint)
         if (l) { await addItem(l.id, d.name, d.qty ?? 'Added by voice'); n++ }
       } else if (d.kind === 'note') {
-        if (d.items) await saveNote({ title: d.title, body: d.items.map((i) => `[ ] ${i}`).join('\n'), kind: 'list' })
-        else await saveNote({ title: d.title, body: d.body, kind: 'voice' })
+        const category_id = opts?.noteCategory ?? null
+        if (d.items) await saveNote({ title: d.title, body: d.items.map((i) => `[ ] ${i}`).join('\n'), kind: 'list', category_id })
+        else await saveNote({ title: d.title, body: d.body, kind: 'voice', category_id })
         n++
       }
     }
@@ -348,10 +363,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const memberFor = useCallback((userId: string | null) => members.find((m) => m.user_id === userId), [members])
 
   const value = useMemo<Store>(() => ({
-    ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+    ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
-  }), [ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, lists, items, events, reminders, notes, loading, theme, palette,
+  }), [ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 

@@ -31,7 +31,8 @@ export default function Listen() {
 
   const text = supported ? v.text : typed
   const drafts = useMemo(() => understandIn(text, scope, { listHint }), [text, scope, listHint])
-  const done = () => { v.stop(); nav('/review', { state: { text, scope, listHint, from: page } }) }
+  const noteCategory = (() => { try { return sessionStorage.getItem('tadween-notecat') } catch { return null } })()
+  const done = () => { v.stop(); nav('/review', { state: { text, scope, listHint, from: page, noteCategory: page === 'notes' ? noteCategory : null } }) }
   const lit = Math.min(60, secs * 2)
   const mg = document.documentElement.classList.contains('marigold')
 

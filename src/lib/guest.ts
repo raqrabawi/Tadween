@@ -34,9 +34,10 @@ function seed(): GuestData {
   const list = (title: string, category_id: string, tone: List['tone'], verb: string, shared = false, staples: string[] = []): List => ({
     id: newId(), owner_id: 'guest', family_id: shared ? GUEST_FAMILY : null, category_id, title, tone, verb, staples, created_at: now()
   })
+  const ncat = (name: string, position: number): Category => ({ id: newId(), name, position, scope: 'notes' })
   return {
     profile: {},
-    categories: [groceries, home, personal],
+    categories: [groceries, home, personal, ncat('Personal', 0), ncat('Ideas', 1), ncat('Work', 2)],
     lists: [
       list('Family Groceries', groceries.id, 'mint', 'buy', true, ['Rice', 'Eggs', 'Milk', 'Bread']),
       list('Home Fixes', home.id, 'sand', 'do'),
@@ -52,6 +53,7 @@ export function loadGuest(): GuestData {
     if (raw) {
       const d = { ...seed(), ...(JSON.parse(raw) as GuestData) }
       d.notes = d.notes.map((n) => (n.id ? n : { ...n, id: newId() })) // repair notes saved without an id
+      if (!d.categories.some((c) => c.scope === 'notes')) d.categories.push(...seed().categories.filter((c) => c.scope === 'notes'))
       return d
     }
   } catch { /* private mode or bad data: start fresh */ }
@@ -66,7 +68,7 @@ export function saveGuest(d: GuestData) {
 export function hasGuestContent(d: GuestData | null) {
   if (!d) return false
   return d.items.length + d.events.length + d.reminders.length + d.notes.length > 0 ||
-    d.lists.length > 3 || d.categories.length > 3
+    d.lists.length > 3 || d.categories.filter((c) => c.scope !== 'notes').length > 3
 }
 
 export function peekGuest(): GuestData | null {
@@ -91,9 +93,10 @@ export async function migrateGuest(familyId: string | null): Promise<boolean> {
 
   const catMap: Record<string, string> = {}
   for (const c of g.categories) {
-    const hit = remoteCats.find((x) => x.name.toLowerCase() === c.name.toLowerCase())
+    const scope = c.scope ?? 'lists'
+    const hit = remoteCats.find((x) => x.name.toLowerCase() === c.name.toLowerCase() && (x.scope ?? 'lists') === scope)
     if (hit) { catMap[c.id] = hit.id; continue }
-    const { data } = await db.from('categories').insert({ name: c.name, position: c.position }).select().single()
+    const { data } = await db.from('categories').insert({ name: c.name, position: c.position, scope }).select().single()
     if (data) catMap[c.id] = (data as Category).id
   }
 
@@ -116,7 +119,7 @@ export async function migrateGuest(familyId: string | null): Promise<boolean> {
     alert_minutes: e.alert_minutes, source: e.source
   }))
   const reminders = g.reminders.map((r) => ({ title: r.title, remind_at: r.remind_at, done: r.done, source: r.source }))
-  const notes = g.notes.map((n) => ({ title: n.title, body: n.body, kind: n.kind, tags: n.tags, opens_at: n.opens_at, image: n.image ?? null }))
+  const notes = g.notes.map((n) => ({ title: n.title, body: n.body, kind: n.kind, tags: n.tags, opens_at: n.opens_at, image: n.image ?? null, category_id: n.category_id ? catMap[n.category_id] ?? null : null }))
 
   await Promise.all([
     items.length ? db.from('list_items').insert(items) : null,

@@ -25,7 +25,7 @@ export default function Review() {
   const loc = useLocation()
   const nav = useNavigate()
   const { saveDrafts, profile, lists, categories } = useStore()
-  const st = (loc.state ?? {}) as { text?: string; scope?: Scope; listHint?: string; from?: Scope }
+  const st = (loc.state ?? {}) as { text?: string; scope?: Scope; listHint?: string; from?: Scope; noteCategory?: string | null }
   const text = st.text ?? ''
   const back = st.from && st.from !== 'all' ? `/${st.from}` : '/'
   const drafts = useMemo(() => understandIn(text, st.scope ?? 'all', { listHint: st.listHint }), [text, st.scope, st.listHint])
@@ -42,7 +42,7 @@ export default function Review() {
 
   const save = async () => {
     setBusy(true)
-    const n = await saveDrafts(chosen)
+    const n = await saveDrafts(chosen, { noteCategory: st.noteCategory })
     setBusy(false)
     if (profile?.speak_replies) speak(`Done. I saved ${n} ${n === 1 ? 'thing' : 'things'}.`, profile.voice_style)
     nav(back, { replace: true })

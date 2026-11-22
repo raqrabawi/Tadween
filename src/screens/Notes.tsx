@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { I } from '../components/Icon'
@@ -6,20 +6,34 @@ import { Fab } from '../components/Fab'
 import { pickPhoto } from '../lib/photo'
 
 const TONES = ['mint', 'sky', 'sand', 'lilac', 'moss']
-const FILTERS = ['All', 'Notes', 'Voice', 'Capsules'] as const
 
 export default function Notes() {
-  const { notes, saveNote } = useStore()
+  const { notes, saveNote, noteCategories, addCategory, deleteCategory } = useStore()
   const nav = useNavigate()
+  // null = All
+  const [cat, setCat] = useState<string | null>(() => { try { return sessionStorage.getItem('tadween-notecat') || null } catch { return null } })
+  const [editing, setEditing] = useState(false)
+  const [adding, setAdding] = useState(false)
+  const [catName, setCatName] = useState('')
+  const current = noteCategories.find((c) => c.id === cat) ?? null
+  // Voice and new notes go into the category on screen
+  useEffect(() => { try { if (current) sessionStorage.setItem('tadween-notecat', current.id); else sessionStorage.removeItem('tadween-notecat') } catch { /* ignore */ } }, [current])
+  const q = current ? `cat=${current.id}` : ''
+
   const addPhoto = async (source: 'camera' | 'gallery') => {
     const image = await pickPhoto(source)
     if (!image) return
-    const n = await saveNote({ title: 'Photo', kind: 'photo', image })
+    const n = await saveNote({ title: 'Photo', kind: 'photo', image, category_id: current?.id ?? null })
     if (n) nav(`/note/${n.id}`)
   }
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]>('All')
+  const saveCat = async () => {
+    const c = await addCategory(catName.trim() || 'New category', 'notes')
+    setAdding(false); setCatName('')
+    if (c) setCat(c.id)
+  }
   const now = new Date()
-  const shown = notes.filter((n) => filter === 'All' || (filter === 'Notes' && n.kind !== 'voice' && !n.opens_at) || (filter === 'Voice' && n.kind === 'voice') || (filter === 'Capsules' && !!n.opens_at))
+  const shown = notes.filter((n) => !current || n.category_id === current.id)
+  const countIn = (id: string) => notes.filter((n) => n.category_id === id).length
   const voiceCount = notes.filter((n) => n.kind === 'voice').length
   const cols: (typeof shown)[] = [[], []]
   shown.forEach((n, i) => cols[i % 2].push(n))
@@ -32,12 +46,31 @@ export default function Notes() {
           <h1 className="h1">Notes</h1>
         </div>
         <div className="row" style={{ gap: 8 }}>
+          <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? 'Done' : 'Edit'}</button>
           <Link to="/ask" className="ib" aria-label="Search notes"><I n="search" /></Link>
         </div>
       </div>
 
-      <div className="chips mt20" role="group" aria-label="Filter notes">
-        {FILTERS.map((f) => <button key={f} className={f === filter ? 'chip on' : 'chip'} aria-pressed={f === filter} onClick={() => setFilter(f)}>{f}</button>)}
+      <div className="rowhead">
+        <span className="cap" id="ncats-label">Categories</span>
+        {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />Add category</button>}
+      </div>
+      <div className="chips" role="tablist" aria-labelledby="ncats-label">
+        {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat(null)}>All<span className="n">{notes.length}</span></button>}
+        {noteCategories.map((c) => editing ? (
+          <span key={c.id} className="chip" style={{ paddingRight: 10 }}>{c.name}
+            <button aria-label={`Delete category ${c.name}`} onClick={() => { if (confirm(`Delete “${c.name}”? Its notes stay, under All.`)) { deleteCategory(c.id); if (cat === c.id) setCat(null) } }} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
+          </span>
+        ) : (
+          <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{c.name}<span className="n">{countIn(c.id)}</span></button>
+        ))}
+        {adding && (
+          <form className="chip" style={{ width: 210, padding: '0 4px 0 18px', boxShadow: 'var(--edge), 0 0 0 2px var(--acc)' }} onSubmit={(e) => { e.preventDefault(); saveCat() }}>
+            <label className="sr" htmlFor="ncatname">Category name</label>
+            <input id="ncatname" autoFocus className="inp" style={{ fontSize: 15 }} placeholder="Category name" value={catName} onChange={(e) => setCatName(e.target.value)} />
+            <button type="submit" className="ib sm acc" aria-label="Save category"><I n="check" s={15} w={3} /></button>
+          </form>
+        )}
       </div>
 
       <Link to="/listen?from=notes" className="card hot mt16" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -47,7 +80,7 @@ export default function Notes() {
       </Link>
 
       {shown.length === 0 ? (
-        <div className="card empty mt12"><span className="ttl">{filter === 'All' ? 'No notes yet' : `No ${filter.toLowerCase()} yet`}</span><span className="sub">Write or speak your first note.</span></div>
+        <div className="card empty mt12"><span className="ttl">{current ? `No notes in ${current.name} yet` : 'No notes yet'}</span><span className="sub">Write or speak your first note.</span></div>
       ) : (
         <div className="grid2 mt12" style={{ alignItems: 'start' }}>
           {cols.map((col, ci) => (
@@ -57,7 +90,7 @@ export default function Notes() {
                 const tone = TONES[(ci + i * 2) % TONES.length]
                 return (
                   <Link key={n.id} to={`/note/${n.id}`} className={`card tight tone-${locked ? 'lilac' : tone}`} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <span className="spread"><span className="cap">{locked ? 'Time capsule' : n.kind === 'voice' ? 'Voice' : n.kind === 'list' ? 'List' : n.kind === 'photo' ? 'Photo' : 'Note'}</span>{locked ? <I n="lock" s={15} /> : n.kind === 'voice' ? <I n="mic" s={15} /> : n.kind === 'list' ? <I n="checklist" s={15} /> : null}</span>
+                    <span className="spread"><span className="cap">{locked ? 'Time capsule' : n.kind === 'voice' ? 'Voice' : n.kind === 'list' ? 'List' : n.kind === 'photo' ? 'Photo' : 'Note'}{!current && n.category_id && noteCategories.find((c) => c.id === n.category_id) ? ` · ${noteCategories.find((c) => c.id === n.category_id)!.name}` : ''}</span>{locked ? <I n="lock" s={15} /> : n.kind === 'voice' ? <I n="mic" s={15} /> : n.kind === 'list' ? <I n="checklist" s={15} /> : null}</span>
                     {!locked && n.image && <img className="nimg" src={n.image} alt="" style={{ maxHeight: 180 }} />}
                     <span className="ttl" style={{ fontSize: 17, lineHeight: '22px' }}>{n.title}</span>
                     {!locked && n.kind === 'list' && n.body && <span className="sub" style={{ fontSize: 13, lineHeight: '20px', whiteSpace: 'pre-line' }}>{n.body.split('\n').slice(0, 5).map((l) => l.replace(/^\[x\] /, '☑ ').replace(/^\[ \] /, '☐ ')).join('\n')}</span>}
@@ -71,10 +104,11 @@ export default function Notes() {
         </div>
       )}
       <Fab label="Add to notes" actions={[
-        { icon: 'text', label: 'Text note', onSelect: () => nav('/note/new') },
-        { icon: 'checklist', label: 'List', hint: 'Tick items off', onSelect: () => nav('/note/new?kind=list') },
+        { icon: 'text', label: 'Text note', hint: current ? `In ${current.name}` : undefined, onSelect: () => nav(`/note/new?${q}`) },
+        { icon: 'checklist', label: 'List', hint: 'Tick items off', onSelect: () => nav(`/note/new?kind=list&${q}`) },
         { icon: 'camera', label: 'Take a photo', onSelect: () => addPhoto('camera') },
-        { icon: 'image', label: 'From gallery', onSelect: () => addPhoto('gallery') }
+        { icon: 'image', label: 'From gallery', onSelect: () => addPhoto('gallery') },
+        { icon: 'folder', label: 'New category', onSelect: () => { setAdding(true); window.scrollTo({ top: 0, behavior: 'smooth' }) } }
       ]} />
     </main>
   )
