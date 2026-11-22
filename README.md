@@ -2,7 +2,7 @@
 
 A voice-first everyday app: calendar, reminders, lists, family groceries and a journal. Speak in English or Arabic and Tadween turns it into events, reminders, list items and notes.
 
-- **Live:** https://raqrabawi.github.io/nook/
+- **Live:** https://raqrabawi.github.io/tadween/
 - **Stack:** React + Vite + TypeScript, installable PWA, Supabase (auth, Postgres with row-level security, realtime).
 - **Sign-in:** Apple, Google, phone code or email code.
 
@@ -21,8 +21,8 @@ In the repo, set **Settings → Pages → Source** to **GitHub Actions** once.
 ## Supabase setup (one time)
 
 **Authentication → URL Configuration**
-- Site URL: `https://raqrabawi.github.io/nook/`
-- Redirect URLs: `https://raqrabawi.github.io/nook/**` and `http://localhost:5173/**`
+- Site URL: `https://raqrabawi.github.io/tadween/`
+- Redirect URLs: `https://raqrabawi.github.io/tadween/**` and `http://localhost:5173/**`
 
 **Authentication → Sign In / Providers**
 - **Google:** create an OAuth client (Web) in Google Cloud, add the redirect URI

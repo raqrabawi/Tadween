@@ -2,8 +2,8 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Served from https://<user>.github.io/nook/ by default; override with BASE_PATH for other hosts.
-const base = process.env.BASE_PATH ?? '/nook/'
+// Served from https://<user>.github.io/tadween/ by default; override with BASE_PATH for other hosts.
+const base = process.env.BASE_PATH ?? '/tadween/'
 
 export default defineConfig({
   base,
