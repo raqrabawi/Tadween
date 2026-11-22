@@ -8,6 +8,12 @@ import { StoreProvider } from './lib/store'
 
 applyTheme(storedMode(), storedPalette())
 
+// When a new version is deployed, reload once so people aren't left on the old one
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+  let reloaded = false
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloaded) { reloaded = true; location.reload() } })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
