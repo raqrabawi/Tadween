@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { I } from './Icon'
-import { HoldMic } from './HoldMic'
 
 export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
@@ -11,33 +10,7 @@ export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boo
   )
 }
 
-// The mic knows which tab it was opened from, so it only adds things for that page
-const FROM: Record<string, string> = { '/calendar': 'calendar', '/lists': 'lists', '/notes': 'notes' }
-
-export function TabBar() {
-  const { pathname } = useLocation()
-  const from = FROM[pathname]
-  const tab = (to: string, label: string, icon: string) => (
-    <NavLink to={to} end className={({ isActive }) => (isActive ? 'on' : '')} aria-label={label}>
-      {({ isActive }) => <>
-        <span className="tpill"><I n={isActive ? `${icon}F` : icon} s={isActive ? 25 : 24} w={1.9} /></span>
-        <span className="tlbl">{label}</span>
-      </>}
-    </NavLink>
-  )
-  return (
-    <div className="tabbar">
-      <nav aria-label="Main">
-        {tab('/', 'Today', 'home')}
-        {tab('/calendar', 'Calendar', 'cal')}
-        <span aria-hidden="true" />
-        {tab('/lists', 'Lists', 'list')}
-        {tab('/notes', 'Notes', 'book')}
-      </nav>
-      <HoldMic from={from} />
-    </div>
-  )
-}
+export { TabBar } from './TabBar'
 
 export function Toast({ text, action, onAction, onDone, ms = 3500 }: { text: string; action?: string; onAction?: () => void; onDone: () => void; ms?: number }) {
   useEffect(() => { const t = setTimeout(onDone, ms); return () => clearTimeout(t) }, [text, ms, onDone])

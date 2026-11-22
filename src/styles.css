@@ -376,3 +376,37 @@ textarea.inp{resize:none;line-height:28px}
 .tabbar nav a .tlbl{font-size:10.5px;font-weight:600;letter-spacing:.2px;line-height:13px;color:var(--ink3)}
 .tabbar nav a.on .tpill{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)}
 .tabbar nav a.on .tlbl{color:var(--acc);font-weight:700}
+
+/* ---------- Tab bar 2: notch, liquid pill, micro-interactions ---------- */
+.tabbar{transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .35s}
+.tabbar.tucked{transform:translateX(-50%) translateY(calc(100% + 10px))}
+.tabbar.tucked .mic{transform:translateY(-34px) scale(.86)}
+.tb-shell{position:absolute;left:0;right:0;bottom:0;height:68px;filter:drop-shadow(0 14px 22px rgba(35,39,42,.16)) drop-shadow(0 2px 4px rgba(35,39,42,.08));pointer-events:none}
+.tabbar nav.tb-nav{pointer-events:auto;position:absolute;inset:0;height:68px;border-radius:26px;padding:0 6px;display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:center;background:var(--s1);box-shadow:inset 0 0 0 1px var(--line);
+  -webkit-mask:radial-gradient(circle 43px at 50% 0,transparent 42px,#000 43px);mask:radial-gradient(circle 43px at 50% 0,transparent 42px,#000 43px)}
+.marigold.light .tabbar nav.tb-nav,.marigold .light .tabbar nav.tb-nav{background:#FFFFFF}
+/* the gliding pill */
+.tb-blob{position:absolute;left:0;top:8px;width:56px;height:52px;border-radius:18px;background:color-mix(in srgb,var(--acc) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--acc) 18%,transparent);transition:transform .5s cubic-bezier(.34,1.45,.5,1);pointer-events:none}
+.tb-blob.go{animation:tbJelly .5s cubic-bezier(.3,.7,.4,1)}
+@keyframes tbJelly{0%{scale:1 1}35%{scale:1.45 .82}65%{scale:.92 1.06}100%{scale:1 1}}
+.tabbar nav a.tb-link{position:relative;z-index:1;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:var(--ink3);-webkit-tap-highlight-color:transparent}
+.tb-ic{display:flex;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.tb-link:not(.on) .tb-ic{transform:translateY(7px)}
+.tb-link:active .tb-ic{transform:scale(.84)}
+.tb-link.on .tb-ic{animation:tbPop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes tbPop{0%{transform:scale(.6) rotate(-12deg)}60%{transform:scale(1.18) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+/* tiny sparks when a tab is picked */
+.tb-link.on .tb-ic::before,.tb-link.on .tb-ic::after{content:"";position:absolute;width:4px;height:4px;border-radius:2px;background:var(--cta,var(--acc));top:12px;left:50%;opacity:0;animation:tbSpark .55s ease-out .08s}
+.tb-link.on .tb-ic::after{animation-name:tbSpark2;background:var(--acc)}
+@keyframes tbSpark{0%{opacity:1;transform:translate(-2px,0) scale(1)}100%{opacity:0;transform:translate(-20px,-12px) scale(.3)}}
+@keyframes tbSpark2{0%{opacity:1;transform:translate(-2px,0) scale(1)}100%{opacity:0;transform:translate(16px,-14px) scale(.3)}}
+.tb-lbl{font-size:10.5px;line-height:13px;font-weight:700;letter-spacing:.2px;margin-top:3px;max-height:0;opacity:0;transform:translateY(6px);transition:all .3s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+.tb-link.on{color:var(--acc)}
+.tb-link.on .tb-lbl{max-height:14px;opacity:1;transform:none}
+/* mic sits in the notch and breathes */
+.tabbar .mic{top:-26px;background:transparent}
+.tabbar .mic .vorb::after{animation:tbBreath 2.8s ease-in-out infinite}
+@keyframes tbBreath{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.1);opacity:.35}}
+.tabbar .mic:active .vorb{transform:scale(.93)}
+@media (prefers-reduced-motion:reduce){.tb-blob,.tb-ic,.tb-lbl,.tabbar{transition:none}.tb-blob.go,.tb-link.on .tb-ic,.tb-link.on .tb-ic::before,.tb-link.on .tb-ic::after,.tabbar .mic .vorb::after{animation:none}}
+.tabbar nav a.tb-link.on{color:var(--acc)}
