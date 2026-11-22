@@ -99,11 +99,7 @@ export default function Listen() {
         </div>
 
         <div className="vwave">
-          <VoiceWave level={level} height={240} muted={!v.listening} />
-          <button className="vorb" onClick={() => (v.listening ? stop() : (setEmpty(false), v.start()))} aria-label={v.listening ? 'Stop recording' : 'Start recording'}>
-            <I n={v.listening ? 'stop' : 'mic'} s={26} w={2.4} />
-            <span>{v.listening ? 'Tap to stop' : 'Tap to talk'}</span>
-          </button>
+          <VoiceWave level={level} height={220} muted={!v.listening} />
         </div>
 
         {empty && <p role="status" className="sub" style={{ textAlign: 'center', marginTop: 12 }}>I didn’t catch anything. Tap the mic to try again.</p>}
