@@ -369,3 +369,10 @@ textarea.inp{resize:none;line-height:28px}
 .qa-b{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 4px;border-radius:20px;background:var(--s1);box-shadow:var(--edge);font-size:13px;font-weight:600;color:var(--ink)}
 .qa-i{width:48px;height:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;background:var(--s2,var(--bg));color:var(--acc)}
 .qa-b.danger,.qa-b.danger .qa-i{color:var(--red)}
+
+/* Selected tab: filled icon on a tinted pill, with its name */
+.tabbar nav a{gap:2px}
+.tabbar nav a .tpill{width:52px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+.tabbar nav a .tlbl{font-size:10.5px;font-weight:600;letter-spacing:.2px;line-height:13px;color:var(--ink3)}
+.tabbar nav a.on .tpill{background:color-mix(in srgb,var(--acc) 16%,transparent);color:var(--acc)}
+.tabbar nav a.on .tlbl{color:var(--acc);font-weight:700}

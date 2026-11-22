@@ -42,16 +42,21 @@ const P: Record<string, string> = {
   checklist: 'M4 6.5l1.5 1.5L8 5.5M4 12.5l1.5 1.5L8 11.5M4 18.5l1.5 1.5L8 17.5M11 7h9M11 13h9M11 19h9',
   folder: 'M3 6h6.5l2 2.5H21v10.5H3z',
   more: 'M5.5 12h.01M12 12h.01M18.5 12h.01',
+  // Filled versions for the selected tab
+  homeF: 'M12 3.6l8.6 7.1c.3.3.4.6.4 1v7.8a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H4.5A1.5 1.5 0 0 1 3 19.5v-7.8c0-.4.2-.7.4-1z',
+  calF: 'M5 4.5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-12a2 2 0 0 1 2-2zM3 9h18v1.2H3zM7 12.5h2.5V15H7zM11 12.5h2.5V15H11zM15 12.5h2.5V15H15zM7 16.5h2.5v2H7zM11 16.5h2.5v2H11zM7 2.5h2v1.6H7zM15 2.5h2v1.6h-2z',
+  listF: 'M4 5.5h3v3H4zM4 10.5h3v3H4zM4 15.5h3v3H4zM9.5 5.75H20v2.5H9.5zM9.5 10.75H20v2.5H9.5zM9.5 15.75H20v2.5H9.5z',
+  bookF: 'M6.5 3h11a2 2 0 0 1 2 2v16l-3.75-2.1L12 21l-3.75-2.1L4.5 21V5a2 2 0 0 1 2-2zM8.5 8.5h7v1.6h-7zM8.5 12.5H13v1.6H8.5z',
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5'
 }
 
-const FILLED = new Set(['spark', 'play', 'pause', 'stop'])
+const FILLED = new Set(['spark', 'play', 'pause', 'stop', 'homeF', 'calF', 'listF', 'bookF'])
 
 export function I({ n, s = 20, w = 2, className }: { n: keyof typeof P | string; s?: number; w?: number; className?: string }) {
   const filled = FILLED.has(n)
   return (
     <svg width={s} height={s} viewBox="0 0 24 24" aria-hidden="true" className={className}
-      fill={filled ? 'currentColor' : 'none'} stroke={filled ? 'none' : 'currentColor'}
+      fill={filled ? 'currentColor' : 'none'} stroke={filled ? 'none' : 'currentColor'} fillRule={filled ? 'evenodd' : undefined}
       strokeWidth={w} strokeLinecap="round" strokeLinejoin="round">
       <path d={P[n] ?? ''} />
     </svg>

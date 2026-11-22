@@ -19,8 +19,10 @@ export function TabBar() {
   const from = FROM[pathname]
   const tab = (to: string, label: string, icon: string) => (
     <NavLink to={to} end className={({ isActive }) => (isActive ? 'on' : '')} aria-label={label}>
-      <I n={icon} s={24} w={1.9} />
-      <span className="dot" />
+      {({ isActive }) => <>
+        <span className="tpill"><I n={isActive ? `${icon}F` : icon} s={isActive ? 25 : 24} w={1.9} /></span>
+        <span className="tlbl">{label}</span>
+      </>}
     </NavLink>
   )
   return (
