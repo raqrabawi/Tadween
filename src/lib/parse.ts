@@ -46,6 +46,18 @@ function stripWhen(raw: string, now: Date): When {
     if (d < base) d.setFullYear(d.getFullYear() + 1)
     date = d
   })
+  // "March 3", "on March 3rd"
+  if (!date) take(new RegExp(`\\b(?:on\\s+)?(${MONTHS.join('|')})[a-z]*\\.?\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b`, 'i'), (m) => {
+    const d = new Date(base); d.setMonth(MONTHS.indexOf(m[1].slice(0, 3).toLowerCase()), parseInt(m[2], 10))
+    if (d < base) d.setFullYear(d.getFullYear() + 1)
+    date = d
+  })
+  // "on the 1st": this month, or next month if it has passed
+  if (!date) take(/\bon the (\d{1,2})(?:st|nd|rd|th)\b/i, (m) => {
+    const d = new Date(base); d.setDate(parseInt(m[1], 10))
+    if (d < base) d.setMonth(d.getMonth() + 1)
+    date = d
+  })
   take(/\bin (\d+) (minutes?|mins?|hours?)\b/i, (m) => {
     const d = new Date(base); const n = parseInt(m[1], 10)
     if (/h/i.test(m[2])) d.setHours(d.getHours() + n); else d.setMinutes(d.getMinutes() + n)
@@ -95,7 +107,7 @@ const tidy = (t: string) => {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-function splitItems(text: string) {
+export function splitItems(text: string) {
   return text
     .split(/\s*,\s*|\s+and\s+|\s*،\s*/i)
     .map((x) => x.trim())
@@ -164,6 +176,15 @@ export function understand(input: string, now = new Date()): Draft[] {
       continue
     }
 
+    // Birthdays: "Mama's birthday is March 3" — saved as a yearly calendar entry
+    if (when.date && /\bbirthday\b/i.test(when.rest)) {
+      const who = when.rest.match(/^(?:add\s+|it'?s\s+)?(.+?)['’]?s?\s+birthday/i)?.[1]?.replace(/^(?:my|our)\s+/i, '')
+      const start = when.date; start.setHours(9, 0, 0, 0)
+      const name = who ? who.charAt(0).toUpperCase() + who.slice(1) : ''
+      drafts.push({ kind: 'event', title: name ? `${name}’s birthday` : 'Birthday', start, end: start, calendar: 'Birthday', birthday: true })
+      continue
+    }
+
     // Events: anything with a time or date
     if (when.date) {
       const start = when.date
@@ -197,4 +218,46 @@ export const describeWhen = (d: Date) => {
   if (diff === 0) return `Today · ${t}`
   if (diff === 1) return `Tomorrow · ${t}`
   return `${d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })} · ${t}`
+}
+
+/** Where the mic was opened. On a page, voice only adds things that belong on that page; on Today it can add anything. */
+export type Scope = 'all' | 'calendar' | 'lists' | 'notes'
+
+export const SCOPES: Record<Scope, { name: string; icon: string; lead: string; examples: string[] }> = {
+  all: { name: 'Anything', icon: 'spark', lead: 'Events, reminders, list items and notes — all at once.', examples: ['Dentist Monday at 5, remind me the day before', 'Add milk and eggs to groceries', 'Note that the plumber comes Thursday'] },
+  calendar: { name: 'Calendar', icon: 'cal', lead: 'Events, tasks, reminders and birthdays.', examples: ['Lunch with Sara Friday at 1', 'Remind me to pay the rent on the 1st', 'Mama’s birthday is March 3'] },
+  lists: { name: 'Lists', icon: 'list', lead: 'Items for your lists. Name a list, or it goes in the category you’re on.', examples: ['Milk, eggs and 2 kg rice', 'Add batteries to Home Fixes', 'We need bread and olive oil'] },
+  notes: { name: 'Notes', icon: 'book', lead: 'A note in your own words, or a checklist.', examples: ['Ideas for the weekend trip: the beach, then dinner out', 'Make a list: passport, charger, tickets', 'Note that the fridge warranty ends in 2028'] }
+}
+
+export function understandIn(input: string, scope: Scope, ctx: { listHint?: string } = {}, now = new Date()): Draft[] {
+  const text = input.trim()
+  if (!text) return []
+  if (scope === 'notes') {
+    const m = text.match(/^(?:make|start|new|create)?\s*(?:a\s+)?(?:check)?list(?:\s+(?:of|for))?\s*[:,-]?\s*(.+)$/i)
+    if (m) {
+      const items = splitItems(m[1]).map((i) => (i.qty ? `${i.qty} ${i.name}` : i.name))
+      return [{ kind: 'note', title: 'List', body: items.join(', '), items }]
+    }
+    const body = text.replace(/^(?:note(?: that)?|write down|remember that)\s*[:,-]?\s*/i, '')
+    return [{ kind: 'note', title: tidy(body.split(/[.!?:]/)[0]).slice(0, 60) || 'Note', body }]
+  }
+  if (scope === 'lists') {
+    const out: Draft[] = []
+    for (const clause of text.split(/\.\s+|;\s*/).filter(Boolean)) {
+      let c = clause.trim().replace(/^(?:please\s+)?(?:add|put|get|buy|we need|i need|need|pick up|also)\s+/i, '')
+      let hint = ctx.listHint
+      const to = c.match(/\s+(?:to|on|in|into)\s+(?:the\s+|my\s+|our\s+)?(.+?)(?:\s+list)?$/i)
+      if (to) { hint = to[1]; c = c.slice(0, to.index) }
+      for (const it of splitItems(c)) out.push({ kind: 'item', name: it.name, qty: it.qty, listHint: hint })
+    }
+    return out
+  }
+  const drafts = understand(text, now)
+  if (scope === 'calendar') {
+    // Anything that isn't a calendar entry becomes a task
+    return drafts.map((d): Draft => (d.kind === 'item' ? { kind: 'task', title: `Buy ${d.name.toLowerCase()}`, due: null }
+      : d.kind === 'note' ? { kind: 'task', title: d.title, due: null } : d))
+  }
+  return drafts
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { understand, describeWhen } from '../lib/parse'
+import { understandIn, describeWhen, type Scope } from '../lib/parse'
 import { speak, stopSpeaking } from '../lib/voice'
 import type { Draft } from '../lib/types'
 import { I } from '../components/Icon'
@@ -9,37 +9,48 @@ import { Switch } from '../components/ui'
 
 const meta = (d: Draft, listTitle?: string) => {
   switch (d.kind) {
-    case 'event': return { tone: 'sky', icon: 'cal', kind: `Event · ${d.calendar}`, title: d.title, detail: describeWhen(d.start) + (d.location ? ` · ${d.location}` : '') }
+    case 'event': return d.birthday
+      ? { tone: 'lilac', icon: 'gift', kind: 'Birthday · every year', title: d.title, detail: d.start.toLocaleDateString([], { day: 'numeric', month: 'long' }) }
+      : { tone: 'sky', icon: 'cal', kind: `Event · ${d.calendar}`, title: d.title, detail: describeWhen(d.start) + (d.location ? ` · ${d.location}` : '') }
     case 'reminder': return { tone: 'sand', icon: 'bell', kind: 'Reminder', title: d.title, detail: d.at ? describeWhen(d.at) : 'No time set' }
     case 'item': return { tone: 'mint', icon: 'bag', kind: listTitle ?? 'List', title: d.name, detail: d.qty ?? 'Added by voice' }
     case 'task': return { tone: 'moss', icon: 'check', kind: 'Task', title: d.title, detail: d.due ? describeWhen(d.due) : 'Anytime' }
-    case 'note': return { tone: 'lilac', icon: 'pen', kind: 'Journal note', title: d.title, detail: d.body.slice(0, 60) }
+    case 'note': return d.items
+      ? { tone: 'lilac', icon: 'checklist', kind: 'Checklist note', title: d.title, detail: d.items.join(', ').slice(0, 60) }
+      : { tone: 'lilac', icon: 'pen', kind: 'Note', title: d.title, detail: d.body.slice(0, 60) }
   }
 }
 
 export default function Review() {
   const loc = useLocation()
   const nav = useNavigate()
-  const { saveDrafts, profile, lists } = useStore()
-  const text: string = (loc.state as { text?: string } | null)?.text ?? ''
-  const drafts = useMemo(() => understand(text), [text])
+  const { saveDrafts, profile, lists, categories } = useStore()
+  const st = (loc.state ?? {}) as { text?: string; scope?: Scope; listHint?: string; from?: Scope }
+  const text = st.text ?? ''
+  const back = st.from && st.from !== 'all' ? `/${st.from}` : '/'
+  const drafts = useMemo(() => understandIn(text, st.scope ?? 'all', { listHint: st.listHint }), [text, st.scope, st.listHint])
   const [off, setOff] = useState<Record<number, boolean>>({})
   const [busy, setBusy] = useState(false)
   const [reading, setReading] = useState(false)
   const chosen = drafts.filter((_, i) => !off[i])
-  const shopping = lists.find((l) => l.verb === 'buy')?.title
+  // Which list a spoken item will go to (same rule the store uses when saving)
+  const listFor = (hint?: string) => {
+    const h = (hint ?? '').toLowerCase()
+    const cat = categories.find((c) => h && c.name.toLowerCase() === h)
+    return (lists.find((l) => h && l.title.toLowerCase().includes(h)) ?? (cat && lists.find((l) => l.category_id === cat.id)) ?? lists.find((l) => l.verb === 'buy') ?? lists[0])?.title
+  }
 
   const save = async () => {
     setBusy(true)
     const n = await saveDrafts(chosen)
     setBusy(false)
     if (profile?.speak_replies) speak(`Done. I saved ${n} ${n === 1 ? 'thing' : 'things'}.`, profile.voice_style)
-    nav('/', { replace: true })
+    nav(back, { replace: true })
   }
 
   const readBack = () => {
     if (reading) { stopSpeaking(); setReading(false); return }
-    const line = chosen.map((d) => { const m = meta(d, shopping); return `${m.kind}: ${m.title}, ${m.detail}` }).join('. ')
+    const line = chosen.map((d) => { const m = meta(d, d.kind === 'item' ? listFor(d.listHint) : undefined); return `${m.kind}: ${m.title}, ${m.detail}` }).join('. ')
     setReading(true)
     speak(line || 'Nothing selected.', profile?.voice_style, () => setReading(false))
   }
@@ -57,8 +68,8 @@ export default function Review() {
   return (
     <main className="screen col">
       <div className="hd">
-        <Link to="/listen" className="ib wide"><I n="redo" s={17} w={2.2} />Say again</Link>
-        <Link to="/" className="ib" aria-label="Cancel"><I n="close" s={15} w={2.6} /></Link>
+        <Link to={st.from && st.from !== 'all' ? `/listen?from=${st.from}` : '/listen'} className="ib wide"><I n="redo" s={17} w={2.2} />Say again</Link>
+        <Link to={back} className="ib" aria-label="Cancel"><I n="close" s={15} w={2.6} /></Link>
       </div>
 
       <div className="spread" style={{ margin: '24px 4px 10px' }}>
@@ -71,7 +82,7 @@ export default function Review() {
 
       <div className="stack" style={{ gap: 10 }}>
         {drafts.map((d, i) => {
-          const m = meta(d, shopping)
+          const m = meta(d, d.kind === 'item' ? listFor(d.listHint) : undefined)
           const on = !off[i]
           return (
             <div key={i} className={`card tight tone-${m.tone}`} style={{ display: 'flex', alignItems: 'center', gap: 14, opacity: on ? 1 : .45, transition: 'opacity .2s' }}>

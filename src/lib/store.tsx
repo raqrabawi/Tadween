@@ -309,15 +309,18 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const h = (hint ?? '').toLowerCase()
     const byTitle = lists.find((l) => h && l.title.toLowerCase().includes(h))
     if (byTitle) return byTitle
+    const cat = categories.find((c) => h && c.name.toLowerCase() === h)
+    const inCat = cat && lists.find((l) => l.category_id === cat.id)
+    if (inCat) return inCat
     if (/grocer|shop|cart|market|food|family/.test(h) || !h) return lists.find((l) => l.verb === 'buy') ?? lists[0]
     return lists[0]
-  }, [lists])
+  }, [lists, categories])
 
   const saveDrafts = useCallback(async (drafts: Draft[]) => {
     let n = 0
     for (const d of drafts) {
       if (d.kind === 'event') {
-        await addEvent({ title: d.title, starts_at: iso(d.start), ends_at: iso(d.end), calendar: d.calendar, location: d.location ?? null, source: 'voice' }); n++
+        await addEvent({ title: d.title, starts_at: iso(d.start), ends_at: d.birthday ? null : iso(d.end), calendar: d.calendar, location: d.location ?? null, source: d.birthday ? 'birthday' : 'voice' }); n++
       } else if (d.kind === 'reminder') {
         await addReminder({ title: d.title, remind_at: d.at ? iso(d.at) : null, source: 'voice' }); n++
       } else if (d.kind === 'task') {
@@ -326,7 +329,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const l = findList(d.listHint)
         if (l) { await addItem(l.id, d.name, d.qty ?? 'Added by voice'); n++ }
       } else if (d.kind === 'note') {
-        await saveNote({ title: d.title, body: d.body, kind: 'voice' }); n++
+        if (d.items) await saveNote({ title: d.title, body: d.items.map((i) => `[ ] ${i}`).join('\n'), kind: 'list' })
+        else await saveNote({ title: d.title, body: d.body, kind: 'voice' })
+        n++
       }
     }
     return n

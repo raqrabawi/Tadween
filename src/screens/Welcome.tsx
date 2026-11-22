@@ -28,7 +28,7 @@ export default function Welcome() {
       </div>
 
       <h1 className="h1 mtauto" style={{ fontSize: 38, lineHeight: '44px', letterSpacing: -1.2 }}>Just say it.<br /><em>Tadween keeps it.</em></h1>
-      <p className="sub mt12" style={{ fontSize: 16, lineHeight: '23px' }}>Your calendar, lists, family groceries and journal — by voice, in English or Arabic.</p>
+      <p className="sub mt12" style={{ fontSize: 16, lineHeight: '23px' }}>Your calendar, lists, family groceries and notes — by voice, in English or Arabic.</p>
 
       <div className="mt24"><AuthButtons /></div>
       <Link to="/" className="btn mt8" style={{ background: 'transparent', color: 'var(--ink2)', height: 48 }}>Look around first<I n="next" s={15} w={2.4} /></Link>

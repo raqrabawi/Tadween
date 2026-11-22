@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link, useLocation } from 'react-router-dom'
 import { I } from './Icon'
 
 export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
@@ -10,7 +10,12 @@ export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boo
   )
 }
 
+// The mic knows which tab it was opened from, so it only adds things for that page
+const FROM: Record<string, string> = { '/calendar': 'calendar', '/lists': 'lists', '/notes': 'notes' }
+
 export function TabBar() {
+  const { pathname } = useLocation()
+  const from = FROM[pathname]
   const tab = (to: string, label: string, icon: string) => (
     <NavLink to={to} end className={({ isActive }) => (isActive ? 'on' : '')} aria-label={label}>
       <I n={icon} s={24} w={1.9} />
@@ -24,9 +29,9 @@ export function TabBar() {
         {tab('/calendar', 'Calendar', 'cal')}
         <span aria-hidden="true" />
         {tab('/lists', 'Lists', 'list')}
-        {tab('/journal', 'Journal', 'book')}
+        {tab('/notes', 'Notes', 'book')}
       </nav>
-      <Link to="/listen" className="mic" aria-label="Speak to Tadween">
+      <Link to={from ? `/listen?from=${from}` : '/listen'} className="mic" aria-label={from ? `Speak to add to ${from.charAt(0).toUpperCase() + from.slice(1)}` : 'Speak to Tadween'}>
         <span className="vorb"><I n="mic" s={26} /></span>
       </Link>
     </div>

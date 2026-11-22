@@ -35,8 +35,8 @@ export interface Note { id: string; title: string; body: string; kind: string; t
 
 /** What the voice/text understanding produces before the person confirms it. */
 export type Draft =
-  | { kind: 'event'; title: string; start: Date; end: Date; calendar: string; location?: string }
+  | { kind: 'event'; title: string; start: Date; end: Date; calendar: string; location?: string; birthday?: boolean }
   | { kind: 'reminder'; title: string; at: Date | null }
   | { kind: 'item'; name: string; qty?: string; listHint?: string }
   | { kind: 'task'; title: string; due?: Date | null }
-  | { kind: 'note'; title: string; body: string }
+  | { kind: 'note'; title: string; body: string; items?: string[] }

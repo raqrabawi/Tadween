@@ -83,7 +83,7 @@ function ListCard({ list, editing }: { list: List; editing: boolean }) {
             <label className="sr" htmlFor={`add-${list.id}`}>Add item to {list.title}</label>
             <input id={`add-${list.id}`} className="inp" style={{ fontSize: 16 }} placeholder="Add item — type or say it" value={draft} onChange={(e) => setDraft(e.target.value)} enterKeyHint="done" />
             {draft.trim() ? <button className="tag acc" type="submit">Add</button>
-              : <Link to="/listen" className="vorb" style={{ width: 40, height: 40, boxShadow: 'none' }} aria-label="Add by voice"><I n="mic" s={16} w={2.2} /></Link>}
+              : <Link to="/listen?from=lists" onClick={() => { try { sessionStorage.setItem('tadween-list', list.title) } catch { /* ignore */ } }} className="vorb" style={{ width: 40, height: 40, boxShadow: 'none' }} aria-label={`Add to ${list.title} by voice`}><I n="mic" s={16} w={2.2} /></Link>}
           </form>
 
           {done > 0 && (
@@ -114,6 +114,8 @@ export default function Lists() {
 
   useEffect(() => { if (!cat && categories[0]) setCat(categories[0].id) }, [categories, cat])
   const current = categories.find((c) => c.id === cat) ?? categories[0]
+  // The mic uses this to put spoken items in the category you're looking at
+  useEffect(() => { try { if (current) sessionStorage.setItem('tadween-cat', current.name) } catch { /* ignore */ } }, [current])
   const shown = lists.filter((l) => l.category_id === current?.id)
   const openCount = (cid: string) => items.filter((i) => !i.done && lists.some((l) => l.id === i.list_id && l.category_id === cid)).length
   const totalOpen = items.filter((i) => !i.done).length

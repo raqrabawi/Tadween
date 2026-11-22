@@ -8,7 +8,7 @@ import Setup from './screens/Setup'
 import Today from './screens/Today'
 import Calendar from './screens/Calendar'
 import Lists from './screens/Lists'
-import Journal from './screens/Journal'
+import Notes from './screens/Notes'
 import NoteScreen from './screens/Note'
 import Ask from './screens/Ask'
 import Add from './screens/Add'
@@ -16,7 +16,7 @@ import Listen from './screens/Listen'
 import Review from './screens/Review'
 import Settings from './screens/Settings'
 
-const TAB_ROUTES = ['/', '/calendar', '/lists', '/journal']
+const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes']
 
 export default function App() {
   const { ready, session, profile, guest } = useStore()
@@ -32,7 +32,8 @@ export default function App() {
         <Route path="/" element={<Today />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/lists" element={<Lists />} />
-        <Route path="/journal" element={<Journal />} />
+        <Route path="/notes" element={<Notes />} />
+        <Route path="/journal" element={<Navigate to="/notes" replace />} />
         <Route path="/note/:id" element={<NoteScreen />} />
         <Route path="/ask" element={<Ask />} />
         <Route path="/add" element={<Add />} />

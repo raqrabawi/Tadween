@@ -16,7 +16,7 @@ export default defineConfig({
       manifest: {
         name: 'Tadween — just say it',
         short_name: 'Tadween',
-        description: 'Voice-first calendar, lists, family groceries and journal.',
+        description: 'Voice-first calendar, lists, family groceries and notes.',
         theme_color: '#FAF8F5',
         background_color: '#FAF8F5',
         display: 'standalone',

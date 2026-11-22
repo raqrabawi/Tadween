@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useListener, canListen } from '../lib/voice'
-import { understand, describeWhen } from '../lib/parse'
+import { understandIn, describeWhen, SCOPES, type Scope } from '../lib/parse'
 import { I } from '../components/Icon'
 
 export default function Listen() {
@@ -10,6 +10,17 @@ export default function Listen() {
   const [secs, setSecs] = useState(0)
   const [typed, setTyped] = useState('')
   const supported = canListen()
+  const [sp] = useSearchParams()
+  const page = (['calendar', 'lists', 'notes'].includes(sp.get('from') ?? '') ? sp.get('from') : 'all') as Scope
+  const [scope, setScope] = useState<Scope>(page)
+  // On Lists, items go to the list whose mic was tapped, else the category on screen
+  const [listHint] = useState(() => {
+    try {
+      const l = sessionStorage.getItem('tadween-list'); sessionStorage.removeItem('tadween-list')
+      return l ?? sessionStorage.getItem('tadween-cat') ?? undefined
+    } catch { return undefined }
+  })
+  const info = SCOPES[scope]
 
   useEffect(() => { if (supported) v.start() }, []) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -19,8 +30,8 @@ export default function Listen() {
   }, [v.listening])
 
   const text = supported ? v.text : typed
-  const drafts = useMemo(() => understand(text), [text])
-  const done = () => { v.stop(); nav('/review', { state: { text } }) }
+  const drafts = useMemo(() => understandIn(text, scope, { listHint }), [text, scope, listHint])
+  const done = () => { v.stop(); nav('/review', { state: { text, scope, listHint, from: page } }) }
   const lit = Math.min(60, secs * 2)
   const mg = document.documentElement.classList.contains('marigold')
 
@@ -28,13 +39,32 @@ export default function Listen() {
     <div className="lvw" style={{ minHeight: '100dvh', color: 'var(--ink)' }}>
       <main className="screen col" style={{ background: 'transparent' }}>
         <div className="hd">
-          <Link to="/" className="ib" aria-label="Cancel" onClick={() => v.stop()}><I n="close" s={15} w={2.6} /></Link>
+          <Link to={page === 'all' ? '/' : `/${page}`} className="ib" aria-label="Cancel" onClick={() => v.stop()}><I n="close" s={15} w={2.6} /></Link>
           <span role="status" className="ib wide num" style={{ height: 40 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: v.listening ? 'var(--red)' : 'var(--ink3)', boxShadow: v.listening ? '0 0 10px var(--red)' : 'none' }} />{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}</span>
           <span className="bi" style={{ height: 40, borderRadius: 20, padding: '0 12px 0 8px' }}><b>EN</b><b>AR</b>Auto</span>
         </div>
 
+        <div className="row mt20" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <span className="tag" aria-live="polite"><I n={info.icon} s={14} w={2.2} />{scope === 'all' ? 'Adding anything' : `Adding to ${info.name}`}</span>
+          {page !== 'all' && (
+            <button className="tag" style={{ background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => setScope(scope === 'all' ? page : 'all')}>
+              {scope === 'all' ? `Only ${SCOPES[page].name}` : 'Anything instead'}
+            </button>
+          )}
+        </div>
+
+        {!text && (
+          <div className="card tight mt16" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <span className="cap">You can say</span>
+            <span className="sub" style={{ fontSize: 14 }}>{info.lead}{scope === 'lists' && listHint ? ` Now: ${listHint}.` : ''}</span>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {info.examples.map((e) => <li key={e} style={{ fontSize: 15, lineHeight: '21px', fontWeight: 600 }}>“{e}”</li>)}
+            </ul>
+          </div>
+        )}
+
         {supported ? (
-          <p style={{ marginTop: 32, fontSize: 27, lineHeight: '36px', fontWeight: 600, letterSpacing: -.5, minHeight: 108 }}>
+          <p style={{ marginTop: 24, fontSize: 27, lineHeight: '36px', fontWeight: 600, letterSpacing: -.5, minHeight: 108 }}>
             {v.finalText || (!v.interim && <span className="muted">Go ahead — I’m listening…</span>)}
             {v.interim && <span className="muted"> {v.interim}</span>}
             {v.listening && <span className="car" />}
@@ -42,7 +72,7 @@ export default function Listen() {
         ) : (
           <div className="mt24">
             <p className="sub">Voice isn’t available in this browser. Type it instead — Tadween understands it the same way.</p>
-            <label className="fld focus mt12"><span className="sr">What should Tadween do?</span><input autoFocus className="inp" placeholder="Dentist Monday at 5, remind me the day before" value={typed} onChange={(e) => setTyped(e.target.value)} /></label>
+            <label className="fld focus mt12"><span className="sr">What should Tadween do?</span><input autoFocus className="inp" placeholder={info.examples[0]} value={typed} onChange={(e) => setTyped(e.target.value)} /></label>
           </div>
         )}
         {v.error === 'denied' && <p role="alert" className="sub mt12" style={{ color: 'var(--red)' }}>Microphone access is blocked. Allow it in your browser settings, then try again.</p>}
@@ -51,9 +81,9 @@ export default function Listen() {
           {drafts.slice(0, 4).map((d, i) => (
             <span key={i} className="gl" style={{ minHeight: 40, padding: '0 14px 0 6px', borderRadius: 20, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
               <span className="ib" style={{ width: 28, height: 28, background: d.kind === 'event' ? 'var(--k-event)' : d.kind === 'reminder' ? 'var(--k-reminder)' : d.kind === 'item' ? 'var(--k-item)' : 'var(--k-note)', color: '#16232A', boxShadow: 'none' }}>
-                <I n={d.kind === 'event' ? 'cal' : d.kind === 'reminder' ? 'bell' : d.kind === 'item' ? 'bag' : d.kind === 'note' ? 'pen' : 'check'} s={13} w={2.4} />
+                <I n={d.kind === 'event' ? 'cal' : d.kind === 'reminder' ? 'bell' : d.kind === 'item' ? 'bag' : d.kind === 'note' ? (d.items ? 'checklist' : 'pen') : 'check'} s={13} w={2.4} />
               </span>
-              {d.kind === 'event' ? describeWhen(d.start) : d.kind === 'reminder' ? (d.at ? `Remind ${describeWhen(d.at).split(' · ')[0]}` : 'Reminder') : d.kind === 'item' ? d.name : d.title}
+              {d.kind === 'event' ? (d.birthday ? d.title : describeWhen(d.start)) : d.kind === 'reminder' ? (d.at ? `Remind ${describeWhen(d.at).split(' · ')[0]}` : 'Reminder') : d.kind === 'item' ? d.name : d.title}
             </span>
           ))}
         </div>
@@ -77,7 +107,7 @@ export default function Listen() {
         </div>
 
         <div className="spread mt24" style={{ alignItems: 'flex-start' }}>
-          <Link to="/add" className="orb" onClick={() => v.stop()}><span className="ib lg"><I n="keyboard" s={22} w={1.8} /></span>Type</Link>
+          <Link to={scope === 'calendar' ? '/add?type=Event' : scope === 'lists' ? '/add?type=Shopping' : scope === 'notes' ? '/note/new' : '/add'} className="orb" onClick={() => v.stop()}><span className="ib lg"><I n="keyboard" s={22} w={1.8} /></span>Type</Link>
           <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!text} onClick={done}><I n="stop" s={14} />Done</button>
           {supported ? (
             <button className="orb" onClick={() => (v.listening ? v.stop() : v.start())}><span className="ib lg"><I n={v.listening ? 'pause' : 'mic'} s={20} /></span>{v.listening ? 'Pause' : 'Resume'}</button>

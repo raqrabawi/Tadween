@@ -8,7 +8,7 @@ import { pickPhoto } from '../lib/photo'
 const TONES = ['mint', 'sky', 'sand', 'lilac', 'moss']
 const FILTERS = ['All', 'Notes', 'Voice', 'Capsules'] as const
 
-export default function Journal() {
+export default function Notes() {
   const { notes, saveNote } = useStore()
   const nav = useNavigate()
   const addPhoto = async (source: 'camera' | 'gallery') => {
@@ -29,10 +29,10 @@ export default function Journal() {
       <div className="hd" style={{ minHeight: 60 }}>
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 4 }}>
           <span className="cap">{notes.length} notes · {voiceCount} voice</span>
-          <h1 className="h1">Journal</h1>
+          <h1 className="h1">Notes</h1>
         </div>
         <div className="row" style={{ gap: 8 }}>
-          <Link to="/ask" className="ib" aria-label="Search journal"><I n="search" /></Link>
+          <Link to="/ask" className="ib" aria-label="Search notes"><I n="search" /></Link>
         </div>
       </div>
 
@@ -40,14 +40,14 @@ export default function Journal() {
         {FILTERS.map((f) => <button key={f} className={f === filter ? 'chip on' : 'chip'} aria-pressed={f === filter} onClick={() => setFilter(f)}>{f}</button>)}
       </div>
 
-      <Link to="/listen" className="card hot mt16" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      <Link to="/listen?from=notes" className="card hot mt16" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <span className="vorb" style={{ width: 52, height: 52, boxShadow: 'none' }}><I n="mic" s={22} /></span>
-        <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span className="ttl">Say what’s on your mind</span><span className="sub">Start with “note that…” and Tadween files it here.</span></span>
+        <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span className="ttl">Say what’s on your mind</span><span className="sub">Talk it through, or say “make a list: …”.</span></span>
         <span className="arr"><I n="arrow" s={16} /></span>
       </Link>
 
       {shown.length === 0 ? (
-        <div className="card empty mt12"><span className="ttl">{filter === 'All' ? 'Your journal is empty' : `No ${filter.toLowerCase()} yet`}</span><span className="sub">Write or speak your first note.</span></div>
+        <div className="card empty mt12"><span className="ttl">{filter === 'All' ? 'No notes yet' : `No ${filter.toLowerCase()} yet`}</span><span className="sub">Write or speak your first note.</span></div>
       ) : (
         <div className="grid2 mt12" style={{ alignItems: 'start' }}>
           {cols.map((col, ci) => (
@@ -70,7 +70,7 @@ export default function Journal() {
           ))}
         </div>
       )}
-      <Fab label="Add to journal" actions={[
+      <Fab label="Add to notes" actions={[
         { icon: 'text', label: 'Text note', onSelect: () => nav('/note/new') },
         { icon: 'checklist', label: 'List', hint: 'Tick items off', onSelect: () => nav('/note/new?kind=list') },
         { icon: 'camera', label: 'Take a photo', onSelect: () => addPhoto('camera') },

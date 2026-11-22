@@ -66,7 +66,7 @@ export default function NoteScreen() {
   if (locked) {
     return (
       <main className="screen notab">
-        <div className="hd"><Link to="/journal" className="ib" aria-label="Back to Journal"><I n="back" s={18} w={2.4} /></Link></div>
+        <div className="hd"><Link to="/notes" className="ib" aria-label="Back to Notes"><I n="back" s={18} w={2.4} /></Link></div>
         <div className="card tone-lilac mt24 empty"><span className="ib"><I n="lock" /></span><span className="ttl">{existing.title}</span><span className="sub">This time capsule opens on {new Date(existing.opens_at!).toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' })}.</span></div>
       </main>
     )
@@ -75,10 +75,10 @@ export default function NoteScreen() {
   return (
     <main className="screen notab" style={{ paddingBottom: 140 }}>
       <div className="hd">
-        <Link to="/journal" className="ib" aria-label="Back to Journal"><I n="back" s={18} w={2.4} /></Link>
+        <Link to="/notes" className="ib" aria-label="Back to Notes"><I n="back" s={18} w={2.4} /></Link>
         <div className="row" style={{ gap: 8 }}>
           <button className={reading ? 'ib acc' : 'ib'} aria-label={reading ? 'Stop reading' : 'Read this note aloud'} onClick={() => { if (reading) { stopSpeaking(); setReading(false) } else { setReading(true); speak(`${title}. ${body}`, profile?.voice_style, () => setReading(false)) } }}><I n="speaker" s={18} /></button>
-          {noteId && <button className="ib" aria-label="Delete note" onClick={async () => { if (confirm('Delete this note?')) { await deleteNote(noteId); nav('/journal') } }}><I n="trash" s={18} /></button>}
+          {noteId && <button className="ib" aria-label="Delete note" onClick={async () => { if (confirm('Delete this note?')) { await deleteNote(noteId); nav('/notes') } }}><I n="trash" s={18} /></button>}
           {'share' in navigator && <button className="ib" aria-label="Share" onClick={() => navigator.share({ title, text: body }).catch(() => undefined)}><I n="share" s={18} /></button>}
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function NoteScreen() {
       <div style={{ position: 'fixed', left: '50%', transform: 'translateX(-50%)', bottom: 'calc(env(safe-area-inset-bottom,0px) + 18px)', width: 'min(448px, calc(100% - 32px))', display: 'flex', gap: 10, alignItems: 'center' }}>
         <div className="gl" style={{ flex: 1, height: 68, borderRadius: 34, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 10px 0 16px' }}>
           <span className="sub" style={{ fontSize: 13 }}>{dictate.listening ? 'Listening… keep talking' : noteId ? 'Saved' : 'Not saved yet'}</span>
-          <Link to="/journal" className="tag acc" style={{ minHeight: 48, borderRadius: 24, padding: '0 20px', fontSize: 15, fontWeight: 700 }}>Done</Link>
+          <Link to="/notes" className="tag acc" style={{ minHeight: 48, borderRadius: 24, padding: '0 20px', fontSize: 15, fontWeight: 700 }}>Done</Link>
         </div>
         {canListen() && (
           <button className="vorb" style={{ width: 68, height: 68, position: 'relative' }} aria-label={dictate.listening ? 'Stop dictation' : 'Dictate'} onClick={() => (dictate.listening ? dictate.stop() : dictate.start())}>
