@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { I } from './Icon'
+import { HoldMic } from './HoldMic'
 
 export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
@@ -31,9 +32,7 @@ export function TabBar() {
         {tab('/lists', 'Lists', 'list')}
         {tab('/notes', 'Notes', 'book')}
       </nav>
-      <Link to={from ? `/listen?from=${from}` : '/listen'} className="mic" aria-label={from ? `Speak to add to ${from.charAt(0).toUpperCase() + from.slice(1)}` : 'Speak to Tadween'}>
-        <span className="vorb"><I n="mic" s={26} /></span>
-      </Link>
+      <HoldMic from={from} />
     </div>
   )
 }

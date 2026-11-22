@@ -337,3 +337,27 @@ textarea.inp{resize:none;line-height:28px}
 .nimg{display:block;width:100%;border-radius:18px;object-fit:cover}
 .ckrow{display:flex;align-items:center;gap:10px;min-height:48px}
 .ckrow input{flex:1}
+
+/* Press-and-hold voice */
+.tabbar .mic{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;z-index:41;transition:transform .2s ease}
+.tabbar .mic .vorb{transition:transform .12s ease,background .2s}
+.tabbar .mic.holding{transform:translateY(-6px)}
+.tabbar .mic.cancel .vorb{background:var(--ink3)}
+.hold-layer{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 24px) 20px calc(env(safe-area-inset-bottom,0px) + 120px);animation:fabIn .15s ease}
+.hold-top{display:flex;align-items:center;justify-content:space-between;max-width:440px;width:100%;margin:0 auto}
+.hold-dot{width:10px;height:10px;border-radius:5px;background:var(--red);box-shadow:0 0 12px var(--red);animation:holdBlink 1.2s ease-in-out infinite}
+.hold-text{max-width:440px;width:100%;margin:32px auto 0;font-size:28px;line-height:37px;font-weight:600;letter-spacing:-.5px;color:var(--ink)}
+.hold-try{max-width:440px;width:100%;margin:12px auto 0;font-size:15px}
+.hold-wave{margin:auto -20px 0;transition:transform .15s ease}
+.hold-hint{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px;font-size:14px;color:var(--ink2);text-align:center}
+.hold-hint b{font-weight:600;color:var(--ink)}
+.hold-x{width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:var(--s1);box-shadow:var(--edge);color:var(--ink2);transition:background .15s,color .15s}
+.hold-x.on{background:var(--red);color:#fff}
+.hold-layer.cancel .hold-text{opacity:.4}
+@keyframes holdBlink{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.hold-dot{animation:none}}
+.holding-voice .tabbar{z-index:42}
+.holding-voice .tabbar nav{opacity:0;pointer-events:none}
+.tabbar .mic{border:0;cursor:pointer}
+.vwave{position:relative;margin:auto -20px 0}
+.vwave .vorb{position:absolute;left:50%;top:50%;width:132px;height:132px;margin:-66px 0 0 -66px;flex-direction:column;gap:6px;font-size:13px;font-weight:700}
