@@ -31,7 +31,8 @@ interface Store {
   reload: () => Promise<void>
   addCategory: (name: string, scope?: 'lists' | 'notes') => Promise<Category | null>
   deleteCategory: (id: string) => Promise<void>
-  addList: (categoryId: string, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => Promise<void>
+  updateList: (id: string, patch: Partial<Pick<List, 'category_id' | 'family_id' | 'title'>>) => Promise<void>
+  addList: (categoryId: string | null, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => Promise<void>
   deleteList: (id: string) => Promise<void>
   addItem: (listId: string, name: string, qty?: string | null, aisle?: string | null) => Promise<void>
   toggleItem: (item: Item) => Promise<void>
@@ -234,7 +235,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await db.from('categories').delete().eq('id', id)
   }, [uid, nudge])
 
-  const addList = useCallback(async (categoryId: string, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => {
+  const addList = useCallback(async (categoryId: string | null, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => {
     const tone = opts?.tone ?? TONES[lists.length % TONES.length]
     if (!uid) {
       setLists((l) => [...l, { id: newId(), owner_id: 'guest', family_id: opts?.shared ? GUEST_FAMILY : null, category_id: categoryId, title, tone, verb: opts?.verb ?? 'do', staples: [], created_at: now() }])
@@ -245,6 +246,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }).select().single()
     if (data) setLists((l) => (l.some((x) => x.id === data.id) ? l : [...l, data as List]))
   }, [lists.length, family, uid, nudge])
+
+  const updateList = useCallback(async (id: string, patch: Partial<Pick<List, 'category_id' | 'family_id' | 'title'>>) => {
+    setLists((l) => l.map((x) => (x.id === id ? { ...x, ...patch } : x)))
+    if (!uid) return
+    await db.from('lists').update(patch).eq('id', id)
+  }, [uid])
 
   const deleteList = useCallback(async (id: string) => {
     setLists((l) => l.filter((x) => x.id !== id))
@@ -364,10 +371,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Store>(() => ({
     ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
-    setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
+    setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
   }), [ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
-    setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, deleteList, addItem, toggleItem, resetDone,
+    setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

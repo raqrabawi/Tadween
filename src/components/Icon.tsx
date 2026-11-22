@@ -41,6 +41,7 @@ const P: Record<string, string> = {
   text: 'M5 6h14M5 11h14M5 16h9',
   checklist: 'M4 6.5l1.5 1.5L8 5.5M4 12.5l1.5 1.5L8 11.5M4 18.5l1.5 1.5L8 17.5M11 7h9M11 13h9M11 19h9',
   folder: 'M3 6h6.5l2 2.5H21v10.5H3z',
+  more: 'M5.5 12h.01M12 12h.01M18.5 12h.01',
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5'
 }
 
