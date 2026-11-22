@@ -21,7 +21,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
   --grn:#0A6970; --mint:#7CC6CA; --sun:#E8C478; --honey:#E8C478; --red:#FF6B6B;
   --hot:radial-gradient(260px 150px at 16% 0%,rgba(124,198,202,.28),transparent 70%),linear-gradient(160deg,#0B6B72 0%,#075056 55%,#05404A 100%);
   --edge:inset 0 1px 0 rgba(228,238,240,.1),inset 0 0 0 1px rgba(228,238,240,.05);
-  --shadow:0 24px 48px -24px rgba(0,0,0,.85);
+  --shadow:0 1px 2px rgba(0,0,0,.3);
   --a1:rgba(7,80,86,.6); --a2:rgba(7,80,86,.32); --a3:rgba(91,227,190,.08); --dot:rgba(228,238,240,.045);
   --inkBtn:#E4EEF0; --inkBtnText:#16232A;
   --field:#1C2C34; --fieldSep:rgba(228,238,240,.14);
@@ -36,7 +36,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
   --grn:#075056; --mint:#075056; --sun:#8A5E00; --honey:#8A5E00; --red:#C2362B;
   --hot:radial-gradient(260px 150px at 16% 0%,rgba(124,198,202,.22),transparent 70%),linear-gradient(160deg,#0B6B72 0%,#075056 55%,#05404A 100%);
   --edge:inset 0 1px 0 #FFFFFF,inset 0 0 0 1px rgba(255,255,255,.6),0 0 0 .5px rgba(22,35,42,.08);
-  --shadow:0 22px 44px -26px rgba(22,35,42,.32);
+  --shadow:0 1px 2px rgba(22,35,42,.05);
   --a1:rgba(7,80,86,.16); --a2:rgba(255,255,255,.7); --a3:rgba(91,227,190,.14); --dot:rgba(22,35,42,.06);
   --inkBtn:#16232A; --inkBtnText:#FFFFFF;
   --field:#FFFFFF; --fieldSep:rgba(22,35,42,.14);
@@ -83,7 +83,7 @@ body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSys
 .card.tight{padding:16px}
 .card.flush{padding:6px 0}
 .hot{background:var(--hot);color:var(--hotInk);-webkit-backdrop-filter:none;backdrop-filter:none;
-  box-shadow:inset 0 1px 0 rgba(124,198,202,.3),inset 0 0 0 1px rgba(124,198,202,.12),0 24px 44px -22px rgba(5,40,44,.7)}
+  box-shadow:inset 0 1px 0 rgba(124,198,202,.3),inset 0 0 0 1px rgba(124,198,202,.12),0 1px 2px rgba(5,40,44,.12)}
 .hot .ttl,.hot .h1{color:var(--hotInk)}
 .hot .sub,.hot .cap{color:var(--hotInk);opacity:.84}
 .gl{background:var(--s1);-webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);box-shadow:var(--edge),var(--shadow)}
@@ -249,7 +249,7 @@ textarea.inp{resize:none;line-height:28px}
   --cta:#E08E26; --ctaFlat:#E08E26; --ctaInk:#1E201F; --ctaPress:#C97B18; --ctaRing:rgba(224,142,38,.4); --ctaEdge:#C97B18; --ctaGlow:rgba(224,142,38,.3);
   --grn:#3D6B5E; --mint:#3D6B5E; --teal:#3D6B5E; --sun:#9A5A0A; --honey:#9A5A0A; --red:#B8573A; --urgent:#D97757;
   --hot:linear-gradient(160deg,#4A7C6E 0%,#3D6B5E 55%,#33594E 100%);
-  --edge:inset 0 0 0 1px #E8E4DD; --shadow:0 18px 36px -28px rgba(35,39,42,.28);
+  --edge:inset 0 0 0 1px #E8E4DD; --shadow:0 1px 2px rgba(35,39,42,.04);
   --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
   --inkBtn:#23272A; --inkBtnText:#FAF8F5;
   --field:#FFFFFF; --fieldSep:#E8E4DD;
@@ -265,7 +265,7 @@ textarea.inp{resize:none;line-height:28px}
   --cta:#F0A843; --ctaFlat:#F0A843; --ctaInk:#181A19; --ctaPress:#F5B861; --ctaRing:rgba(240,168,67,.45); --ctaEdge:#F5B861; --ctaGlow:rgba(240,168,67,.3);
   --grn:#5C9484; --mint:#5C9484; --teal:#5C9484; --sun:#F0A843; --honey:#F0A843; --red:#E38E71; --urgent:#E38E71;
   --hot:linear-gradient(160deg,#3F6F62 0%,#335A4F 55%,#2A4A41 100%);
-  --edge:inset 0 0 0 1px #343836; --shadow:0 20px 40px -26px rgba(0,0,0,.7);
+  --edge:inset 0 0 0 1px #343836; --shadow:0 1px 2px rgba(0,0,0,.25);
   --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
   --inkBtn:#F2EFE9; --inkBtnText:#181A19;
   --field:#2C302E; --fieldSep:#343836;
