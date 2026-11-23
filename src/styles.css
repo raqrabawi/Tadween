@@ -950,3 +950,18 @@ select.val option{color:initial}
 @keyframes addUp{from{transform:translateY(100%)}to{transform:none}}
 @keyframes addFade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.add-bg,.add-sheet{animation:none}}
+
+/* ---------- New category bar: slides over the category tabs ---------- */
+.tabs-wrap{position:relative}
+.tabs-cover{position:absolute;inset:0;z-index:3;display:flex;align-items:center;gap:6px;padding:4px 4px 4px 16px;border-radius:999px;
+  background:color-mix(in srgb,var(--s1-solid) 92%,transparent);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
+  box-shadow:inset 0 1px 0 var(--tabEdge),0 0 0 2px var(--acc),0 8px 20px -12px rgba(0,0,0,.3);animation:tcIn .32s cubic-bezier(.22,1.2,.36,1) both}
+[dir="rtl"] .tabs-cover{padding:4px 16px 4px 4px}
+.tabs-cover .tc-ic{color:var(--acc);flex:none}
+.tabs-cover .inp{flex:1;min-width:0;font-size:16px}
+.tabs-cover .ib.sm{flex:none}
+.tc-done{flex:none;height:40px;padding:0 18px;border-radius:999px;font-size:15px;font-weight:700;background:var(--acc);color:var(--on)}
+.tc-done:active{transform:scale(.96)}
+.tabs-wrap:has(.tabs-cover) > .tabs{opacity:0;transition:opacity .2s}
+@keyframes tcIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tabs-cover{animation:none}}

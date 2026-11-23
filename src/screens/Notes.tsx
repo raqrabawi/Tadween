@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { I } from '../components/Icon'
 import { Tabs } from '../components/Tabs'
+import { CategoryAdd } from '../components/CategoryAdd'
 import { Fab } from '../components/Fab'
 import { pickPhoto } from '../lib/photo'
 import { LOC, t } from '../lib/i18n'
@@ -57,23 +58,19 @@ export default function Notes() {
         <span className="cap" id="ncats-label">{t('Categories')}</span>
         {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />{t('Add category')}</button>}
       </div>
-      <Tabs active={`${current?.id ?? ''}|${editing}|${adding}`} className="scroll" role="tablist" aria-labelledby="ncats-label">
-        {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat(null)}>{t('All')}<span className="n">{notes.length}</span></button>}
-        {noteCategories.map((c) => editing ? (
-          <span key={c.id} className="chip" style={{ paddingRight: 10 }}>{t(c.name)}
-            <button aria-label={t('Delete category {name}', { name: c.name })} onClick={() => { if (confirm(t('Delete “{name}”? Its notes stay, under All.', { name: c.name }))) { deleteCategory(c.id); if (cat === c.id) setCat(null) } }} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
-          </span>
-        ) : (
-          <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{t(c.name)}<span className="n">{countIn(c.id)}</span></button>
-        ))}
-        {adding && (
-          <form className="chip" style={{ width: 210, padding: '0 4px 0 18px', boxShadow: 'var(--edge), 0 0 0 2px var(--acc)' }} onSubmit={(e) => { e.preventDefault(); saveCat() }}>
-            <label className="sr" htmlFor="ncatname">{t('Category name')}</label>
-            <input id="ncatname" autoFocus className="inp" style={{ fontSize: 15 }} placeholder={t('Category name')} value={catName} onChange={(e) => setCatName(e.target.value)} />
-            <button type="submit" className="ib sm acc" aria-label={t('Save category')}><I n="check" s={15} w={3} /></button>
-          </form>
-        )}
-      </Tabs>
+      <div className="tabs-wrap">
+        <Tabs active={`${current?.id ?? ''}|${editing}|${adding}`} className="scroll" role="tablist" aria-labelledby="ncats-label">
+          {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat(null)}>{t('All')}<span className="n">{notes.length}</span></button>}
+          {noteCategories.map((c) => editing ? (
+            <span key={c.id} className="chip" style={{ paddingRight: 10 }}>{t(c.name)}
+              <button aria-label={t('Delete category {name}', { name: c.name })} onClick={() => { if (confirm(t('Delete “{name}”? Its notes stay, under All.', { name: c.name }))) { deleteCategory(c.id); if (cat === c.id) setCat(null) } }} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
+            </span>
+          ) : (
+            <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{t(c.name)}<span className="n">{countIn(c.id)}</span></button>
+          ))}
+        </Tabs>
+        {adding && <CategoryAdd id="ncatname" value={catName} onChange={setCatName} onDone={saveCat} onCancel={() => { setAdding(false); setCatName('') }} />}
+      </div>
 
       {shown.length === 0 ? (
         <div className="card empty mt16"><span className="ttl">{current ? t('No notes in {name} yet', { name: t(current.name) }) : t('No notes yet')}</span><span className="sub">{t('Write or speak your first note.')}</span></div>
