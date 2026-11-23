@@ -30,8 +30,8 @@ function useLongPress(onLong: () => void, ms = 480) {
   }
 }
 
-function ListCard({ list, editing, onActions, catName }: { list: List; editing: boolean; onActions: (l: List) => void; catName?: string }) {
-  const { items, members, addItem, toggleItem, resetDone, deleteList, memberFor } = useStore()
+function ListCard({ list, onActions, catName }: { list: List; onActions: (l: List) => void; catName?: string }) {
+  const { items, members, addItem, toggleItem, resetDone, memberFor } = useStore()
   const [open, setOpen] = useState(true)
   const [draft, setDraft] = useState('')
   const mine = items.filter((i) => i.list_id === list.id)
@@ -50,72 +50,61 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
     await addItem(list.id, name, null, list.verb === 'buy' ? 'Other' : null)
   }
 
+  // Progress ring: how much of the list is ticked off
+  const pct = mine.length ? done / mine.length : 0
+  const R = 15, C = 2 * Math.PI * R
+
   return (
-    <section className={`card tone-${list.tone}`} style={{ padding: 0 }} aria-label={list.title}>
-      <div className="lhead">
-        <div className="row" style={{ gap: 8 }}>
-          <button className="row grow lp" style={{ gap: 14, textAlign: 'start', minWidth: 0 }} {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description={t('Long press for more actions')}>
-            <span className="ib"><I n={shared ? 'people' : 'list'} s={19} w={2.2} /></span>
-            <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-              <span className="ttl ell">{t(list.title)}</span>
-              <span className="sub ell">{todo.length ? (list.verb === 'buy' ? t('To buy: {n}', { n: todo.length }) : t('To do: {n}', { n: todo.length })) : t('All done')}{catName ? ` · ${catName}` : ''}</span>
+    <section className={`card lcard tone-${list.tone}`} aria-label={t(list.title)}>
+      <div className="lc-head">
+        <button className="lc-main lp" {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description={t('Long press for more actions')}>
+          <span className="lc-ring" aria-hidden="true">
+            <svg viewBox="0 0 36 36" width="40" height="40"><circle cx="18" cy="18" r={R} className="lc-track" /><circle cx="18" cy="18" r={R} className="lc-fill" strokeDasharray={`${pct * C} ${C}`} /></svg>
+            <b className="num">{todo.length || <I n="check" s={13} w={3} />}</b>
+          </span>
+          <span className="lc-txt">
+            <span className="lc-title">{t(list.title)}</span>
+            <span className="lc-meta">
+              {todo.length ? (list.verb === 'buy' ? t('To buy: {n}', { n: todo.length }) : t('To do: {n}', { n: todo.length })) : t('All done')}
+              {catName ? ` · ${catName}` : ''}
+              {shared && <> · <I n="people" s={12} w={2.4} /> {others.length || ''}</>}
             </span>
-          </button>
-          {editing
-            ? <button className="arr" style={{ color: 'var(--red)', boxShadow: 'inset 0 0 0 1px var(--red)' }} onClick={() => confirm(t('Delete “{title}” and its items?', { title: list.title })) && deleteList(list.id)} aria-label={`Delete ${list.title}`}><I n="trash" s={18} /></button>
-            : <>
-                <button className="arr" onClick={() => onActions(list)} aria-label={t('More actions for {title}', { title: list.title })}><I n="more" s={16} w={2.6} /></button>
-                <button className="arr" onClick={() => setOpen(!open)} aria-label={open ? t('Fold list') : t('Unfold list')}><I n="down" s={14} w={2.6} className="" /></button>
-              </>}
-        </div>
-        {shared && (
-          <div className="lshare">
-            {others.length > 0 && <span className="avs">{others.slice(0, 4).map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} size={24} />)}</span>}
-            <span className="sub ell">{t('Shared with family')}{others.length ? ' · ' + t('People: {n}', { n: others.length }) : ''}</span>
-          </div>
-        )}
+          </span>
+          <I n="down" s={14} w={2.6} className={'lc-fold' + (open ? ' on' : '')} />
+        </button>
+        <button className="lc-more" onClick={() => onActions(list)} aria-label={t('More actions for {title}', { title: list.title })}><I n="more" s={16} w={2.6} /></button>
       </div>
 
-      {done > 0 && (
-        <div className="row" style={{ margin: '0 20px 8px', gap: 12 }}>
-          <div className="bar grow" style={{ height: 10, borderRadius: 5 }}><span style={{ width: `${Math.round((done / mine.length) * 100)}%` }} /></div>
-          <span className="sub num" style={{ fontSize: 13, fontWeight: 700 }}>{done}/{mine.length}</span>
-        </div>
-      )}
-
       {open && (
-        <div>
+        <div className="lc-body">
           {Object.entries(groups).map(([aisle, its]) => (
             <div key={aisle || 'all'}>
-              {aisle && <p className="cap" style={{ paddingBlock: '10px 2px', paddingInline: '66px 20px', fontSize: 11 }}>{t(aisle)}</p>}
+              {aisle && <p className="lc-aisle">{t(aisle)}</p>}
               {its.map((it) => {
                 const by = memberFor(it.added_by)
                 return (
-                  <div key={it.id} className="row" style={{ minHeight: 52, paddingInline: '10px 20px', gap: 8 }}>
+                  <div key={it.id} className="lc-item">
                     <button className="ck" onClick={() => toggleItem(it)} aria-label={t('Check off {name}', { name: it.name })}><span /></button>
-                    <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: 17, lineHeight: '22px' }}>{it.name}</span>
-                      {it.qty && <span className="sub" style={{ fontSize: 13, lineHeight: '18px' }}>{it.qty}</span>}
-                    </span>
-                    {shared && by && <Avatar name={by.name} color={by.color} size={26} />}
+                    <span className="grow lc-name">{it.name}{it.qty && <small>{it.qty}</small>}</span>
+                    {shared && by && <Avatar name={by.name} color={by.color} size={22} />}
                   </div>
                 )
               })}
             </div>
           ))}
 
-          <form className="row addfield" style={{ margin: '8px 12px 12px', minHeight: 52, borderRadius: 26, paddingInline: '16px 6px', gap: 10, color: 'var(--ink3)' }} onSubmit={(e) => { e.preventDefault(); submit() }}>
-            <I n="plus" s={18} w={2.2} />
+          <form className="lc-add" onSubmit={(e) => { e.preventDefault(); submit() }}>
+            <I n="plus" s={16} w={2.4} />
             <label className="sr" htmlFor={`add-${list.id}`}>{t('Add item to {title}', { title: list.title })}</label>
-            <input id={`add-${list.id}`} className="inp" style={{ fontSize: 16 }} placeholder={t('Add item — type or say it')} value={draft} onChange={(e) => setDraft(e.target.value)} enterKeyHint="done" />
+            <input id={`add-${list.id}`} className="inp" placeholder={t('Add item — type or say it')} value={draft} onChange={(e) => setDraft(e.target.value)} enterKeyHint="done" />
             {draft.trim() ? <button className="tag acc" type="submit">{t('Add')}</button>
-              : <Link to="/listen?from=lists" onClick={() => { try { sessionStorage.setItem('tadween-list', list.title) } catch { /* ignore */ } }} className="vorb" style={{ width: 40, height: 40, boxShadow: 'none' }} aria-label={`Add to ${list.title} by voice`}><I n="mic" s={16} w={2.2} /></Link>}
+              : <Link to="/listen?from=lists" onClick={() => { try { sessionStorage.setItem('tadween-list', list.title) } catch { /* ignore */ } }} className="lc-mic" aria-label={t('Add to {title} by voice', { title: list.title })}><I n="mic" s={15} /></Link>}
           </form>
 
           {done > 0 && (
-            <div className="spread" style={{ margin: '0 12px 12px', padding: '0 6px 0 18px', minHeight: 44 }}>
-              <span className="row" style={{ gap: 10 }}><I n="check" s={16} w={3} className="" /><span className="sub">{done} {list.verb === 'buy' ? 'in the cart' : 'done'}</span></span>
-              <button className="btn line" style={{ height: 36, width: 'auto', padding: '0 14px', fontSize: 14 }} onClick={() => resetDone(list.id)}>{t('Undo all')}</button>
+            <div className="lc-done">
+              <span><I n="check" s={13} w={3} /> {done} {list.verb === 'buy' ? t('in the cart') : t('done')}</span>
+              <button onClick={() => resetDone(list.id)}>{t('Undo all')}</button>
             </div>
           )}
         </div>
@@ -238,8 +227,8 @@ export default function Lists() {
         {renaming && current && <CategoryAdd id="cat-rename" rename value={catName} onChange={setCatName} onDone={saveRename} onCancel={() => { setRenaming(false); setCatName('') }} />}
       </div>
 
-      <div className="stack mt16" role="tabpanel">
-        {shown.map((l) => <ListCard key={l.id} list={l} editing={false} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? t('No category')} />)}
+      <div className="stack lc-stack mt16" role="tabpanel">
+        {shown.map((l) => <ListCard key={l.id} list={l} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? t('No category')} />)}
         {!shown.length && <div className="card empty"><span className="ttl">{current ? t('No lists in {name} yet', { name: current.name }) : t('No lists yet')}</span><span className="sub">{t('Make one, or just say “add milk to groceries”.')}</span></div>}
         {lists.length > 0 && <p className="sub" style={{ textAlign: 'center', fontSize: 13 }}>{t('Tip: press and hold a list for more actions.')}</p>}
         <button className="btn dash" style={{ height: 56, color: 'var(--ink2)', fontSize: 16 }} onClick={openNewList}><I n="plus" s={18} w={2.4} />{current ? t('New list in {name}', { name: current.name }) : t('New list')}</button>

@@ -1024,3 +1024,44 @@ select.val option{color:initial}
 .cat-tools .ib.sm{width:36px;height:36px}
 .cat-tools .ib.sm:disabled{opacity:.35;pointer-events:none}
 .cat-tools .ib.sm.danger{color:var(--red)}
+
+/* ---------- Lists: minimal list cards ----------
+   Plain surface, a soft tone wash in the corner, a progress ring with the count, hairline rows. */
+.lc-stack{gap:20px}
+.card.lcard{padding:0;overflow:hidden}
+/* plain surface; the list's colour lives only in its progress ring (beats the tinted tone cards) */
+html .card.lcard[class*="tone-"]{background:var(--s1)!important;box-shadow:var(--edge),var(--shadow)!important}
+html.light .card.lcard[class*="tone-"],html .light .card.lcard[class*="tone-"]{background:#FFFFFF!important}
+
+.lc-head{display:flex;align-items:center;gap:4px;padding:14px 10px 12px 16px}
+[dir="rtl"] .lc-head{padding:14px 16px 12px 10px}
+.lc-main{flex:1;min-width:0;display:flex;align-items:center;gap:14px;text-align:start;color:inherit}
+.lc-ring{position:relative;flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,rgba(var(--tc),.7) 0 13px,transparent 13.5px);color:#1B2230}
+.lc-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.lc-ring circle{fill:none;stroke-width:3}
+.lc-track{stroke:rgba(var(--tc),.35)}
+.lc-fill{stroke:var(--acc);stroke-linecap:round;transition:stroke-dasharray .5s cubic-bezier(.22,1,.36,1)}
+.lc-ring b{font-size:14px;font-weight:700;position:relative;display:grid;place-items:center}
+.lc-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lc-title{font-size:18px;line-height:24px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-meta{display:flex;align-items:center;gap:4px;font-size:13px;line-height:18px;color:var(--ink3);white-space:nowrap;overflow:hidden}
+.lc-fold{flex:none;color:var(--ink3);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.lc-fold:not(.on){transform:rotate(-90deg)}
+[dir="rtl"] .lc-fold:not(.on){transform:rotate(90deg)}
+.lc-more{flex:none;width:40px;height:40px;border-radius:20px;display:grid;place-items:center;color:var(--ink3)}
+.lc-more:active{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.lc-body{padding:0 16px 10px}
+.lc-aisle{margin:12px 0 2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.lc-item{display:flex;align-items:center;gap:12px;min-height:50px;border-top:1px solid color-mix(in srgb,var(--ink) 7%,transparent)}
+.lc-item .ck{margin-inline-start:-6px}
+.lc-name{display:flex;flex-direction:column;font-size:16px;line-height:21px}
+.lc-name small{font-size:12px;line-height:16px;color:var(--ink3)}
+.lc-add{display:flex;align-items:center;gap:10px;min-height:48px;margin-top:4px;padding:0 4px 0 12px;border-radius:24px;background:color-mix(in srgb,var(--ink) 4%,transparent);color:var(--ink3)}
+[dir="rtl"] .lc-add{padding:0 12px 0 4px}
+.lc-add .inp{flex:1;min-width:0;font-size:15px}
+.lc-add:focus-within{background:var(--s1-solid);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.lc-mic{flex:none;width:36px;height:36px;border-radius:18px;display:grid;place-items:center;background:var(--cta);color:var(--ctaInk)}
+.lc-done{display:flex;align-items:center;justify-content:space-between;min-height:40px;margin-top:6px;padding:0 4px;font-size:13px;color:var(--ink3)}
+.lc-done span{display:flex;align-items:center;gap:6px}
+.lc-done button{font-size:13px;font-weight:600;color:var(--acc);text-decoration:underline;text-underline-offset:3px;padding:8px}
+@media (prefers-reduced-motion:reduce){.lc-fill,.lc-fold{transition:none}}
