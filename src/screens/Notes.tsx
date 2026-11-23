@@ -49,7 +49,6 @@ export default function Notes() {
         </div>
         <div className="row" style={{ gap: 8 }}>
           <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? t('Done') : t('Edit')}</button>
-          <Link to="/ask" className="ib" aria-label={t('Search notes')}><I n="search" /></Link>
           <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
         </div>
       </div>

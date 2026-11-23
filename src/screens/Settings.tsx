@@ -59,7 +59,6 @@ export default function Settings() {
     <main className="screen notab st">
       <div className="hd">
         <Link to="/" className="ib" aria-label={t('Back to Today')}><I n="back" s={18} w={2.4} /></Link>
-        <Link to="/ask" className="ib" aria-label={t('Search')}><I n="search" s={19} /></Link>
       </div>
       <h1 className="h1" style={{ margin: '14px 4px 0' }}>{t('Settings')}</h1>
 

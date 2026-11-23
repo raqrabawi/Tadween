@@ -108,7 +108,6 @@ export default function Today() {
           <span style={{ display: 'flex', flexDirection: 'column' }}><span className="sub">{greeting()}</span><span className="ttl">{first}</span></span>
         </Link>
         <div className="row" style={{ gap: 8 }}>
-          <Link to="/ask" className="ib" aria-label={t('Search or ask')}><I n="search" /></Link>
           <Link to="/add" className="ib" aria-label={t('Add manually')}><I n="plus" w={2.2} /></Link>
           <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
         </div>
