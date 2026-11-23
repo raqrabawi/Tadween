@@ -141,10 +141,12 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font,Inter,-apple-s
 
 /* ---------- Tabs: the ONE tab / segment / filter style for the whole app (components/Tabs.tsx) ----------
    Soft pill track, white thumb that springs to the selected option. Use <Tabs> for every new tab row. */
-:root{--tabTrack:color-mix(in srgb,var(--ink) 7%,transparent);--tabThumb:#FFFFFF;--tabInk:var(--ink);--tabOnInk:#1B2230;--tabSpring:cubic-bezier(.34,1.4,.64,1)}
-.dark{--tabTrack:color-mix(in srgb,var(--ink) 11%,transparent);--tabThumb:#F2EFE9;--tabOnInk:#1B2230}
-.tabs{position:relative;display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--tabTrack);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 5%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--tabInk)}
-.tabs > .tab-thumb{position:absolute;top:0;left:0;width:0;height:0;border-radius:999px;background:var(--tabThumb);box-shadow:0 4px 14px -6px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.08);pointer-events:none;z-index:0;opacity:0}
+:root{--tabTrack:color-mix(in srgb,var(--s1-solid) 42%,transparent);--tabEdge:rgba(255,255,255,.55);--tabLine:color-mix(in srgb,var(--ink) 9%,transparent);--tabThumb:color-mix(in srgb,#FFFFFF 80%,transparent);--tabInk:var(--ink);--tabOnInk:#1B2230;--tabSpring:cubic-bezier(.34,1.4,.64,1)}
+.dark{--tabTrack:rgba(255,255,255,.07);--tabEdge:rgba(255,255,255,.12);--tabLine:rgba(255,255,255,.1);--tabThumb:color-mix(in srgb,#F2EFE9 92%,transparent);--tabOnInk:#1B2230}
+/* Glass track: translucent fill, blur of what's behind, a light top edge */
+.tabs{position:relative;display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--tabTrack);box-shadow:inset 0 1px 0 var(--tabEdge),inset 0 0 0 1px var(--tabLine),0 8px 20px -14px rgba(0,0,0,.3);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);color:var(--tabInk)}
+/* Frosted thumb: mostly white, a touch see-through */
+.tabs > .tab-thumb{position:absolute;top:0;left:0;width:0;height:0;border-radius:999px;background:var(--tabThumb);-webkit-backdrop-filter:blur(12px) saturate(170%);backdrop-filter:blur(12px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgba(255,255,255,.35),0 4px 14px -6px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.08);pointer-events:none;z-index:0;opacity:0}
 .tabs.ready > .tab-thumb{transition:transform .45s var(--tabSpring),width .45s var(--tabSpring),height .3s ease,opacity .2s}
 .tabs > :not(.tab-thumb){position:relative;z-index:1;flex:1 1 0;min-width:0;min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font-size:15px;font-weight:600;color:inherit;opacity:.72;white-space:nowrap;transition:opacity .25s,color .25s}
 .tabs > .on{opacity:1;color:var(--tabOnInk)}
@@ -640,7 +642,7 @@ textarea.inp{resize:none;line-height:28px}
 .st-sun{position:absolute;top:-26px;inset-inline-end:22px;width:64px;height:64px;border-radius:50%;pointer-events:none;
   background:radial-gradient(circle at 40% 40%,color-mix(in srgb,var(--cta) 45%,#FFE3A1),var(--cta) 75%);opacity:.55;box-shadow:0 0 46px 10px color-mix(in srgb,var(--cta) 30%,transparent);transition:all .5s ease}
 .sky-dark .st-sun{background:transparent;opacity:.9;box-shadow:inset -14px 8px 0 0 color-mix(in srgb,var(--ink) 80%,transparent),0 0 36px 6px color-mix(in srgb,var(--ink) 12%,transparent);transform:rotate(-20deg)}
-.st-look .tabs{z-index:1;background:color-mix(in srgb,var(--s1-solid) 55%,transparent)}
+.st-look .tabs{z-index:1}
 .st-look .tabs > :not(.tab-thumb){min-height:48px}
 .st-g{font-size:18px;font-weight:700;line-height:1}
 .st-mode > :not(.tab-thumb){min-height:44px!important;font-size:14px}

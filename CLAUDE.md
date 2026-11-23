@@ -2,7 +2,7 @@
 
 ## UI defaults
 - **Tabs / segmented controls / filter rows:** always use `<Tabs>` from `src/components/Tabs.tsx`
-  (pill track + white thumb that springs to the selected option, `.tabs` in `src/styles.css`).
+  (frosted-glass pill track + slightly see-through white thumb that springs to the selected option, `.tabs` in `src/styles.css`).
   Mark the selected child with `className="on"`; add `className="scroll"` for a scrolling row.
   Never hand-roll a new segmented control or tab style, in existing or new pages.
 - Main call to action (incl. the mic) uses the terracotta CTA (`--cta` / `--ctaInk`).
