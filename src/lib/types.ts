@@ -31,7 +31,7 @@ export interface EventRow {
   starts_at: string; ends_at: string | null; location: string | null; calendar: string; alert_minutes: number | null; source: string
 }
 export interface Reminder { id: string; title: string; remind_at: string | null; done: boolean; source: string }
-export interface Note { id: string; title: string; body: string; kind: string; tags: string[]; opens_at: string | null; created_at: string; updated_at: string; image?: string | null; category_id?: string | null }
+export interface Note { id: string; owner_id?: string; title: string; body: string; kind: string; tags: string[]; opens_at: string | null; created_at: string; updated_at: string; image?: string | null; category_id?: string | null }
 
 /** What the voice/text understanding produces before the person confirms it. */
 export type Draft =

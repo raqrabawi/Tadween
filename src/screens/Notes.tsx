@@ -9,6 +9,7 @@ import { PageSkeleton } from '../components/Skeleton'
 import { Tabs } from '../components/Tabs'
 import { CategoryAdd } from '../components/CategoryAdd'
 import { Fab } from '../components/Fab'
+import { InviteSheet } from '../components/InviteSheet'
 import { pickPhoto } from '../lib/photo'
 import { LOC, t } from '../lib/i18n'
 
@@ -28,7 +29,8 @@ function NoteCard({ note, className, onActions, children }: { note: Note; classN
 import { SHOW_ALL_TAB } from '../lib/flags'
 
 export default function Notes() {
-  const { notes, saveNote, deleteNote, noteCategories, addCategory, deleteCategory, renameCategory, firstLoad } = useStore()
+  const { notes, saveNote, deleteNote, noteCategories, addCategory, deleteCategory, renameCategory, firstLoad, roleFor } = useStore()
+  const [invite, setInvite] = useState<Note | null>(null)
   // Note options sheet: 'menu' shows the actions, 'edit' renames the note and sets its category
   const [act, setAct] = useState<Note | null>(null)
   const [actMode, setActMode] = useState<'menu' | 'edit'>('menu')
@@ -130,7 +132,7 @@ export default function Notes() {
                 const tone = TONES[(ci + i * 2) % TONES.length]
                 return (
                   <NoteCard key={n.id} note={n} className={`card tight tone-${locked ? 'lilac' : tone}`} onActions={(x) => { setActMode('menu'); setAct(x) }}>
-                    <span className="spread"><span className="cap">{locked ? t('Time capsule') : n.kind === 'voice' ? t('Voice') : n.kind === 'list' ? t('List') : n.kind === 'photo' ? t('Photo') : t('Note')}{!current && cat !== 'none' && n.category_id && noteCategories.find((c) => c.id === n.category_id) ? ` · ${noteCategories.find((c) => c.id === n.category_id)!.name}` : ''}</span>{locked ? <I n="lock" s={15} /> : n.kind === 'voice' ? <I n="mic" s={15} /> : n.kind === 'list' ? <I n="checklist" s={15} /> : null}</span>
+                    <span className="spread"><span className="cap">{locked ? t('Time capsule') : n.kind === 'voice' ? t('Voice') : n.kind === 'list' ? t('List') : n.kind === 'photo' ? t('Photo') : t('Note')}{!current && cat !== 'none' && n.category_id && noteCategories.find((c) => c.id === n.category_id) ? ` · ${noteCategories.find((c) => c.id === n.category_id)!.name}` : ''}{roleFor('note', n) !== 'owner' ? ` · ${t('Shared with you')}` : ''}</span>{locked ? <I n="lock" s={15} /> : n.kind === 'voice' ? <I n="mic" s={15} /> : n.kind === 'list' ? <I n="checklist" s={15} /> : null}</span>
                     {!locked && n.image && <img className="nimg" src={n.image} alt="" style={{ maxHeight: 180 }} />}
                     <span className="ttl" style={{ fontSize: 17, lineHeight: '22px' }}>{n.title}</span>
                     {!locked && n.kind === 'list' && n.body && <span className="sub" style={{ fontSize: 13, lineHeight: '20px', whiteSpace: 'pre-line' }}>{n.body.split('\n').slice(0, 5).map((l) => l.replace(/^\[x\] /, '☑ ').replace(/^\[ \] /, '☐ ')).join('\n')}</span>}
@@ -143,14 +145,15 @@ export default function Notes() {
           ))}
         </div>
       )}
-      {act && (
+      {act && (() => { const mineAct = roleFor('note', act) === 'owner'; return (
         <Sheet label={t('{title} actions', { title: act.title })} onClose={() => setAct(null)}>
           <div className="hd3 mt12"><button className="ib" aria-label={actMode === 'edit' ? t('Back') : t('Close')} onClick={() => (actMode === 'edit' ? setActMode('menu') : setAct(null))}><I n={actMode === 'edit' ? 'back' : 'close'} s={15} w={2.6} /></button><h1>{actMode === 'edit' ? t('Edit note') : act.title}</h1><span /></div>
           {actMode === 'menu' ? (
-            <div className="qa mt20" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }} role="menu" aria-label={t('{title} actions', { title: act.title })}>
-              <button role="menuitem" className="qa-b" onClick={() => { setEditName(act.title); setEditCat(act.category_id ?? ''); setActMode('edit') }}><span className="qa-i"><I n="pen" s={22} /></span>{t('Edit')}</button>
+            <div className="qa mt20" role="menu" aria-label={t('{title} actions', { title: act.title })}>
+              {mineAct && <button role="menuitem" className="qa-b" onClick={() => { setEditName(act.title); setEditCat(act.category_id ?? ''); setActMode('edit') }}><span className="qa-i"><I n="pen" s={22} /></span>{t('Edit')}</button>}
               <button role="menuitem" className="qa-b" onClick={() => { const n = act; setAct(null); shareNote(n) }}><span className="qa-i"><I n="share" s={22} /></span>{t('Share')}</button>
-              <button role="menuitem" className="qa-b danger" onClick={() => { const n = act; if (confirm(t('Delete “{title}”?', { title: n.title }))) { void deleteNote(n.id); setAct(null); announce(t('Note deleted')) } }}><span className="qa-i"><I n="trash" s={22} /></span>{t('Delete')}</button>
+              {mineAct && <button role="menuitem" className="qa-b" onClick={() => { const n = act; setAct(null); setInvite(n) }}><span className="qa-i"><I n="people" s={22} /></span>{t('Invite')}</button>}
+              {mineAct && <button role="menuitem" className="qa-b danger" onClick={() => { const n = act; if (confirm(t('Delete “{title}”?', { title: n.title }))) { void deleteNote(n.id); setAct(null); announce(t('Note deleted')) } }}><span className="qa-i"><I n="trash" s={22} /></span>{t('Delete')}</button>}
             </div>
           ) : (
             <form onSubmit={async (e) => { e.preventDefault(); const title = editName.trim(); if (!title) return; await saveNote({ id: act.id, title, category_id: editCat || null }); setAct(null); announce(t('Note updated')) }}>
@@ -161,8 +164,10 @@ export default function Notes() {
               <button className="btn pri mt24" type="submit" disabled={!editName.trim()}>{t('Save')}<I n="check" s={16} w={2.6} /></button>
             </form>
           )}
+          {actMode === 'menu' && <p className="ffoot">{mineAct ? t('Invite people to view it or edit it with you.') : t(roleFor('note', act) === 'view' ? 'Shared with you · view only.' : 'Shared with you · you can edit it.')}</p>}
         </Sheet>
-      )}
+      ) })()}
+      {invite && <InviteSheet kind="note" item={invite} onClose={() => setInvite(null)} />}
       <Fab label={t('Add to notes')} actions={[
         { icon: 'text', label: t('Text note'), hint: current ? t('In {name}', { name: current.name }) : undefined, onSelect: () => nav(`/note/new?${q}`) },
         { icon: 'checklist', label: t('List'), hint: t('Tick items off'), onSelect: () => nav(`/note/new?kind=list&${q}`) },

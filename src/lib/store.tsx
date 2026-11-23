@@ -51,6 +51,11 @@ interface Store {
   saveDrafts: (drafts: Draft[], opts?: { noteCategory?: string | null }) => Promise<number>
   joinFamily: (code: string) => Promise<string | null>
   memberFor: (userId: string | null) => Member | undefined
+  /** What I can do with a list or note: my own, shared with edit rights, or view only. */
+  roleFor: (kind: 'list' | 'note', item: { id: string; owner_id?: string; family_id?: string | null }) => 'owner' | 'edit' | 'view'
+  /** A link that adds whoever opens it to this list or note, with view or edit rights. */
+  createInvite: (kind: 'list' | 'note', id: string, role: 'view' | 'edit') => Promise<string | null>
+  acceptInvite: (token: string) => Promise<{ kind: 'list' | 'note'; item_id: string; role: 'view' | 'edit' } | string>
 }
 
 const Ctx = createContext<Store | null>(null)
@@ -65,7 +70,7 @@ const TONES: Tone[] = ['mint', 'sky', 'sand', 'lilac', 'moss']
 /* Last synced account data, kept on the device so the app opens instantly and still shows
    your things when the network is down. Cleared on sign-out. */
 const CACHE = 'tadween-cache'
-type Snapshot = { uid: string; profile: Profile | null; family: Family | null; members: Member[]; categories: Category[]; lists: List[]; items: Item[]; events: EventRow[]; reminders: Reminder[]; notes: Note[] }
+type Snapshot = { uid: string; profile: Profile | null; family: Family | null; members: Member[]; categories: Category[]; lists: List[]; items: Item[]; events: EventRow[]; reminders: Reminder[]; notes: Note[]; shared?: Record<string, 'view' | 'edit'> }
 const readCache = (): Snapshot | null => { try { const r = localStorage.getItem(CACHE); return r ? (JSON.parse(r) as Snapshot) : null } catch { return null } }
 export const clearCache = () => { try { localStorage.removeItem(CACHE) } catch { /* private mode */ } }
 // Only replace state when the data really changed, so background syncs don't re-render every screen
@@ -93,6 +98,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [events, setEvents] = useState<EventRow[]>([])
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [notes, setNotes] = useState<Note[]>([])
+  // Lists and notes other people invited me to: item id → my rights
+  const [shared, setShared] = useState<Record<string, 'view' | 'edit'>>({})
   const [loading, setLoading] = useState(false)
   const [theme, setThemeState] = useState<Mode>(storedMode)
   const [palette, setPaletteState] = useState<Palette>(storedPalette)
@@ -151,14 +158,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     // Creates the profile and family on first sign-in, then returns the profile
     const p = await db.rpc('ensure_me')
-    const [fm, cats, ls, its, evs, rems, ns] = await Promise.all([
+    const [fm, cats, ls, its, evs, rems, ns, col] = await Promise.all([
       db.from('family_members').select('family_id, user_id, role, color, joined_at'),
       db.from('categories').select('*').order('position'),
       db.from('lists').select('*').order('created_at'),
       db.from('list_items').select('*').order('created_at'),
       db.from('events').select('*').order('starts_at'),
       db.from('reminders').select('*').order('created_at'),
-      db.from('notes').select('*').order('created_at', { ascending: false })
+      db.from('notes').select('*').order('created_at', { ascending: false }),
+      db.from('collaborators').select('item_id, role').eq('user_id', uid)
     ])
     if (p.data) {
       setProfile(p.data as Profile)
@@ -198,6 +206,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setEvents((evs.data ?? []) as EventRow[])
     setReminders((rems.data ?? []) as Reminder[])
     setNotes((ns.data ?? []) as Note[])
+    setShared(Object.fromEntries(((col.data ?? []) as { item_id: string; role: 'view' | 'edit' }[]).map((c) => [c.item_id, c.role])))
     setLoading(false)
 
     // First run: starter categories and lists so the app is useful immediately.
@@ -231,7 +240,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         const c = readCache()
         if (c && c.uid === cachedUid) {
           setProfile(c.profile); setFamily(c.family); setMembers(c.members); setCategories(c.categories)
-          setLists(c.lists); setItems(c.items); setEvents(c.events); setReminders(c.reminders); setNotes(c.notes)
+          setLists(c.lists); setItems(c.items); setEvents(c.events); setReminders(c.reminders); setNotes(c.notes); setShared(c.shared ?? {})
           return
         }
       }
@@ -262,10 +271,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!uid || loading || !profile) return
     const tm = setTimeout(() => {
-      try { localStorage.setItem(CACHE, JSON.stringify({ uid, profile, family, members, categories: allCats, lists, items, events, reminders, notes } satisfies Snapshot)); setCachedUid(uid) } catch { /* storage full */ }
+      try { localStorage.setItem(CACHE, JSON.stringify({ uid, profile, family, members, categories: allCats, lists, items, events, reminders, notes, shared } satisfies Snapshot)); setCachedUid(uid) } catch { /* storage full */ }
     }, 800)
     return () => clearTimeout(tm)
-  }, [uid, loading, profile, family, members, allCats, lists, items, events, reminders, notes])
+  }, [uid, loading, profile, family, members, allCats, lists, items, events, reminders, notes, shared])
 
   // Keep guest data on the device as it changes
   const guest = ready && !uid && !cachedUid
@@ -457,13 +466,34 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const memberFor = useCallback((userId: string | null) => members.find((m) => m.user_id === userId), [members])
 
+  const roleFor = useCallback((kind: 'list' | 'note', it: { id: string; owner_id?: string; family_id?: string | null }) => {
+    if (!uid || !it.owner_id || it.owner_id === uid) return 'owner' as const
+    if (shared[it.id]) return shared[it.id]
+    // Family lists: everyone in the family space can edit
+    return kind === 'list' && it.family_id ? 'edit' as const : 'view' as const
+  }, [uid, shared])
+
+  const createInvite = useCallback(async (kind: 'list' | 'note', id: string, role: 'view' | 'edit') => {
+    if (!uid) { setSavePromptState(true); return null }
+    const { data, error } = await db.rpc('create_share', { k: kind, iid: id, r: role })
+    if (error || !data) return null
+    return `${window.location.origin}${window.location.pathname}#/join/${data as string}`
+  }, [uid])
+
+  const acceptInvite = useCallback(async (token: string) => {
+    const { data, error } = await db.rpc('accept_share', { tok: token })
+    if (error || !data) return error?.message ?? 'Invite not found'
+    await loadAll()
+    return data as { kind: 'list' | 'note'; item_id: string; role: 'view' | 'edit' }
+  }, [loadAll])
+
   const value = useMemo<Store>(() => ({
     ready, firstLoad: !!uid && loading && !profile, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, renameCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
-    addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
+    addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor, roleFor, createInvite, acceptInvite
   }), [ready, uid, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, renameCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
-    addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
+    addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor, roleFor, createInvite, acceptInvite])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

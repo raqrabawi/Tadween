@@ -9,11 +9,15 @@ import { Tabs } from '../components/Tabs'
 import { CategoryAdd } from '../components/CategoryAdd'
 import { Avatar, Sheet, Switch, announce } from '../components/ui'
 import { Fab } from '../components/Fab'
+import { InviteSheet } from '../components/InviteSheet'
 import { t } from '../lib/i18n'
 
 
 function ListCard({ list, onActions, catName }: { list: List; onActions: (l: List) => void; catName?: string }) {
-  const { items, members, addItem, toggleItem, resetDone, memberFor } = useStore()
+  const { items, members, addItem, toggleItem, resetDone, memberFor, roleFor } = useStore()
+  // Lists someone shared with me as view only can't be changed
+  const role = roleFor('list', list)
+  const readOnly = role === 'view'
   const [open, setOpen] = useState(true)
   const [draft, setDraft] = useState('')
   const mine = items.filter((i) => i.list_id === list.id)
@@ -50,6 +54,7 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
               {todo.length ? (list.verb === 'buy' ? t('To buy: {n}', { n: todo.length }) : t('To do: {n}', { n: todo.length })) : mine.length ? t('All done') : t('Empty')}
               {catName ? ` · ${catName}` : ''}
               {shared && <> · <I n="people" s={12} w={2.4} /> {others.length || ''}</>}
+              {role !== 'owner' && !shared && <> · <I n="people" s={12} w={2.4} /> {t(readOnly ? 'View only' : 'Shared with you')}</>}
             </span>
           </span>
           <I n="down" s={14} w={2.6} className={'lc-fold' + (open ? ' on' : '')} />
@@ -66,7 +71,7 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
                 const by = memberFor(it.added_by)
                 return (
                   <div key={it.id} className="lc-item">
-                    <button className="ck" onClick={() => toggleItem(it)} aria-label={t('Check off {name}', { name: it.name })}><span /></button>
+                    {readOnly ? <span className="ck" aria-hidden="true"><span /></span> : <button className="ck" onClick={() => toggleItem(it)} aria-label={t('Check off {name}', { name: it.name })}><span /></button>}
                     <span className="grow lc-name">{it.name}{it.qty && <small>{it.qty}</small>}</span>
                     {shared && by && <Avatar name={by.name} color={by.color} size={22} />}
                   </div>
@@ -75,18 +80,18 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
             </div>
           ))}
 
-          <form className="lc-add" onSubmit={(e) => { e.preventDefault(); submit() }}>
+          {!readOnly && <form className="lc-add" onSubmit={(e) => { e.preventDefault(); submit() }}>
             <I n="plus" s={16} w={2.4} />
             <label className="sr" htmlFor={`add-${list.id}`}>{t('Add item to {title}', { title: list.title })}</label>
             <input id={`add-${list.id}`} className="inp" placeholder={t('Add item — type or say it')} value={draft} onChange={(e) => setDraft(e.target.value)} enterKeyHint="done" />
             {draft.trim() ? <button className="tag acc" type="submit">{t('Add')}</button>
               : <Link to="/listen?from=lists" onClick={() => { try { sessionStorage.setItem('tadween-list', list.title) } catch { /* ignore */ } }} className="lc-mic" aria-label={t('Add to {title} by voice', { title: list.title })}><I n="mic" s={15} /></Link>}
-          </form>
+          </form>}
 
           {done > 0 && (
             <div className="lc-done">
               <span><I n="check" s={13} w={3} /> {done} {list.verb === 'buy' ? t('in the cart') : t('done')}</span>
-              <button onClick={() => resetDone(list.id)}>{t('Undo all')}</button>
+              {!readOnly && <button onClick={() => resetDone(list.id)}>{t('Undo all')}</button>}
             </div>
           )}
         </div>
@@ -98,7 +103,8 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
 import { SHOW_ALL_TAB } from '../lib/flags'
 
 export default function Lists() {
-  const { categories, lists, items, addCategory, deleteCategory, renameCategory, addList, addItem, updateList, deleteList, family, guest, setSavePrompt, firstLoad } = useStore()
+  const { categories, lists, items, addCategory, deleteCategory, renameCategory, addList, addItem, updateList, deleteList, firstLoad, roleFor } = useStore()
+  const [invite, setInvite] = useState<List | null>(null)
   // 'all' shows every list; 'none' the lists with no category (used while the All tab is hidden)
   const [cat, setCat] = useState<string>('all')
   const [act, setAct] = useState<List | null>(null)
@@ -160,17 +166,6 @@ export default function Lists() {
     try {
       if (typeof navigator.share === 'function') await navigator.share({ title: l.title, text })
       else { await navigator.clipboard.writeText(text); announce(t('List copied — paste it anywhere')) }
-    } catch { /* closed the share sheet */ }
-  }
-  const inviteTo = async (l: List) => {
-    if (guest) { setSavePrompt(true); return }
-    if (!family) return
-    if (!l.family_id) await updateList(l.id, { family_id: family.id })
-    const link = window.location.origin + window.location.pathname
-    const text = t('Join my “{title}” list on Tadween: open {link} , sign in, then Settings › Join a family with code {code}', { title: l.title, link, code: family.invite_code })
-    try {
-      if (typeof navigator.share === 'function') await navigator.share({ title: t('Join {title}', { title: l.title }), text })
-      else { await navigator.clipboard.writeText(text); announce(t('Invite copied — send it to family')) }
     } catch { /* closed the share sheet */ }
   }
 
@@ -256,15 +251,15 @@ export default function Lists() {
           <button className="btn pri mt24" onClick={saveList}>{t('Create list')}<I n="next" s={16} w={2.6} /></button>
         </Sheet>
       )}
-      {act && (
+      {act && (() => { const mineAct = roleFor('list', act) === 'owner'; return (
         <Sheet label={t('{title} actions', { title: act.title })} onClose={() => setAct(null)}>
           <div className="hd3 mt12"><button className="ib" aria-label={actMode === 'edit' ? t('Back') : t('Close')} onClick={() => (actMode === 'edit' ? setActMode('menu') : setAct(null))}><I n={actMode === 'edit' ? 'back' : 'close'} s={15} w={2.6} /></button><h1>{actMode === 'edit' ? t('Edit list') : act.title}</h1><span /></div>
           {actMode === 'menu' ? (
             <div className="qa mt20" role="menu" aria-label={t('{title} actions', { title: act.title })}>
-              <button role="menuitem" className="qa-b" onClick={() => { setEditName(act.title); setEditCat(act.category_id ?? ''); setActMode('edit') }}><span className="qa-i"><I n="pen" s={22} /></span>{t('Edit')}</button>
+              {mineAct && <button role="menuitem" className="qa-b" onClick={() => { setEditName(act.title); setEditCat(act.category_id ?? ''); setActMode('edit') }}><span className="qa-i"><I n="pen" s={22} /></span>{t('Edit')}</button>}
               <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); shareList(l) }}><span className="qa-i"><I n="share" s={22} /></span>{t('Share')}</button>
-              <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); inviteTo(l) }}><span className="qa-i"><I n="people" s={22} /></span>{t('Invite')}</button>
-              <button role="menuitem" className="qa-b danger" onClick={() => { const l = act; if (confirm(t('Delete “{title}” and its items?', { title: l.title }))) { deleteList(l.id); setAct(null); announce(t('List deleted')) } }}><span className="qa-i"><I n="trash" s={22} /></span>{t('Delete')}</button>
+              {mineAct && <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); setInvite(l) }}><span className="qa-i"><I n="people" s={22} /></span>{t('Invite')}</button>}
+              {mineAct && <button role="menuitem" className="qa-b danger" onClick={() => { const l = act; if (confirm(t('Delete “{title}” and its items?', { title: l.title }))) { deleteList(l.id); setAct(null); announce(t('List deleted')) } }}><span className="qa-i"><I n="trash" s={22} /></span>{t('Delete')}</button>}
             </div>
           ) : (
             <form onSubmit={async (e) => { e.preventDefault(); const title = editName.trim(); if (!title) return; await updateList(act.id, { title, category_id: editCat || null }); setAct(null); announce(t('List updated')) }}>
@@ -275,9 +270,10 @@ export default function Lists() {
               <button className="btn pri mt24" type="submit" disabled={!editName.trim()}>{t('Save')}<I n="check" s={16} w={2.6} /></button>
             </form>
           )}
-          {actMode === 'menu' && <p className="ffoot">{act.family_id ? t('This list is shared with your family.') : t('Invite shares this list with your family space.')}</p>}
+          {actMode === 'menu' && <p className="ffoot">{!mineAct ? t(roleFor('list', act) === 'view' ? 'Shared with you · view only.' : 'Shared with you · you can edit it.') : act.family_id ? t('This list is shared with your family.') : t('Invite people to view it or edit it with you.')}</p>}
         </Sheet>
-      )}
+      ) })()}
+      {invite && <InviteSheet kind="list" item={invite} onClose={() => setInvite(null)} />}
       <Fab label={t('Add to lists')} actions={[
         { icon: 'plus', label: current ? t('Item in {name}', { name: current.name }) : t('New item'), onSelect: openItem },
         { icon: 'list', label: current ? t('New list in {name}', { name: current.name }) : t('New list'), onSelect: openNewList },

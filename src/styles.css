@@ -1082,3 +1082,4 @@ html.light .card.lcard[class*="tone-"],html .light .card.lcard[class*="tone-"]{b
 .st-tone{display:grid;gap:10px;padding:12px;border-radius:24px}
 .st-tone .tabs > :not(.tab-thumb){min-height:46px;gap:8px}
 .st-tone-hint{margin:0 6px 2px;font-size:13px;line-height:18px}
+.inv-what{margin:10px 6px 0;text-align:center}
