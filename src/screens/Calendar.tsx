@@ -1,11 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
+import type React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { addDays, hm, sameDay, startOfDay, weekStart } from '../lib/dates'
 import { I } from '../components/Icon'
 import { Fab } from '../components/Fab'
 import type { EventRow } from '../lib/types'
-import { LOC, t } from '../lib/i18n'
+import { isAr, LOC, t } from '../lib/i18n'
+import { Tabs } from '../components/Tabs'
 
 // Birthdays repeat every year on the same day
 const onDay = (e: EventRow, d: Date) => {
@@ -14,13 +16,24 @@ const onDay = (e: EventRow, d: Date) => {
   return s.getMonth() === d.getMonth() && s.getDate() === d.getDate() && d.getFullYear() >= s.getFullYear()
 }
 
+type View = 'Day' | 'Week' | 'Month'
+const VIEWS: View[] = ['Day', 'Week', 'Month']
+// ISO week number (Monday-based), as shown under the month name
+const isoWeek = (d: Date) => {
+  const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+  const dn = x.getUTCDay() || 7
+  x.setUTCDate(x.getUTCDate() + 4 - dn)
+  return Math.ceil(((x.getTime() - Date.UTC(x.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7)
+}
+
 const TONE: Record<string, string> = { Work: 'tone-sky', Personal: 'tone-mint', Family: 'tone-sand', Birthday: 'tone-lilac' }
 
 export default function Calendar() {
   const { events, reminders, toggleReminder } = useStore()
   const nav = useNavigate()
   const [day, setDay] = useState(() => startOfDay(new Date()))
-  const [week, setWeek] = useState(() => weekStart(new Date()))
+  const [view, setView] = useState<View>('Week')
+  const week = weekStart(day)
   const now = new Date()
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i))
 
@@ -43,41 +56,83 @@ export default function Calendar() {
   }, [dayEvents, day]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const pick = (d: Date) => setDay(startOfDay(d))
-  const shiftWeek = (n: number) => { const w = addDays(week, 7 * n); setWeek(w); setDay(w) }
+  // Move by one day / week / month depending on the view
+  const step = (n: number) => {
+    if (view === 'Day') setDay(addDays(day, n))
+    else if (view === 'Week') setDay(addDays(day, 7 * n))
+    else { const d = new Date(day.getFullYear(), day.getMonth() + n, 1); setDay(startOfDay(d)) }
+  }
+  const swipe = useRef<{ x: number; y: number } | null>(null)
+  const swipeStart = (e: React.PointerEvent) => { swipe.current = { x: e.clientX, y: e.clientY } }
+  const swipeEnd = (e: React.PointerEvent) => {
+    const s0 = swipe.current; swipe.current = null
+    if (!s0) return
+    const dx = e.clientX - s0.x, dy = e.clientY - s0.y
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return
+    step((dx < 0 ? 1 : -1) * (isAr ? -1 : 1))
+  }
+  // Month grid, weeks starting on the same weekday as the week strip
+  const first = new Date(day.getFullYear(), day.getMonth(), 1)
+  const lead = Math.round((first.getTime() - weekStart(first).getTime()) / 86400000)
+  const inMonth = new Date(day.getFullYear(), day.getMonth() + 1, 0).getDate()
+  const monthDays: (Date | null)[] = [...Array.from({ length: lead }, () => null), ...Array.from({ length: inMonth }, (_, i) => new Date(day.getFullYear(), day.getMonth(), i + 1))]
   const isToday = sameDay(day, now)
 
   return (
     <main className="screen">
       <div className="hd" style={{ minHeight: 60 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 4 }}>
-          <span className="cap">{week.getFullYear()} · {t('This week: {n}', { n: weekCount })}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', marginInlineStart: 4 }}>
+          <span className="cap">{day.getFullYear()} · {t('Week {n}', { n: isoWeek(day) })}</span>
           <h1 className="h1">{day.toLocaleDateString(LOC, { month: 'long' })}</h1>
         </div>
-        <div className="row" style={{ gap: 8 }}>
-          <button className="ib" aria-label={t('Jump to today')} onClick={() => { setWeek(weekStart(now)); pick(now) }}><I n="target" /></button>
-          <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
-        </div>
+        <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
       </div>
 
       <div className="spread mt20">
-        <button className="ib sm" aria-label={t('Previous week')} onClick={() => shiftWeek(-1)}><I n="back" s={16} w={2.4} /></button>
-        <span className="sub" style={{ fontWeight: 600 }}>{days[0].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })} – {days[6].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })}</span>
-        <button className="ib sm" aria-label={t('Next week')} onClick={() => shiftWeek(1)}><I n="chev" s={16} w={2.4} /></button>
+        <Tabs active={view} role="radiogroup" aria-label={t('View')} className="cal-views">
+          {VIEWS.map((v) => <button key={v} role="radio" aria-checked={view === v} className={view === v ? 'on' : ''} onClick={() => setView(v)}>{t(v)}</button>)}
+        </Tabs>
+        <span className="sub" style={{ display: 'flex', alignItems: 'center', gap: 8, marginInlineEnd: 4 }}>
+          <span style={{ width: 8, height: 8, borderRadius: 4, background: 'var(--mint, var(--acc))' }} />
+          {t('{n} this week', { n: weekCount })}
+        </span>
       </div>
 
-      <div className="mt12" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0,1fr))', gap: 6 }}>
-        {days.map((d) => {
-          const on = sameDay(d, day)
-          const n = events.filter((e) => onDay(e, d)).length
-          return (
-            <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })}
-              className={on ? 'card' : 'card'} style={{ height: 84, borderRadius: 24, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, ...(on ? { background: 'var(--hot)', color: 'var(--hotInk)', backdropFilter: 'none' } : {}) }}>
-              <span style={{ fontSize: 12, fontWeight: 700, opacity: .7 }}>{d.toLocaleDateString(LOC, { weekday: 'short' })}</span>
-              <span className="num" style={{ fontSize: 19, fontWeight: 600, color: !on && sameDay(d, now) ? 'var(--acc)' : undefined }}>{d.getDate()}</span>
-              <span style={{ display: 'flex', gap: 3, height: 5 }}>{Array.from({ length: Math.min(n, 3) }, (_, i) => <span key={i} style={{ width: 5, height: 5, borderRadius: 3, background: 'currentColor', opacity: .6 }} />)}</span>
-            </button>
-          )
-        })}
+      {/* Swipe sideways to move by a day, week or month */}
+      <div className="cal-swipe mt16" onPointerDown={swipeStart} onPointerUp={swipeEnd} onPointerCancel={() => { swipe.current = null }}>
+        <button className="sr" onClick={() => step(-1)}>{t(view === 'Day' ? 'Previous day' : view === 'Week' ? 'Previous week' : 'Previous month')}</button>
+        <button className="sr" onClick={() => step(1)}>{t(view === 'Day' ? 'Next day' : view === 'Week' ? 'Next week' : 'Next month')}</button>
+        {view === 'Week' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0,1fr))', gap: 6 }}>
+            {days.map((d) => {
+              const on = sameDay(d, day)
+              const n = events.filter((e) => onDay(e, d)).length
+              return (
+                <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })} className={on ? 'card cal-day on' : 'card cal-day'}>
+                  <span style={{ fontSize: 12, fontWeight: 700, opacity: .7 }}>{d.toLocaleDateString(LOC, { weekday: 'short' })}</span>
+                  <span className="num" style={{ fontSize: 19, fontWeight: 600, color: !on && sameDay(d, now) ? 'var(--acc)' : undefined }}>{d.getDate()}</span>
+                  <span style={{ display: 'flex', gap: 3, height: 5 }}>{Array.from({ length: Math.min(n, 3) }, (_, i) => <span key={i} style={{ width: 5, height: 5, borderRadius: 3, background: 'currentColor', opacity: .6 }} />)}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {view === 'Month' && (
+          <div className="cal-month">
+            {days.map((d) => <span key={'h' + d.getDay()} className="cal-wd">{d.toLocaleDateString(LOC, { weekday: 'narrow' })}</span>)}
+            {monthDays.map((d, i) => {
+              if (!d) return <span key={'x' + i} />
+              const on = sameDay(d, day)
+              const n = events.filter((e) => onDay(e, d)).length
+              return (
+                <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })} className={'cal-md' + (on ? ' on' : '') + (sameDay(d, now) ? ' today' : '')}>
+                  <span className="num">{d.getDate()}</span>
+                  <i style={{ opacity: n ? .6 : 0 }} />
+                </button>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       <div className="sec"><h2>{isToday ? t('Today') : day.toLocaleDateString(LOC, { weekday: 'long' })}, {day.getDate()} {day.toLocaleDateString(LOC, { month: 'short' })}</h2><span className="sub">{dayEvents.length ? t('Events: {n}', { n: dayEvents.length }) : t('Free day')}</span></div>
@@ -94,8 +149,11 @@ export default function Calendar() {
                 {en && e.source !== 'birthday' && <span className="sub num" style={{ fontSize: 12, lineHeight: '16px' }}>{hm(en)}</span>}
               </div>
               {live ? (
-                <div className="card hot tight grow" style={{ paddingLeft: 20 }}>
-                  <span className="ttl">{e.title}</span><p className="sub">{[e.location, e.calendar].filter(Boolean).join(' · ')}</p>
+                <div className="card hot tight grow" style={{ paddingInlineStart: 20 }}>
+                  <div className="spread" style={{ alignItems: 'flex-start' }}>
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="ttl">{e.title}</span><span className="sub">{[e.location, e.calendar].filter(Boolean).join(' · ')}</span></span>
+                    <span className="arr"><I n="arrow" s={16} /></span>
+                  </div>
                   <div className="row mt12" style={{ gap: 10 }}>
                     <div className="bar grow" style={{ height: 6 }}><span style={{ width: `${en ? Math.min(100, Math.round(((now.getTime() - s.getTime()) / (en.getTime() - s.getTime())) * 100)) : 50}%` }} /></div>
                     <span className="sub" style={{ fontWeight: 700, fontSize: 13 }}>{t('Now')}</span>
