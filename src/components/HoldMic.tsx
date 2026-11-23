@@ -104,7 +104,7 @@ export function HoldMic({ from }: { from?: string }) {
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nav(listenUrl) } }}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <span className="vorb" style={holding ? { transform: `scale(${1.12 + level.current * 0.1})` } : undefined}><I n="mic" s={26} /></span>
+        <span className="vorb" style={holding ? { transform: `scale(${1.12 + level.current * 0.1})` } : undefined}><I n="micF" s={32} /></span>
       </button>
       {toast && createPortal(<Toast text={toast} onDone={() => setToast(null)} ms={2600} />, document.body)}
     </>

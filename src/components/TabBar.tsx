@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { I } from './Icon'
 import { HoldMic } from './HoldMic'
@@ -15,32 +15,19 @@ const TABS = [
 
 /**
  * Floating tab bar with a notch for the mic.
- * A soft "liquid" pill glides to the selected tab and stretches as it moves;
- * the selected icon fills in with a little pop and its name slides up.
+ * The selected tab's icon fills in with a little pop; every tab shows its name.
  * Scrolling down tucks the bar in; scrolling up brings it back.
  */
 export function TabBar() {
   const { pathname } = useLocation()
   const from = FROM[pathname]
-  const nav = useRef<HTMLElement>(null)
-  const [blob, setBlob] = useState<{ x: number; w: number } | null>(null)
-  const [moving, setMoving] = useState(0)
-  const [tucked, setTucked] = useState(false)
   const first = useRef(true)
+  const [tucked, setTucked] = useState(false)
 
-  // Move the pill under the selected tab
-  useLayoutEffect(() => {
-    const place = () => {
-      const a = nav.current?.querySelector<HTMLElement>('a.on')
-      if (!a) { setBlob(null); return }
-      setBlob({ x: a.offsetLeft + a.offsetWidth / 2, w: a.offsetWidth })
-    }
-    place()
-    if (!first.current) { setMoving((m) => m + 1); navigator.vibrate?.(6) }
+  // A light tap of haptics when the tab changes
+  useEffect(() => {
+    if (!first.current) navigator.vibrate?.(6)
     first.current = false
-    const ro = new ResizeObserver(place)
-    if (nav.current) ro.observe(nav.current)
-    return () => ro.disconnect()
   }, [pathname])
 
   // Tuck away while scrolling down, come back when scrolling up
@@ -58,8 +45,7 @@ export function TabBar() {
   return (
     <div className={tucked ? 'tabbar tucked' : 'tabbar'}>
       <div className="tb-shell">
-        <nav ref={nav} aria-label="Main" className="tb-nav">
-          {blob && <span key={moving} className={moving ? 'tb-blob go' : 'tb-blob'} style={{ transform: `translateX(${blob.x - 28}px)` }} aria-hidden="true" />}
+        <nav aria-label="Main" className="tb-nav">
           {TABS.map((t, i) => t ? (
             <NavLink key={t.to} to={t.to} end className={({ isActive }) => (isActive ? 'tb-link on' : 'tb-link')} aria-label={t.label}>
               {({ isActive }) => <>

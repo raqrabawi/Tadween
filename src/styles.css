@@ -410,3 +410,13 @@ textarea.inp{resize:none;line-height:28px}
 .tabbar .mic:active .vorb{transform:scale(.93)}
 @media (prefers-reduced-motion:reduce){.tb-blob,.tb-ic,.tb-lbl,.tabbar{transition:none}.tb-blob.go,.tb-link.on .tb-ic,.tb-link.on .tb-ic::before,.tb-link.on .tb-ic::after,.tabbar .mic .vorb::after{animation:none}}
 .tabbar nav a.tb-link.on{color:var(--acc)}
+
+/* v3: names always shown, no selected background, filled black mic, a little bigger */
+.tb-blob{display:none}
+.tb-link:not(.on) .tb-ic{transform:none}
+.tb-lbl{max-height:14px;opacity:1;transform:none;font-weight:600;color:var(--ink3)}
+.tabbar nav a.tb-link.on .tb-lbl{color:var(--acc);font-weight:700}
+.tabbar nav.tb-nav{-webkit-mask:radial-gradient(circle 46px at 50% 0,transparent 45px,#000 46px);mask:radial-gradient(circle 46px at 50% 0,transparent 45px,#000 46px)}
+.tabbar .mic{top:-28px;width:88px;height:88px;margin-left:-44px;border-radius:44px}
+.tabbar .mic .vorb{width:76px;height:76px;color:#111111}
+.tabbar .mic.cancel .vorb{color:#111111}

@@ -43,6 +43,7 @@ const P: Record<string, string> = {
   folder: 'M3 6h6.5l2 2.5H21v10.5H3z',
   more: 'M5.5 12h.01M12 12h.01M18.5 12h.01',
   // Filled versions for the selected tab
+  micF: 'M12 2.5a3.5 3.5 0 0 1 3.5 3.5v6a3.5 3.5 0 0 1-7 0V6A3.5 3.5 0 0 1 12 2.5zM5 11a1 1 0 0 1 2 0 5 5 0 0 0 10 0 1 1 0 0 1 2 0 7 7 0 0 1-6 6.93V20h2.5a1 1 0 0 1 0 2h-7a1 1 0 0 1 0-2H11v-2.07A7 7 0 0 1 5 11z',
   homeF: 'M12 3.6l8.6 7.1c.3.3.4.6.4 1v7.8a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H4.5A1.5 1.5 0 0 1 3 19.5v-7.8c0-.4.2-.7.4-1z',
   calF: 'M5 4.5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-12a2 2 0 0 1 2-2zM3 9h18v1.2H3zM7 12.5h2.5V15H7zM11 12.5h2.5V15H11zM15 12.5h2.5V15H15zM7 16.5h2.5v2H7zM11 16.5h2.5v2H11zM7 2.5h2v1.6H7zM15 2.5h2v1.6h-2z',
   listF: 'M4 5.5h3v3H4zM4 10.5h3v3H4zM4 15.5h3v3H4zM9.5 5.75H20v2.5H9.5zM9.5 10.75H20v2.5H9.5zM9.5 15.75H20v2.5H9.5z',
@@ -50,7 +51,7 @@ const P: Record<string, string> = {
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5'
 }
 
-const FILLED = new Set(['spark', 'play', 'pause', 'stop', 'homeF', 'calF', 'listF', 'bookF'])
+const FILLED = new Set(['spark', 'play', 'pause', 'stop', 'homeF', 'calF', 'listF', 'bookF', 'micF'])
 
 export function I({ n, s = 20, w = 2, className }: { n: keyof typeof P | string; s?: number; w?: number; className?: string }) {
   const filled = FILLED.has(n)
