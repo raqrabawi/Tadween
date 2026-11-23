@@ -4,6 +4,7 @@ import { useStore } from '../lib/store'
 import { haptic } from '../lib/a11y'
 import type { List } from '../lib/types'
 import { I } from '../components/Icon'
+import { Tabs } from '../components/Tabs'
 import { Avatar, Sheet, Switch, announce } from '../components/ui'
 import { Fab } from '../components/Fab'
 import { t } from '../lib/i18n'
@@ -222,7 +223,7 @@ export default function Lists() {
         <span className="cap" id="cats-label">{t('Categories')}</span>
         {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />{t('Add category')}</button>}
       </div>
-      <div className="chips" role="tablist" aria-labelledby="cats-label">
+      <Tabs active={`${current?.id ?? 'all'}|${editing}|${adding}`} className="scroll" role="tablist" aria-labelledby="cats-label">
         {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat('all')}>{t('All')}<span className="n">{lists.length}</span></button>}
         {categories.map((c) => editing ? (
           <span key={c.id} className={c.id === current?.id ? 'chip on' : 'chip'} style={{ paddingRight: 10 }}>{t(c.name)}
@@ -238,7 +239,7 @@ export default function Lists() {
             <button type="submit" className="ib sm acc" aria-label={t('Save category')}><I n="check" s={15} w={3} /></button>
           </form>
         )}
-      </div>
+      </Tabs>
 
       <div className="stack mt16" role="tabpanel">
         {shown.map((l) => <ListCard key={l.id} list={l} editing={editing} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? t('No category')} />)}

@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { understand } from '../lib/parse'
 import { I } from '../components/Icon'
+import { Tabs } from '../components/Tabs'
 import { t } from '../lib/i18n'
 
 type T = 'Event' | 'Reminder' | 'Task' | 'Birthday' | 'Shopping' | 'Note'
@@ -108,9 +109,9 @@ export default function Add() {
 
       {type === 'Birthday' && <p className="ffoot">{t('Shows on your calendar every year.')}</p>}
       {type === 'Event' && (
-        <div className="seg mt16" role="group" aria-label={t('Calendar')}>
-          {['Personal', 'Work', 'Family'].map((c) => <button key={c} className={c === calendar ? 'on' : ''} aria-pressed={c === calendar} onClick={() => setCalendar(c)}>{t(c)}</button>)}
-        </div>
+        <Tabs active={calendar} className="mt16" role="radiogroup" aria-label={t('Calendar')}>
+          {['Personal', 'Work', 'Family'].map((c) => <button key={c} role="radio" className={c === calendar ? 'on' : ''} aria-checked={c === calendar} onClick={() => setCalendar(c)}>{t(c)}</button>)}
+        </Tabs>
       )}
 
       <button className="btn pri mtauto" style={{ marginTop: 24 }} disabled={!title.trim() || busy} onClick={save}>{busy ? t('Saving…') : t('Add ' + (type === 'Shopping' ? 'item' : type.toLowerCase()))}<I n="next" s={16} w={2.6} /></button>

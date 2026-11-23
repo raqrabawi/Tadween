@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { I } from '../components/Icon'
+import { Tabs } from '../components/Tabs'
 import { Fab } from '../components/Fab'
 import { pickPhoto } from '../lib/photo'
 import { LOC, t } from '../lib/i18n'
@@ -57,7 +58,7 @@ export default function Notes() {
         <span className="cap" id="ncats-label">{t('Categories')}</span>
         {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />{t('Add category')}</button>}
       </div>
-      <div className="chips" role="tablist" aria-labelledby="ncats-label">
+      <Tabs active={`${current?.id ?? ''}|${editing}|${adding}`} className="scroll" role="tablist" aria-labelledby="ncats-label">
         {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat(null)}>{t('All')}<span className="n">{notes.length}</span></button>}
         {noteCategories.map((c) => editing ? (
           <span key={c.id} className="chip" style={{ paddingRight: 10 }}>{t(c.name)}
@@ -73,7 +74,7 @@ export default function Notes() {
             <button type="submit" className="ib sm acc" aria-label={t('Save category')}><I n="check" s={15} w={3} /></button>
           </form>
         )}
-      </div>
+      </Tabs>
 
       <Link to="/listen?from=notes" className="card hot mt16" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
         <span className="vorb" style={{ width: 52, height: 52, boxShadow: 'none' }}><I n="mic" s={22} /></span>

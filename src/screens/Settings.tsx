@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { db } from '../lib/db'
 import { I } from '../components/Icon'
+import { Tabs } from '../components/Tabs'
 import { Avatar, Sheet, announce } from '../components/ui'
 import { lang, setLang, t } from '../lib/i18n'
 import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
@@ -104,26 +105,24 @@ export default function Settings() {
 
       {/* Language & look: every choice visible, with a sliding highlight */}
       <p className="cap st-cap">{t('Language & look')}</p>
-      <section className={'st-look sky-' + resolved + (theme === 'system' ? ' sky-auto' : '')}>
+      <section className={'st-look sky-' + resolved}>
         <span className="st-stars" aria-hidden="true" />
         <span className="st-sun" aria-hidden="true" />
-        <div className="st-sw" role="radiogroup" aria-label={t('Language')} style={{ ['--n' as string]: 2, ['--i' as string]: langPick === 'ar' ? 1 : 0 }}>
-          <span className="st-thumb" aria-hidden="true" />
+        <Tabs active={langPick} role="radiogroup" aria-label={t('Language')}>
           {([['en', 'Aa', 'English'], ['ar', 'ع', 'العربية']] as const).map(([code, glyph, label]) => (
             <button key={code} role="radio" aria-checked={langPick === code} lang={code} className={langPick === code ? 'on' : ''} onClick={() => pickLang(code)}>
               <span className="st-g">{glyph}</span><span>{label}</span>
             </button>
           ))}
-        </div>
-        <div className="st-sw st-mode" role="radiogroup" aria-label={t('Mode')} style={{ ['--n' as string]: 3, ['--i' as string]: ['light', 'dark', 'system'].indexOf(theme) }}>
-          <span className="st-thumb" aria-hidden="true" />
+        </Tabs>
+        <Tabs active={theme} className="st-mode" role="radiogroup" aria-label={t('Mode')}>
           {(['light', 'dark', 'system'] as const).map((m) => (
             <button key={m} role="radio" aria-checked={theme === m} className={theme === m ? 'on' : ''} onClick={() => setTheme(m)}>
               <I n={m === 'light' ? 'sun' : m === 'dark' ? 'moon' : 'contrast'} s={18} />
               <span>{t(m === 'light' ? 'Light' : m === 'dark' ? 'Dark' : 'Auto')}</span>
             </button>
           ))}
-        </div>
+        </Tabs>
       </section>
 
       {/* Quick controls */}

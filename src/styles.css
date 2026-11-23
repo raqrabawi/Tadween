@@ -138,9 +138,27 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font,Inter,-apple-s
 .chip .n{min-width:22px;height:22px;padding:0 6px;border-radius:11px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;background:var(--s2)}
 .chip.on .n{background:color-mix(in srgb,var(--on) 14%,transparent)}
 
-.seg{display:flex;padding:2px;border-radius:10px;background:var(--segTrack);min-height:36px}
-.seg button{flex:1;height:32px;padding:0 12px;border-radius:8px;font-size:14px;font-weight:500;text-align:center}
-.seg button.on{background:var(--segOn);font-weight:600;box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04)}
+
+/* ---------- Tabs: the ONE tab / segment / filter style for the whole app (components/Tabs.tsx) ----------
+   Soft pill track, white thumb that springs to the selected option. Use <Tabs> for every new tab row. */
+:root{--tabTrack:color-mix(in srgb,var(--ink) 7%,transparent);--tabThumb:#FFFFFF;--tabInk:var(--ink);--tabOnInk:#1B2230;--tabSpring:cubic-bezier(.34,1.4,.64,1)}
+.dark{--tabTrack:color-mix(in srgb,var(--ink) 11%,transparent);--tabThumb:#F2EFE9;--tabOnInk:#1B2230}
+.tabs{position:relative;display:flex;gap:2px;padding:4px;border-radius:999px;background:var(--tabTrack);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 5%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--tabInk)}
+.tabs > .tab-thumb{position:absolute;top:0;left:0;width:0;height:0;border-radius:999px;background:var(--tabThumb);box-shadow:0 4px 14px -6px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.08);pointer-events:none;z-index:0;opacity:0}
+.tabs.ready > .tab-thumb{transition:transform .45s var(--tabSpring),width .45s var(--tabSpring),height .3s ease,opacity .2s}
+.tabs > :not(.tab-thumb){position:relative;z-index:1;flex:1 1 0;min-width:0;min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font-size:15px;font-weight:600;color:inherit;opacity:.72;white-space:nowrap;transition:opacity .25s,color .25s}
+.tabs > .on{opacity:1;color:var(--tabOnInk)}
+.tabs > :not(.tab-thumb):active{transform:scale(.97)}
+/* scrolling row (categories) */
+.tabs.scroll{overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+.tabs.scroll::-webkit-scrollbar{display:none}
+.tabs.scroll > :not(.tab-thumb){flex:none;padding:0 16px}
+.tabs > .chip,.tadween .tabs > .chip{height:auto;background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;font-weight:600}
+.tabs > .chip.on{background:none;color:var(--tabOnInk)}
+.tabs > .chip .n{background:color-mix(in srgb,var(--ink) 9%,transparent)}
+.tabs > .chip.on .n{background:color-mix(in srgb,#1B2230 9%,transparent)}
+.tabs > form.chip{background:var(--s1-solid);opacity:1}
+@media (prefers-reduced-motion:reduce){.tabs.ready > .tab-thumb{transition:none}}
 
 /* ---------- Fields (iOS inset-grouped) ---------- */
 .form{border-radius:14px;background:var(--field);overflow:hidden}
@@ -613,30 +631,19 @@ textarea.inp{resize:none;line-height:28px}
 .st-foot b{color:var(--ink2)}
 
 /* ── Settings: Language & look (sky card with sliding switches) ── */
-.st-look{position:relative;overflow:hidden;display:grid;gap:10px;padding:18px 14px 14px;border-radius:28px;box-shadow:var(--shadow);transition:background .5s ease}
-.st-look.sky-light{background:linear-gradient(165deg,#FFF1D6 0%,#FBE0BC 38%,#CFE7F3 100%);color:#23272A}
-.st-look.sky-dark{background:linear-gradient(165deg,#24304F 0%,#141B30 60%,#0D1222 100%);color:#F2EFE9}
-.st-look.sky-auto{background:linear-gradient(115deg,#FFF1D6 0%,#CFE7F3 49.5%,#1E2843 50.5%,#0D1222 100%)}
+.st-look{position:relative;overflow:hidden;display:grid;gap:10px;padding:18px 14px 14px;border-radius:28px;color:var(--ink);
+  background:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--cta) 16%,transparent),transparent 60%),linear-gradient(165deg,color-mix(in srgb,var(--acc) 9%,var(--s1-solid)),var(--s1-solid));
+  box-shadow:var(--edge),var(--shadow);transition:background .5s ease}
 .st-stars{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;
-  background:radial-gradient(1.2px 1.2px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 28% 70%,#fff,transparent),radial-gradient(1.4px 1.4px at 46% 14%,#fff,transparent),radial-gradient(1px 1px at 62% 58%,#fff,transparent),radial-gradient(1.3px 1.3px at 78% 30%,#fff,transparent),radial-gradient(1px 1px at 90% 80%,#fff,transparent),radial-gradient(1px 1px at 8% 88%,#fff,transparent),radial-gradient(1.2px 1.2px at 55% 92%,#fff,transparent)}
-.sky-dark .st-stars{opacity:.85}
-.sky-auto .st-stars{opacity:.7;-webkit-mask:linear-gradient(115deg,transparent 50%,#000 50.5%);mask:linear-gradient(115deg,transparent 50%,#000 50.5%)}
+  background:radial-gradient(1.2px 1.2px at 12% 22%,currentColor,transparent),radial-gradient(1px 1px at 28% 70%,currentColor,transparent),radial-gradient(1.4px 1.4px at 46% 14%,currentColor,transparent),radial-gradient(1px 1px at 62% 58%,currentColor,transparent),radial-gradient(1.3px 1.3px at 78% 30%,currentColor,transparent),radial-gradient(1px 1px at 90% 80%,currentColor,transparent),radial-gradient(1px 1px at 8% 88%,currentColor,transparent)}
+.sky-dark .st-stars{opacity:.45}
 .st-sun{position:absolute;top:-26px;inset-inline-end:22px;width:64px;height:64px;border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle at 40% 40%,#FFE3A1,#F0A843 70%);box-shadow:0 0 46px 14px rgba(255,190,90,.45);transition:all .5s ease}
-.sky-dark .st-sun{background:transparent;box-shadow:inset -14px 8px 0 0 #F4EFD9,0 0 36px 6px rgba(244,239,217,.18);transform:rotate(-20deg)}
-.sky-auto .st-sun{inset-inline-end:auto;inset-inline-start:22px}
-.st-sw{position:relative;z-index:1;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));padding:4px;border-radius:999px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.sky-dark .st-sw{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
-.sky-auto .st-sw{background:rgba(255,255,255,.78)}
-.st-thumb{position:absolute;top:4px;bottom:4px;inset-inline-start:4px;width:calc((100% - 8px) / var(--n));border-radius:999px;background:#FFFFFF;
-  box-shadow:0 4px 14px -6px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.08);transform:translateX(calc(var(--i) * 100%));transition:transform .45s cubic-bezier(.34,1.4,.64,1)}
-[dir="rtl"] .st-thumb{transform:translateX(calc(var(--i) * -100%))}
-.sky-dark .st-thumb{background:#F2EFE9}
-.st-sw button{position:relative;z-index:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font-size:15px;font-weight:600;color:inherit;opacity:.72;transition:opacity .25s,color .25s}
-.st-sw button.on{opacity:1;color:#1B2230}
+  background:radial-gradient(circle at 40% 40%,color-mix(in srgb,var(--cta) 45%,#FFE3A1),var(--cta) 75%);opacity:.55;box-shadow:0 0 46px 10px color-mix(in srgb,var(--cta) 30%,transparent);transition:all .5s ease}
+.sky-dark .st-sun{background:transparent;opacity:.9;box-shadow:inset -14px 8px 0 0 color-mix(in srgb,var(--ink) 80%,transparent),0 0 36px 6px color-mix(in srgb,var(--ink) 12%,transparent);transform:rotate(-20deg)}
+.st-look .tabs{z-index:1;background:color-mix(in srgb,var(--s1-solid) 55%,transparent)}
+.st-look .tabs > :not(.tab-thumb){min-height:48px}
 .st-g{font-size:18px;font-weight:700;line-height:1}
-.st-mode button{min-height:44px;font-size:14px}
-.sky-auto .st-sw button:not(.on){color:#23272A}
+.st-mode > :not(.tab-thumb){min-height:44px!important;font-size:14px}
 
 /* ══ Palette: Tadween design system (tokens from src/ds-tokens.css / tokens.json) ══
    Evergreen structure, sage support, ivory & paper surfaces, a restrained terracotta voice/action cue.
