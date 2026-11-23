@@ -67,7 +67,7 @@ export default function Settings() {
   }
 
   return (
-    <main className="screen notab st">
+    <main className="screen st">
       <div className="hd">
         <Link to="/" className="ib" aria-label={t('Back to Today')}><I n="back" s={18} w={2.4} /></Link>
       </div>

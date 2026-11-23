@@ -30,7 +30,7 @@ const Settings = page(() => import('./screens/Settings'))
 const Accessibility = page(() => import('./screens/Accessibility'))
 const PhoneSignIn = page(() => import('./screens/PhoneSignIn'))
 
-const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes']
+const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes', '/settings']
 
 export default function App() {
   const { ready, session, profile, guest } = useStore()
