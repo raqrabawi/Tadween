@@ -1,5 +1,9 @@
 // Arabic UI text. Keys are the English strings used in the code; {x} placeholders are filled in by t().
 export const AR: Record<string, string> = {
+  // Settings v2
+  'Quick controls': 'تحكم سريع', 'On': 'مفعّل', 'Off': 'متوقف', 'More': 'المزيد', 'Sign in to share lists': 'سجّل الدخول لمشاركة القوائم',
+  'Share lists that update for everyone': 'قوائم مشتركة تتحدّث للجميع', 'your day, in your words': 'يومك، بكلماتك',
+
   // Accessibility
   'Accessibility': 'إمكانية الوصول', 'Text size, contrast, motion and more': 'حجم الخط والتباين والحركة والمزيد', 'Back to Settings': 'العودة إلى الإعدادات',
   'Text size': 'حجم الخط', 'This is how your text will look. Drag or tap to make it bigger or smaller.': 'هكذا سيبدو النص. اسحب أو انقر لتكبيره أو تصغيره.',

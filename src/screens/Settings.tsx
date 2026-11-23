@@ -6,6 +6,7 @@ import { db } from '../lib/db'
 import { I } from '../components/Icon'
 import { Avatar, Sheet } from '../components/ui'
 import { lang, setLang, t } from '../lib/i18n'
+import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
 
 const PALETTES = [
   { id: 'marigold' as const, label: 'Marigold', meta: 'Sage & sun', light: ['#FAF8F5', '#3D6B5E', '#E08E26'], dark: ['#181A19', '#5C9484', '#F0A843'] },
@@ -14,7 +15,7 @@ const PALETTES = [
 ]
 
 export default function Settings() {
-  const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt } = useStore()
+  const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt, updateProfile } = useStore()
   const [sheet, setSheet] = useState<null | 'invite' | 'join'>(null)
   const [font, setFont] = useState<Font>(storedFont)
   useEffect(() => { FONTS.forEach((f) => loadFont(f.id)) }, [])  // so each option previews in its own face
@@ -26,95 +27,138 @@ export default function Settings() {
 
   const inviteText = t('Join my family space on Tadween: open {link} , sign in, then Settings › Join a family with code {code}', { link, code: family?.invite_code ?? '' })
 
+  const [a11y, setA11y] = useState<A11y>(loadA11y)
+  const sizeStep = Math.max(0, SIZES.indexOf(a11y.size))
+  const setSize = (i: number) => { const n = { ...a11y, size: SIZES[Math.max(0, Math.min(SIZES.length - 1, i))] }; setA11y(n); saveA11y(n) }
+  const resolved = theme === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : theme
+  const nextMode = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'
+  const speakOn = !!profile?.speak_replies
+
   return (
-    <main className="screen notab">
-      <div className="hd3">
+    <main className="screen notab st">
+      <div className="hd">
         <Link to="/" className="ib" aria-label={t('Back to Today')}><I n="back" s={18} w={2.4} /></Link>
-        <h1>{t('Settings')}</h1>
         <Link to="/ask" className="ib" aria-label={t('Search')}><I n="search" s={19} /></Link>
       </div>
+      <h1 className="h1" style={{ margin: '14px 4px 0' }}>{t('Settings')}</h1>
 
-      <div className="card hot mt20">
-        <div className="row" style={{ gap: 14 }}>
-          <span className="ib lg" style={{ fontSize: 22, fontWeight: 700 }}>{name.charAt(0).toUpperCase()}</span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span style={{ fontSize: 21, lineHeight: '26px', fontWeight: 700, letterSpacing: -.4 }}>{name}</span>
-            <span className="sub">{guest ? t('Saved on this phone only') : `${family?.name ?? t('Family space')} · ${t('People: {n}', { n: members.length })}`}</span>
+      {/* Profile hero */}
+      <section className="card hot st-hero mt16">
+        <span className="st-orb a" aria-hidden="true" /><span className="st-orb b" aria-hidden="true" />
+        <div className="row" style={{ gap: 16, position: 'relative' }}>
+          <span className="st-av">{name.charAt(0).toUpperCase()}</span>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+            <span className="ell" style={{ fontSize: 24, lineHeight: '30px', fontWeight: 700, letterSpacing: -.5 }}>{name}</span>
+            <span className="sub ell">{guest ? t('Saved on this phone only') : (user?.email ?? profile?.email ?? '')}</span>
           </span>
         </div>
-        <div className="spread mt16" style={{ paddingTop: 14, borderTop: '1px solid rgba(228,238,240,.16)' }}>
-          <span className="avs">{members.map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} />)}</span>
-          <span className="row" style={{ gap: 8 }}>
+        <div className="st-fam">
+          <span className="row" style={{ gap: 10, minWidth: 0 }}>
+            {members.length ? <span className="avs">{members.slice(0, 4).map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} size={28} />)}</span> : <span className="st-fam-ic"><I n="people" s={16} /></span>}
+            <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <span className="ell" style={{ fontSize: 14, fontWeight: 700 }}>{family?.name ?? t('Family space')}</span>
+              <span className="ell" style={{ fontSize: 12, opacity: .8 }}>{guest ? t('Sign in to share lists') : t('People: {n}', { n: members.length })}</span>
+            </span>
+          </span>
+          <span className="row" style={{ gap: 6 }}>
             <button className="tag" onClick={() => (guest ? setSavePrompt(true) : setSheet('join'))}>{t('Join')}</button>
-            <button className="tag" style={{ background: 'var(--hotInk)', color: 'var(--sea)' }} onClick={() => (guest ? setSavePrompt(true) : setSheet('invite'))}>{t('Invite')}</button>
+            <button className="tag st-invite" onClick={() => (guest ? setSavePrompt(true) : setSheet('invite'))}><I n="plus" s={13} w={2.6} />{t('Invite')}</button>
           </span>
         </div>
+      </section>
+
+      {/* Quick controls */}
+      <p className="cap st-cap">{t('Quick controls')}</p>
+      <div className="st-tiles">
+        <button className={resolved === 'dark' ? 'st-tile on' : 'st-tile'} onClick={() => setTheme(nextMode)} aria-label={t('Mode') + ': ' + t(theme === 'dark' ? 'Dark' : theme === 'light' ? 'Light' : 'System')}>
+          <span className="st-ti"><I n={theme === 'system' ? 'contrast' : resolved === 'dark' ? 'moon' : 'sun'} s={20} /></span>
+          <span className="st-tl">{t('Mode')}</span>
+          <span className="st-tv">{t(theme === 'dark' ? 'Dark' : theme === 'light' ? 'Light' : 'System')}</span>
+        </button>
+        <button className="st-tile" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} aria-label={t('Language')}>
+          <span className="st-ti st-glyph" lang={lang === 'ar' ? 'en' : 'ar'}>{lang === 'ar' ? 'En' : 'ع'}</span>
+          <span className="st-tl">{t('Language')}</span>
+          <span className="st-tv">{lang === 'ar' ? 'العربية' : 'English'}</span>
+        </button>
+        <div className="st-tile" role="group" aria-label={t('Text size')}>
+          <span className="st-ti st-glyph" style={{ fontSize: 13 + sizeStep * 2 }}>{t('Aa')}</span>
+          <span className="st-tl">{t('Text size')}</span>
+          <span className="st-step">
+            <button aria-label={t('Smaller text')} disabled={sizeStep === 0} onClick={() => setSize(sizeStep - 1)}><I n="minus" s={13} w={3} /></button>
+            <span className="num">{Math.round(a11y.size * 100)}%</span>
+            <button aria-label={t('Larger text')} disabled={sizeStep === SIZES.length - 1} onClick={() => setSize(sizeStep + 1)}><I n="plus" s={13} w={3} /></button>
+          </span>
+        </div>
+        <button className={speakOn ? 'st-tile on' : 'st-tile'} role="switch" aria-checked={speakOn} onClick={() => updateProfile({ speak_replies: !speakOn })}>
+          <span className="st-ti"><I n="speaker" s={20} /></span>
+          <span className="st-tl">{t('Speak replies')}</span>
+          <span className="st-tv">{speakOn ? t('On') : t('Off')}</span>
+        </button>
       </div>
 
-
-      <p className="cap" style={{ margin: '24px 8px 10px' }}>{t('Language')}</p>
-      <div className="seg" role="radiogroup" aria-label={t('Language')}>
-        <button role="radio" aria-checked={lang === 'en'} className={lang === 'en' ? 'on' : ''} lang="en" onClick={() => setLang('en')}>English</button>
-        <button role="radio" aria-checked={lang === 'ar'} className={lang === 'ar' ? 'on' : ''} lang="ar" onClick={() => setLang('ar')}>العربية</button>
-      </div>
-
-      <p className="cap" style={{ margin: '24px 8px 10px' }}>{t('Appearance')}</p>
-      <div className="card" style={{ padding: 14 }}>
-        <div role="radiogroup" aria-label={t('Color theme')} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
-          {PALETTES.map((p) => (
-            <button key={p.id} role="radio" aria-checked={palette === p.id} className="thm-opt" onClick={() => setPalette(p.id)}>
-              <span className="thm-prev" aria-hidden="true">
-                {[p.light, p.dark].map((c) => <span key={c[0]} style={{ background: c[0], ['--ring' as string]: c[0] }}><b style={{ background: c[1] }} /><b style={{ background: c[2] }} /></span>)}
+      {/* Colour theme: mini phones */}
+      <p className="cap st-cap">{t('Color theme')}</p>
+      <div className="st-themes" role="radiogroup" aria-label={t('Color theme')}>
+        {PALETTES.map((p) => {
+          const c = resolved === 'dark' ? p.dark : p.light
+          const on = palette === p.id
+          return (
+            <button key={p.id} role="radio" aria-checked={on} className={on ? 'st-theme on' : 'st-theme'} onClick={() => setPalette(p.id)}>
+              <span className="st-phone" aria-hidden="true" style={{ background: c[0] }}>
+                <i className="hero" style={{ background: c[1] }} />
+                <i className="ln" style={{ background: c[1] }} /><i className="ln s" style={{ background: c[1] }} />
+                <b style={{ background: c[2] }} />
+                {on && <span className="st-ck"><I n="check" s={11} w={3.4} /></span>}
               </span>
-              <span className="thm-name"><span>{t(p.label)}<small>{t(p.meta)}</small></span>{palette === p.id && <span className="thm-ck"><I n="check" s={12} w={3.4} /></span>}</span>
+              <span className="st-tn">{t(p.label)}</span>
+              <span className="st-tm">{t(p.meta)}</span>
             </button>
-          ))}
-        </div>
-        <div className="seg mt12" role="group" aria-label={t('Mode')}>
-          {(['dark', 'light', 'system'] as const).map((m) => <button key={m} className={theme === m ? 'on' : ''} aria-pressed={theme === m} onClick={() => setTheme(m)}>{m === 'dark' ? t('Dark') : m === 'light' ? t('Light') : t('System')}</button>)}
-        </div>
+          )
+        })}
       </div>
 
-      <p className="cap" style={{ margin: '24px 8px 10px' }}>{t('Font')}</p>
-      <div className="card" style={{ padding: 14 }}>
-        <div role="radiogroup" aria-label={t('Font')} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
-          {FONTS.map((f) => (
-            <button key={f.id} role="radio" aria-checked={font === f.id} className="font-opt" style={{ fontFamily: f.stack }} onClick={() => { setFont(f.id); applyFont(f.id) }}>
-              <span className="spread" style={{ width: '100%' }}><span className="aa">{t('Aa')}</span>{font === f.id && <span className="thm-ck"><I n="check" s={12} w={3.4} /></span>}</span>
-              <span style={{ fontSize: 15, fontWeight: 600 }}>{f.id}</span>
-              <small>{t(f.meta)}</small>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="card flush mt24">
-        <Link to="/settings/accessibility" className="rw">
-          <span className="ib sm"><I n="access" s={19} /></span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Accessibility')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Text size, contrast, motion and more')}</span></span>
-          <I n="next" s={15} w={2.4} />
-        </Link>
-      </div>
-
-      {guest ? (
-        <div className="card flush mt24">
-          <Link to="/welcome" className="rw">
-            <span className="ib sm"><I n="mail" s={18} /></span>
-            <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Sign in to save')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Keep your lists safe and share with family')}</span></span>
-            <I n="next" s={15} w={2.4} />
-          </Link>
-        </div>
-      ) : (
-      <div className="card flush mt24">
-          <div className="rw">
-            <span className="ib sm"><I n="mail" s={18} /></span>
-            <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Signed in as')}</span><span className="sub" style={{ fontSize: 13 }}>{user?.email ?? profile?.email ?? '—'}</span></span>
-          </div>
-          <button className="rw" style={{ color: 'var(--red)' }} onClick={() => db.auth.signOut()}>
-            <span className="ib sm"><I n="out" s={18} /></span><span className="grow" style={{ fontSize: 16, fontWeight: 600, textAlign: 'start' }}>{t('Sign out')}</span>
+      {/* Font strip */}
+      <p className="cap st-cap">{t('Font')}</p>
+      <div className="st-fonts" role="radiogroup" aria-label={t('Font')}>
+        {FONTS.map((f) => (
+          <button key={f.id} role="radio" aria-checked={font === f.id} className={font === f.id ? 'st-font on' : 'st-font'} style={{ fontFamily: f.stack }} onClick={() => { setFont(f.id); applyFont(f.id) }}>
+            <span className="aa">{t('Aa')}</span>
+            <span className="st-fn">{f.id}</span>
+            <span className="st-fm">{t(f.meta)}</span>
           </button>
-        </div>
-      )}
+        ))}
+      </div>
+
+      {/* More */}
+      <p className="cap st-cap">{t('More')}</p>
+      <div className="card flush">
+        <Link to="/settings/accessibility" className="rw">
+          <span className="st-chip" style={{ background: '#7B6CF6' }}><I n="access" s={18} /></span>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Accessibility')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Text size, contrast, motion and more')}</span></span>
+          <I n="chev" s={15} w={2.4} />
+        </Link>
+        {!guest && (
+          <button className="rw" onClick={() => setSheet('invite')}>
+            <span className="st-chip" style={{ background: '#E0803A' }}><I n="people" s={18} /></span>
+            <span className="grow" style={{ display: 'flex', flexDirection: 'column', textAlign: 'start' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Invite family')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Share lists that update for everyone')}</span></span>
+            <I n="chev" s={15} w={2.4} />
+          </button>
+        )}
+        {guest ? (
+          <Link to="/welcome" className="rw">
+            <span className="st-chip" style={{ background: '#2F8F6B' }}><I n="mail" s={18} /></span>
+            <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Sign in to save')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Keep your lists safe and share with family')}</span></span>
+            <I n="chev" s={15} w={2.4} />
+          </Link>
+        ) : (
+          <button className="rw" onClick={() => db.auth.signOut()}>
+            <span className="st-chip" style={{ background: '#D2554A' }}><I n="out" s={18} /></span>
+            <span className="grow" style={{ fontSize: 16, fontWeight: 600, textAlign: 'start', color: 'var(--red)' }}>{t('Sign out')}</span>
+          </button>
+        )}
+      </div>
+
+      <p className="st-foot"><b>{t('Tadween')}</b> · {t('your day, in your words')}</p>
 
       {sheet === 'invite' && (
         <Sheet label={t('Invite family')} onClose={() => setSheet(null)}>
