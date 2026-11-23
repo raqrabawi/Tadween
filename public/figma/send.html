@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><title>Send to Figma</title>
+<pre id="out">Sending…</pre>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search), out = document.getElementById('out')
+  const url = q.get('u'), file = q.get('f') || 'all.html'
+  if (!url || !/^https:\/\/mcp\.figma\.com\/mcp\/html_to_figma\//.test(url)) { out.textContent = 'Missing or unexpected submit URL'; return }
+  const html = await (await fetch(file, { cache: 'no-store' })).text()
+  try {
+    const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/html' }, body: html })
+    out.textContent = 'CORS ' + r.status + '\n' + (await r.text()).slice(0, 3000)
+  } catch (e) {
+    out.textContent = 'CORS failed: ' + e + '\nTrying no-cors…'
+    try { await fetch(url, { method: 'POST', mode: 'no-cors', body: new Blob([html], { type: 'text/html' }) }); out.textContent += '\nno-cors sent (no readable reply)' } catch (e2) { out.textContent += '\nno-cors failed: ' + e2 }
+  }
+})()
+</script>
