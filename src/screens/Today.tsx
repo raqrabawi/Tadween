@@ -74,6 +74,7 @@ export default function Today() {
         <div className="row" style={{ gap: 8 }}>
           <Link to="/ask" className="ib" aria-label="Search or ask"><I n="search" /></Link>
           <Link to="/add" className="ib" aria-label="Add manually"><I n="plus" w={2.2} /></Link>
+          <Link to="/settings" className="ib" aria-label="Settings"><I n="gear" s={19} /></Link>
         </div>
       </div>
 

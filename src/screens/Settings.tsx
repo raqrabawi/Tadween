@@ -7,9 +7,9 @@ import { I } from '../components/Icon'
 import { Avatar, Sheet, Switch } from '../components/ui'
 
 const PALETTES = [
-  { id: 'marigold' as const, label: 'Marigold', meta: 'Sage & sun · new', d: ['#181A19', '#232625', '#F0A843', '#FAF8F5', '#FFFFFF', '#E08E26'] },
-  { id: 'linen' as const, label: 'Linen', meta: 'Warm teal', d: ['#0F181D', '#16232A', '#5BE3BE', '#F5F2EC', '#FFFFFF', '#177A61'] },
-  { id: 'classic' as const, label: 'Classic', meta: 'Cool · original', d: ['#0F181D', '#16232A', '#5BE3BE', '#E4EEF0', '#FFFFFF', '#2FBF98'] }
+  { id: 'marigold' as const, label: 'Marigold', meta: 'Sage & sun', light: ['#FAF8F5', '#3D6B5E', '#E08E26'], dark: ['#181A19', '#5C9484', '#F0A843'] },
+  { id: 'linen' as const, label: 'Linen', meta: 'Teal & seafoam', light: ['#F5F2EC', '#075056', '#177A61'], dark: ['#0F181D', '#7CC6CA', '#5BE3BE'] },
+  { id: 'classic' as const, label: 'Classic', meta: 'Ink & cobalt', light: ['#F6F6F3', '#1F2733', '#2F5BEA'], dark: ['#0F1115', '#D5DBE6', '#4C6EF5'] }
 ]
 
 export default function Settings() {
@@ -76,8 +76,7 @@ export default function Settings() {
           {PALETTES.map((p) => (
             <button key={p.id} role="radio" aria-checked={palette === p.id} className="thm-opt" onClick={() => setPalette(p.id)}>
               <span className="thm-prev" aria-hidden="true">
-                <span style={{ background: p.d[0] }}><i style={{ background: p.d[1] }} /><i style={{ width: '70%', background: p.d[2] }} /></span>
-                <span style={{ background: p.d[3] }}><i style={{ background: p.d[4] }} /><i style={{ width: '70%', background: p.d[5] }} /></span>
+                {[p.light, p.dark].map((c) => <span key={c[0]} style={{ background: c[0], ['--ring' as string]: c[0] }}><b style={{ background: c[1] }} /><b style={{ background: c[2] }} /></span>)}
               </span>
               <span className="thm-name"><span>{p.label}<small>{p.meta}</small></span>{palette === p.id && <span className="thm-ck"><I n="check" s={12} w={3.4} /></span>}</span>
             </button>

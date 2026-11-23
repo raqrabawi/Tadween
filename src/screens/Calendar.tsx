@@ -54,6 +54,7 @@ export default function Calendar() {
         </div>
         <div className="row" style={{ gap: 8 }}>
           <button className="ib" aria-label="Jump to today" onClick={() => { setWeek(weekStart(now)); pick(now) }}><I n="target" /></button>
+          <Link to="/settings" className="ib" aria-label="Settings"><I n="gear" s={19} /></Link>
         </div>
       </div>
 

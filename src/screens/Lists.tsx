@@ -212,6 +212,7 @@ export default function Lists() {
         </div>
         <div className="row" style={{ gap: 8 }}>
           <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? 'Done' : 'Edit'}</button>
+          <Link to="/settings" className="ib" aria-label="Settings"><I n="gear" s={19} /></Link>
         </div>
       </div>
 
