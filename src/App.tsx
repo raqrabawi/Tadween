@@ -17,6 +17,9 @@ import Settings from './screens/Settings'
 import Accessibility from './screens/Accessibility'
 import PhoneSignIn from './screens/PhoneSignIn'
 import { PHONE_READY } from './lib/phone'
+import { useState } from 'react'
+import { Splash } from './components/Splash'
+import { Onboarding, needsOnboarding } from './components/Onboarding'
 
 const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes']
 
@@ -24,11 +27,16 @@ export default function App() {
   const { ready, session, profile, guest } = useStore()
   const loc = useLocation()
 
-  if (!ready) return <div className="app"><div className="screen"><Spinner /></div></div>
+  const [splash, setSplash] = useState(true)
+  const [onboard, setOnboard] = useState(needsOnboarding)
+
+  const splashEl = splash && <Splash ready={ready} onGone={() => setSplash(false)} />
+  if (!ready) return <>{splash ? null : <div className="app"><div className="screen"><Spinner /></div></div>}{splashEl}</>
 
   if (!guest && profile && !profile.onboarded && loc.pathname !== '/setup') return <Navigate to="/setup" replace />
 
   return (
+    <>
     <div className="app">
       <Routes>
         <Route path="/" element={<Today />} />
@@ -51,8 +59,11 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {TAB_ROUTES.includes(loc.pathname) && <TabBar />}
-      <SavePrompt />
+      {!onboard && <SavePrompt />}
       <GlobalToast />
+      {onboard && !session && <Onboarding onDone={() => setOnboard(false)} />}
     </div>
+    {splashEl}
+    </>
   )
 }
