@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
@@ -66,11 +66,30 @@ export default function Calendar() {
   const swipeStart = (e: React.PointerEvent) => { swipe.current = { x: e.clientX, y: e.clientY } }
   const swipeEnd = (e: React.PointerEvent) => {
     const s0 = swipe.current; swipe.current = null
-    if (!s0) return
+    if (!s0 || view === 'Week') return
     const dx = e.clientX - s0.x, dy = e.clientY - s0.y
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return
     step((dx < 0 ? 1 : -1) * (isAr ? -1 : 1))
   }
+  // Week view: one smooth-scrolling row with the days of last, this and next month
+  const stripDays = useMemo(() => {
+    const from = new Date(day.getFullYear(), day.getMonth() - 1, 1), to = new Date(day.getFullYear(), day.getMonth() + 2, 0)
+    const out: Date[] = []
+    for (let d = from; d <= to; d = addDays(d, 1)) out.push(d)
+    return out
+  }, [day.getFullYear(), day.getMonth()]) // eslint-disable-line react-hooks/exhaustive-deps
+  const strip = useRef<HTMLDivElement>(null)
+  const placed = useRef('')
+  useLayoutEffect(() => {
+    const el = strip.current, on = el?.querySelector<HTMLElement>('.on')
+    if (!el || !on) return
+    const win = `${day.getFullYear()}-${day.getMonth()}`
+    const left = on.offsetLeft - (el.clientWidth - on.offsetWidth) / 2
+    // Glide when picking within the same stretch of days; jump straight there otherwise
+    el.scrollTo({ left, behavior: placed.current === win ? 'smooth' : 'auto' })
+    placed.current = win
+  }, [day, view])
+
   // Month grid, weeks starting on the same weekday as the week strip
   const first = new Date(day.getFullYear(), day.getMonth(), 1)
   const lead = Math.round((first.getTime() - weekStart(first).getTime()) / 86400000)
@@ -103,13 +122,14 @@ export default function Calendar() {
         <button className="sr" onClick={() => step(-1)}>{t(view === 'Day' ? 'Previous day' : view === 'Week' ? 'Previous week' : 'Previous month')}</button>
         <button className="sr" onClick={() => step(1)}>{t(view === 'Day' ? 'Next day' : view === 'Week' ? 'Next week' : 'Next month')}</button>
         {view === 'Week' && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0,1fr))', gap: 6 }}>
-            {days.map((d) => {
+          <div className="cal-strip" ref={strip} role="listbox" aria-label={t('Days')}>
+            {stripDays.map((d) => {
               const on = sameDay(d, day)
               const n = events.filter((e) => onDay(e, d)).length
+              const firstOfMonth = d.getDate() === 1
               return (
-                <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })} className={on ? 'card cal-day on' : 'card cal-day'}>
-                  <span style={{ fontSize: 12, fontWeight: 700, opacity: .7 }}>{d.toLocaleDateString(LOC, { weekday: 'short' })}</span>
+                <button key={d.toISOString()} role="option" aria-selected={on} onClick={() => pick(d)} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })} className={'card cal-day' + (on ? ' on' : '') + (firstOfMonth ? ' first' : '')}>
+                  <span style={{ fontSize: 12, fontWeight: 700, opacity: .7 }}>{firstOfMonth ? d.toLocaleDateString(LOC, { month: 'short' }) : d.toLocaleDateString(LOC, { weekday: 'short' })}</span>
                   <span className="num" style={{ fontSize: 19, fontWeight: 600, color: !on && sameDay(d, now) ? 'var(--acc)' : undefined }}>{d.getDate()}</span>
                   <span style={{ display: 'flex', gap: 3, height: 5 }}>{Array.from({ length: Math.min(n, 3) }, (_, i) => <span key={i} style={{ width: 5, height: 5, borderRadius: 3, background: 'currentColor', opacity: .6 }} />)}</span>
                 </button>

@@ -978,3 +978,8 @@ select.val option{color:initial}
 .cal-md i{width:4px;height:4px;border-radius:2px;background:currentColor}
 .cal-md.today{color:var(--acc)}
 .cal-md.on{background:var(--hot);color:var(--hotInk)}
+.cal-strip{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;margin:0 -20px;padding:4px 20px 16px;scroll-padding:0 20px}
+.cal-strip::-webkit-scrollbar{display:none}
+.cal-strip .cal-day{flex:0 0 calc((100% - 36px) / 7);min-width:44px;scroll-snap-align:center}
+.cal-strip .cal-day.first{box-shadow:var(--edge),var(--shadow),inset 2px 0 0 var(--acc)}
+[dir="rtl"] .cal-strip .cal-day.first{box-shadow:var(--edge),var(--shadow),inset -2px 0 0 var(--acc)}
