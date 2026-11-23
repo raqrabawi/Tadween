@@ -611,3 +611,29 @@ textarea.inp{resize:none;line-height:28px}
 .st .rw + .rw::before{inset-inline-start:66px}
 .st-foot{margin:28px 0 8px;text-align:center;font-size:13px;color:var(--ink3)}
 .st-foot b{color:var(--ink2)}
+
+/* ── Settings: Language & look (sky card with sliding switches) ── */
+.st-look{position:relative;overflow:hidden;display:grid;gap:10px;padding:18px 14px 14px;border-radius:28px;box-shadow:var(--shadow);transition:background .5s ease}
+.st-look.sky-light{background:linear-gradient(165deg,#FFF1D6 0%,#FBE0BC 38%,#CFE7F3 100%);color:#23272A}
+.st-look.sky-dark{background:linear-gradient(165deg,#24304F 0%,#141B30 60%,#0D1222 100%);color:#F2EFE9}
+.st-look.sky-auto{background:linear-gradient(115deg,#FFF1D6 0%,#CFE7F3 49.5%,#1E2843 50.5%,#0D1222 100%)}
+.st-stars{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;
+  background:radial-gradient(1.2px 1.2px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 28% 70%,#fff,transparent),radial-gradient(1.4px 1.4px at 46% 14%,#fff,transparent),radial-gradient(1px 1px at 62% 58%,#fff,transparent),radial-gradient(1.3px 1.3px at 78% 30%,#fff,transparent),radial-gradient(1px 1px at 90% 80%,#fff,transparent),radial-gradient(1px 1px at 8% 88%,#fff,transparent),radial-gradient(1.2px 1.2px at 55% 92%,#fff,transparent)}
+.sky-dark .st-stars{opacity:.85}
+.sky-auto .st-stars{opacity:.7;-webkit-mask:linear-gradient(115deg,transparent 50%,#000 50.5%);mask:linear-gradient(115deg,transparent 50%,#000 50.5%)}
+.st-sun{position:absolute;top:-26px;inset-inline-end:22px;width:64px;height:64px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 40% 40%,#FFE3A1,#F0A843 70%);box-shadow:0 0 46px 14px rgba(255,190,90,.45);transition:all .5s ease}
+.sky-dark .st-sun{background:transparent;box-shadow:inset -14px 8px 0 0 #F4EFD9,0 0 36px 6px rgba(244,239,217,.18);transform:rotate(-20deg)}
+.sky-auto .st-sun{inset-inline-end:auto;inset-inline-start:22px}
+.st-sw{position:relative;z-index:1;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));padding:4px;border-radius:999px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.sky-dark .st-sw{background:rgba(255,255,255,.1);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.sky-auto .st-sw{background:rgba(255,255,255,.78)}
+.st-thumb{position:absolute;top:4px;bottom:4px;inset-inline-start:4px;width:calc((100% - 8px) / var(--n));border-radius:999px;background:#FFFFFF;
+  box-shadow:0 4px 14px -6px rgba(0,0,0,.35),0 1px 2px rgba(0,0,0,.08);transform:translateX(calc(var(--i) * 100%));transition:transform .45s cubic-bezier(.34,1.4,.64,1)}
+[dir="rtl"] .st-thumb{transform:translateX(calc(var(--i) * -100%))}
+.sky-dark .st-thumb{background:#F2EFE9}
+.st-sw button{position:relative;z-index:1;min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;font-size:15px;font-weight:600;color:inherit;opacity:.72;transition:opacity .25s,color .25s}
+.st-sw button.on{opacity:1;color:#1B2230}
+.st-g{font-size:18px;font-weight:700;line-height:1}
+.st-mode button{min-height:44px;font-size:14px}
+.sky-auto .st-sw button:not(.on){color:#23272A}

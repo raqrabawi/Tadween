@@ -31,7 +31,8 @@ export default function Settings() {
   const sizeStep = Math.max(0, SIZES.indexOf(a11y.size))
   const setSize = (i: number) => { const n = { ...a11y, size: SIZES[Math.max(0, Math.min(SIZES.length - 1, i))] }; setA11y(n); saveA11y(n) }
   const resolved = theme === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : theme
-  const nextMode = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'
+  const [langPick, setLangPick] = useState(lang)
+  const pickLang = (l: 'en' | 'ar') => { if (l === lang) return; setLangPick(l); window.setTimeout(() => setLang(l), 380) }
   const speakOn = !!profile?.speak_replies
 
   return (
@@ -67,19 +68,33 @@ export default function Settings() {
         </div>
       </section>
 
+      {/* Language & look: every choice visible, with a sliding highlight */}
+      <p className="cap st-cap">{t('Language & look')}</p>
+      <section className={'st-look sky-' + resolved + (theme === 'system' ? ' sky-auto' : '')}>
+        <span className="st-stars" aria-hidden="true" />
+        <span className="st-sun" aria-hidden="true" />
+        <div className="st-sw" role="radiogroup" aria-label={t('Language')} style={{ ['--n' as string]: 2, ['--i' as string]: langPick === 'ar' ? 1 : 0 }}>
+          <span className="st-thumb" aria-hidden="true" />
+          {([['en', 'Aa', 'English'], ['ar', 'ع', 'العربية']] as const).map(([code, glyph, label]) => (
+            <button key={code} role="radio" aria-checked={langPick === code} lang={code} className={langPick === code ? 'on' : ''} onClick={() => pickLang(code)}>
+              <span className="st-g">{glyph}</span><span>{label}</span>
+            </button>
+          ))}
+        </div>
+        <div className="st-sw st-mode" role="radiogroup" aria-label={t('Mode')} style={{ ['--n' as string]: 3, ['--i' as string]: ['light', 'dark', 'system'].indexOf(theme) }}>
+          <span className="st-thumb" aria-hidden="true" />
+          {(['light', 'dark', 'system'] as const).map((m) => (
+            <button key={m} role="radio" aria-checked={theme === m} className={theme === m ? 'on' : ''} onClick={() => setTheme(m)}>
+              <I n={m === 'light' ? 'sun' : m === 'dark' ? 'moon' : 'contrast'} s={18} />
+              <span>{t(m === 'light' ? 'Light' : m === 'dark' ? 'Dark' : 'Auto')}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* Quick controls */}
       <p className="cap st-cap">{t('Quick controls')}</p>
       <div className="st-tiles">
-        <button className={resolved === 'dark' ? 'st-tile on' : 'st-tile'} onClick={() => setTheme(nextMode)} aria-label={t('Mode') + ': ' + t(theme === 'dark' ? 'Dark' : theme === 'light' ? 'Light' : 'System')}>
-          <span className="st-ti"><I n={theme === 'system' ? 'contrast' : resolved === 'dark' ? 'moon' : 'sun'} s={20} /></span>
-          <span className="st-tl">{t('Mode')}</span>
-          <span className="st-tv">{t(theme === 'dark' ? 'Dark' : theme === 'light' ? 'Light' : 'System')}</span>
-        </button>
-        <button className="st-tile" onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')} aria-label={t('Language')}>
-          <span className="st-ti st-glyph" lang={lang === 'ar' ? 'en' : 'ar'}>{lang === 'ar' ? 'En' : 'ع'}</span>
-          <span className="st-tl">{t('Language')}</span>
-          <span className="st-tv">{lang === 'ar' ? 'العربية' : 'English'}</span>
-        </button>
         <div className="st-tile" role="group" aria-label={t('Text size')}>
           <span className="st-ti st-glyph" style={{ fontSize: 13 + sizeStep * 2 }}>{t('Aa')}</span>
           <span className="st-tl">{t('Text size')}</span>
