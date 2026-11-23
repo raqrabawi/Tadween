@@ -1,4 +1,5 @@
 import type { Draft } from './types'
+import { LOC, t } from './i18n'
 
 /* Tadween's on-device understanding: turns one spoken or typed sentence into drafts
    (events, reminders, list items, tasks, notes). English first, common Arabic words too.
@@ -214,20 +215,20 @@ export const describeWhen = (d: Date) => {
   const day = new Date(d); day.setHours(0, 0, 0, 0)
   const today = new Date(now); today.setHours(0, 0, 0, 0)
   const diff = Math.round((day.getTime() - today.getTime()) / 86400000)
-  const t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-  if (diff === 0) return `Today · ${t}`
-  if (diff === 1) return `Tomorrow · ${t}`
-  return `${d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })} · ${t}`
+  const tm = d.toLocaleTimeString(LOC, { hour: 'numeric', minute: '2-digit' })
+  if (diff === 0) return `${t('Today')} · ${tm}`
+  if (diff === 1) return `${t('Tomorrow')} · ${tm}`
+  return `${d.toLocaleDateString(LOC, { weekday: 'short', day: 'numeric', month: 'short' })} · ${tm}`
 }
 
 /** Where the mic was opened. On a page, voice only adds things that belong on that page; on Today it can add anything. */
 export type Scope = 'all' | 'calendar' | 'lists' | 'notes'
 
 export const SCOPES: Record<Scope, { name: string; icon: string; lead: string; examples: string[] }> = {
-  all: { name: 'Anything', icon: 'spark', lead: 'Events, reminders, list items and notes — all at once.', examples: ['Dentist Monday at 5, remind me the day before', 'Add milk and eggs to groceries', 'Note that the plumber comes Thursday'] },
-  calendar: { name: 'Calendar', icon: 'cal', lead: 'Events, tasks, reminders and birthdays.', examples: ['Lunch with Sara Friday at 1', 'Remind me to pay the rent on the 1st', 'Mama’s birthday is March 3'] },
-  lists: { name: 'Lists', icon: 'list', lead: 'Items for your lists. Name a list, or it goes in the category you’re on.', examples: ['Milk, eggs and 2 kg rice', 'Add batteries to Home Fixes', 'We need bread and olive oil'] },
-  notes: { name: 'Notes', icon: 'book', lead: 'A note in your own words, or a checklist.', examples: ['Ideas for the weekend trip: the beach, then dinner out', 'Make a list: passport, charger, tickets', 'Note that the fridge warranty ends in 2028'] }
+  all: { name: t('Anything'), icon: 'spark', lead: t('Events, reminders, list items and notes — all at once.'), examples: [t('Dentist Monday at 5, remind me the day before'), t('Add milk and eggs to groceries'), t('Note that the plumber comes Thursday')] },
+  calendar: { name: t('Calendar'), icon: 'cal', lead: t('Events, tasks, reminders and birthdays.'), examples: [t('Lunch with Sara Friday at 1'), t('Remind me to pay the rent on the 1st'), t('Mama’s birthday is March 3')] },
+  lists: { name: t('Lists'), icon: 'list', lead: t('Items for your lists. Name a list, or it goes in the category you’re on.'), examples: [t('Milk, eggs and 2 kg rice'), t('Add batteries to Home Fixes'), t('We need bread and olive oil')] },
+  notes: { name: t('Notes'), icon: 'book', lead: t('A note in your own words, or a checklist.'), examples: [t('Ideas for the weekend trip: the beach, then dinner out'), t('Make a list: passport, charger, tickets'), t('Note that the fridge warranty ends in 2028')] }
 }
 
 export function understandIn(input: string, scope: Scope, ctx: { listHint?: string } = {}, now = new Date()): Draft[] {

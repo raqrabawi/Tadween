@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { I } from './Icon'
+import { t } from '../lib/i18n'
 
 export interface FabAction { icon: string; label: string; hint?: string; onSelect: () => void }
 
@@ -29,7 +30,7 @@ export function Fab({ actions, label = 'Add' }: { actions: FabAction[]; label?: 
             ))}
           </ul>
         )}
-        <button className="fab" aria-label={open ? 'Close' : label} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen(!open)}>
+        <button className="fab" aria-label={open ? t('Close') : t(label)} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen(!open)}>
           <I n="plus" s={26} w={2.4} />
         </button>
       </div>

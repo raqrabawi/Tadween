@@ -5,6 +5,7 @@ import { understandIn, describeWhen, SCOPES, type Scope } from '../lib/parse'
 import { I } from '../components/Icon'
 import { VoiceWave } from '../components/VoiceWave'
 import { useMicLevel } from '../lib/level'
+import { t } from '../lib/i18n'
 
 export default function Listen() {
   const nav = useNavigate()
@@ -49,17 +50,17 @@ export default function Listen() {
     <div className="lvw" style={{ minHeight: '100dvh', color: 'var(--ink)' }}>
       <main className="screen col" style={{ background: 'transparent' }}>
         <div className="row mt8" style={{ gap: 8, flexWrap: 'wrap' }}>
-          <span className="tag" aria-live="polite"><I n={info.icon} s={14} w={2.2} />{scope === 'all' ? 'Adding anything' : `Adding to ${info.name}${scope === 'lists' && listHint ? ` · ${listHint}` : ''}`}</span>
+          <span className="tag" aria-live="polite"><I n={info.icon} s={14} w={2.2} />{scope === 'all' ? t('Adding anything') : t('Adding to {name}', { name: info.name }) + (scope === 'lists' && listHint ? ` · ${listHint}` : '')}</span>
           {page !== 'all' && (
             <button className="tag" style={{ background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => setScope(scope === 'all' ? page : 'all')}>
-              {scope === 'all' ? `Only ${SCOPES[page].name}` : 'Anything instead'}
+              {scope === 'all' ? t('Only {name}', { name: SCOPES[page].name }) : t('Anything instead')}
             </button>
           )}
         </div>
 
         {!text && (
-          <section className="try" aria-label="You can say">
-            <span className="try-cap"><I n="spark" s={12} />Try saying</span>
+          <section className="try" aria-label={t('You can say')}>
+            <span className="try-cap"><I n="spark" s={12} />{t('Try saying')}</span>
             <ul>{info.examples.map((e) => <li key={e}>“{e}”</li>)}</ul>
           </section>
         )}
@@ -72,11 +73,11 @@ export default function Listen() {
           </p>
         ) : (
           <div className="mt24">
-            <p className="sub">Voice isn’t available in this browser. Type it instead — Tadween understands it the same way.</p>
-            <label className="fld focus mt12"><span className="sr">What should Tadween do?</span><input autoFocus className="inp" placeholder={info.examples[0]} value={typed} onChange={(e) => setTyped(e.target.value)} /></label>
+            <p className="sub">{t('Voice isn’t available in this browser. Type it instead — Tadween understands it the same way.')}</p>
+            <label className="fld focus mt12"><span className="sr">{t('What should Tadween do?')}</span><input autoFocus className="inp" placeholder={info.examples[0]} value={typed} onChange={(e) => setTyped(e.target.value)} /></label>
           </div>
         )}
-        {v.error === 'denied' && <p role="alert" className="sub mt12" style={{ color: 'var(--red)' }}>Microphone access is blocked. Allow it in your browser settings, then try again.</p>}
+        {v.error === 'denied' && <p role="alert" className="sub mt12" style={{ color: 'var(--red)' }}>{t('Microphone access is blocked. Allow it in your browser settings, then try again.')}</p>}
 
         <div className="row mt20" style={{ flexWrap: 'wrap', gap: 8 }}>
           {drafts.slice(0, 4).map((d, i) => (
@@ -84,7 +85,7 @@ export default function Listen() {
               <span className="ib" style={{ width: 28, height: 28, background: d.kind === 'event' ? 'var(--k-event)' : d.kind === 'reminder' ? 'var(--k-reminder)' : d.kind === 'item' ? 'var(--k-item)' : 'var(--k-note)', color: '#16232A', boxShadow: 'none' }}>
                 <I n={d.kind === 'event' ? 'cal' : d.kind === 'reminder' ? 'bell' : d.kind === 'item' ? 'bag' : d.kind === 'note' ? (d.items ? 'checklist' : 'pen') : 'check'} s={13} w={2.4} />
               </span>
-              {d.kind === 'event' ? (d.birthday ? d.title : describeWhen(d.start)) : d.kind === 'reminder' ? (d.at ? `Remind ${describeWhen(d.at).split(' · ')[0]}` : 'Reminder') : d.kind === 'item' ? d.name : d.title}
+              {d.kind === 'event' ? (d.birthday ? d.title : describeWhen(d.start)) : d.kind === 'reminder' ? (d.at ? t('Remind {when}', { when: describeWhen(d.at).split(' · ')[0] }) : t('Reminder')) : d.kind === 'item' ? d.name : d.title}
             </span>
           ))}
         </div>
@@ -94,19 +95,19 @@ export default function Listen() {
         </div>
 
         <div className="hd" style={{ marginTop: 4 }}>
-          <Link to={scope === 'calendar' ? '/add?type=Event' : scope === 'lists' ? '/add?type=Shopping' : scope === 'notes' ? '/note/new' : '/add'} className="ib" aria-label="Type instead" onClick={() => v.stop()}><I n="keyboard" s={18} w={1.8} /></Link>
+          <Link to={scope === 'calendar' ? '/add?type=Event' : scope === 'lists' ? '/add?type=Shopping' : scope === 'notes' ? '/note/new' : '/add'} className="ib" aria-label={t('Type instead')} onClick={() => v.stop()}><I n="keyboard" s={18} w={1.8} /></Link>
           <span role="status" className="ib wide num" style={{ height: 40 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: v.listening ? 'var(--red)' : 'var(--ink3)', boxShadow: v.listening ? '0 0 10px var(--red)' : 'none' }} />{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}</span>
         </div>
 
-        {empty && <p role="status" className="sub" style={{ textAlign: 'center', marginTop: 12 }}>I didn’t catch anything. Tap the mic to try again.</p>}
+        {empty && <p role="status" className="sub" style={{ textAlign: 'center', marginTop: 12 }}>{t('I didn’t catch anything. Tap the mic to try again.')}</p>}
 
         <div className="spread mt24" style={{ alignItems: 'flex-start' }}>
-          <button className="orb" onClick={cancel}><span className="ib lg"><I n="close" s={18} w={2.6} /></span>Cancel</button>
+          <button className="orb" onClick={cancel}><span className="ib lg"><I n="close" s={18} w={2.6} /></span>{t('Cancel')}</button>
           {v.listening || !supported
-            ? <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!supported && !text} onClick={stop}><I n="stop" s={14} />Stop</button>
-            : <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!text} onClick={done}><I n="check" s={16} w={2.6} />Save</button>}
+            ? <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!supported && !text} onClick={stop}><I n="stop" s={14} />{t('Stop')}</button>
+            : <button className="btn pri" style={{ width: 'auto', padding: '0 32px' }} disabled={!text} onClick={done}><I n="check" s={16} w={2.6} />{t('Save')}</button>}
           {supported ? (
-            <button className="orb" onClick={() => { if (v.listening) v.stop(); else { setEmpty(false); v.start() } }}><span className="ib lg"><I n={v.listening ? 'pause' : 'mic'} s={20} /></span>{v.listening ? 'Pause' : 'Resume'}</button>
+            <button className="orb" onClick={() => { if (v.listening) v.stop(); else { setEmpty(false); v.start() } }}><span className="ib lg"><I n={v.listening ? 'pause' : 'mic'} s={20} /></span>{v.listening ? t('Pause') : t('Resume')}</button>
           ) : <span style={{ width: 56 }} />}
         </div>
       </main>

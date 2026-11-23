@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { I } from './Icon'
+import { t } from '../lib/i18n'
 
 export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
@@ -28,12 +29,12 @@ export function Avatar({ name, color, size = 28 }: { name?: string | null; color
 }
 
 export function Back({ to = -1 as string | number, label = 'Back' }: { to?: string | number; label?: string }) {
-  if (typeof to === 'string') return <Link to={to} className="ib" aria-label={label}><I n="back" s={18} w={2.4} /></Link>
-  return <button className="ib" aria-label={label} onClick={() => history.back()}><I n="back" s={18} w={2.4} /></button>
+  if (typeof to === 'string') return <Link to={to} className="ib" aria-label={t(label)}><I n="back" s={18} w={2.4} /></Link>
+  return <button className="ib" aria-label={t(label)} onClick={() => history.back()}><I n="back" s={18} w={2.4} /></button>
 }
 
 export function Spinner() {
-  return <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div className="spin" aria-label="Loading" /></div>
+  return <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}><div className="spin" aria-label={t('Loading')} /></div>
 }
 
 export function Sheet({ children, onClose, label }: { children: ReactNode; onClose: () => void; label: string }) {

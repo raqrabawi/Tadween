@@ -5,6 +5,7 @@ import type { List } from '../lib/types'
 import { I } from '../components/Icon'
 import { Avatar, Sheet, Switch, announce } from '../components/ui'
 import { Fab } from '../components/Fab'
+import { t } from '../lib/i18n'
 
 /** Long press (or right-click) opens the list's quick actions; a normal tap still works. */
 function useLongPress(onLong: () => void, ms = 480) {
@@ -52,24 +53,24 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
     <section className={`card tone-${list.tone}`} style={{ padding: 0 }} aria-label={list.title}>
       <div className="lhead">
         <div className="row" style={{ gap: 8 }}>
-          <button className="row grow lp" style={{ gap: 14, textAlign: 'left', minWidth: 0 }} {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description="Long press for more actions">
+          <button className="row grow lp" style={{ gap: 14, textAlign: 'start', minWidth: 0 }} {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description={t('Long press for more actions')}>
             <span className="ib"><I n={shared ? 'people' : 'list'} s={19} w={2.2} /></span>
             <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-              <span className="ttl ell">{list.title}</span>
-              <span className="sub ell">{todo.length ? `${todo.length} to ${list.verb}` : 'All done'}{catName ? ` · ${catName}` : ''}</span>
+              <span className="ttl ell">{t(list.title)}</span>
+              <span className="sub ell">{todo.length ? (list.verb === 'buy' ? t('To buy: {n}', { n: todo.length }) : t('To do: {n}', { n: todo.length })) : t('All done')}{catName ? ` · ${catName}` : ''}</span>
             </span>
           </button>
           {editing
-            ? <button className="arr" style={{ color: 'var(--red)', boxShadow: 'inset 0 0 0 1px var(--red)' }} onClick={() => confirm(`Delete “${list.title}” and its items?`) && deleteList(list.id)} aria-label={`Delete ${list.title}`}><I n="trash" s={18} /></button>
+            ? <button className="arr" style={{ color: 'var(--red)', boxShadow: 'inset 0 0 0 1px var(--red)' }} onClick={() => confirm(t('Delete “{title}” and its items?', { title: list.title })) && deleteList(list.id)} aria-label={`Delete ${list.title}`}><I n="trash" s={18} /></button>
             : <>
-                <button className="arr" onClick={() => onActions(list)} aria-label={`More actions for ${list.title}`}><I n="more" s={16} w={2.6} /></button>
-                <button className="arr" onClick={() => setOpen(!open)} aria-label={open ? 'Fold list' : 'Unfold list'}><I n="down" s={14} w={2.6} className="" /></button>
+                <button className="arr" onClick={() => onActions(list)} aria-label={t('More actions for {title}', { title: list.title })}><I n="more" s={16} w={2.6} /></button>
+                <button className="arr" onClick={() => setOpen(!open)} aria-label={open ? t('Fold list') : t('Unfold list')}><I n="down" s={14} w={2.6} className="" /></button>
               </>}
         </div>
         {shared && (
           <div className="lshare">
             {others.length > 0 && <span className="avs">{others.slice(0, 4).map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} size={24} />)}</span>}
-            <span className="sub ell">Shared with family{others.length ? ` · ${others.length} ${others.length === 1 ? 'person' : 'people'}` : ''}</span>
+            <span className="sub ell">{t('Shared with family')}{others.length ? ' · ' + t('People: {n}', { n: others.length }) : ''}</span>
           </div>
         )}
       </div>
@@ -85,12 +86,12 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
         <div>
           {Object.entries(groups).map(([aisle, its]) => (
             <div key={aisle || 'all'}>
-              {aisle && <p className="cap" style={{ padding: '10px 20px 2px 66px', fontSize: 11 }}>{aisle}</p>}
+              {aisle && <p className="cap" style={{ paddingBlock: '10px 2px', paddingInline: '66px 20px', fontSize: 11 }}>{t(aisle)}</p>}
               {its.map((it) => {
                 const by = memberFor(it.added_by)
                 return (
-                  <div key={it.id} className="row" style={{ minHeight: 52, padding: '0 20px 0 10px', gap: 8 }}>
-                    <button className="ck" onClick={() => toggleItem(it)} aria-label={`Check off ${it.name}`}><span /></button>
+                  <div key={it.id} className="row" style={{ minHeight: 52, paddingInline: '10px 20px', gap: 8 }}>
+                    <button className="ck" onClick={() => toggleItem(it)} aria-label={t('Check off {name}', { name: it.name })}><span /></button>
                     <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontSize: 17, lineHeight: '22px' }}>{it.name}</span>
                       {it.qty && <span className="sub" style={{ fontSize: 13, lineHeight: '18px' }}>{it.qty}</span>}
@@ -103,24 +104,24 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
           ))}
 
           {staples.length > 0 && (
-            <div className="row" style={{ padding: '10px 20px 2px 66px', gap: 6, flexWrap: 'wrap' }}>
-              <span className="sub muted" style={{ fontSize: 13 }}>Usually</span>
-              {staples.map((s) => <button key={s} className="tag sm" style={{ background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => addItem(list.id, s, 'Usual amount', 'Pantry')}>+ {s}</button>)}
+            <div className="row" style={{ paddingBlock: '10px 2px', paddingInline: '66px 20px', gap: 6, flexWrap: 'wrap' }}>
+              <span className="sub muted" style={{ fontSize: 13 }}>{t('Usually')}</span>
+              {staples.map((s) => <button key={s} className="tag sm" style={{ background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => addItem(list.id, s, t('Usual amount'), 'Pantry')}>+ {t(s)}</button>)}
             </div>
           )}
 
-          <form className="row addfield" style={{ margin: '8px 12px 12px', minHeight: 52, borderRadius: 26, padding: '0 6px 0 16px', gap: 10, color: 'var(--ink3)' }} onSubmit={(e) => { e.preventDefault(); submit() }}>
+          <form className="row addfield" style={{ margin: '8px 12px 12px', minHeight: 52, borderRadius: 26, paddingInline: '16px 6px', gap: 10, color: 'var(--ink3)' }} onSubmit={(e) => { e.preventDefault(); submit() }}>
             <I n="plus" s={18} w={2.2} />
-            <label className="sr" htmlFor={`add-${list.id}`}>Add item to {list.title}</label>
-            <input id={`add-${list.id}`} className="inp" style={{ fontSize: 16 }} placeholder="Add item — type or say it" value={draft} onChange={(e) => setDraft(e.target.value)} enterKeyHint="done" />
-            {draft.trim() ? <button className="tag acc" type="submit">Add</button>
+            <label className="sr" htmlFor={`add-${list.id}`}>{t('Add item to {title}', { title: list.title })}</label>
+            <input id={`add-${list.id}`} className="inp" style={{ fontSize: 16 }} placeholder={t('Add item — type or say it')} value={draft} onChange={(e) => setDraft(e.target.value)} enterKeyHint="done" />
+            {draft.trim() ? <button className="tag acc" type="submit">{t('Add')}</button>
               : <Link to="/listen?from=lists" onClick={() => { try { sessionStorage.setItem('tadween-list', list.title) } catch { /* ignore */ } }} className="vorb" style={{ width: 40, height: 40, boxShadow: 'none' }} aria-label={`Add to ${list.title} by voice`}><I n="mic" s={16} w={2.2} /></Link>}
           </form>
 
           {done > 0 && (
             <div className="spread" style={{ margin: '0 12px 12px', padding: '0 6px 0 18px', minHeight: 44 }}>
               <span className="row" style={{ gap: 10 }}><I n="check" s={16} w={3} className="" /><span className="sub">{done} {list.verb === 'buy' ? 'in the cart' : 'done'}</span></span>
-              <button className="btn line" style={{ height: 36, width: 'auto', padding: '0 14px', fontSize: 14 }} onClick={() => resetDone(list.id)}>Undo all</button>
+              <button className="btn line" style={{ height: 36, width: 'auto', padding: '0 14px', fontSize: 14 }} onClick={() => resetDone(list.id)}>{t('Undo all')}</button>
             </div>
           )}
         </div>
@@ -152,12 +153,12 @@ export default function Lists() {
   // The mic uses this to put spoken items in the category you're looking at
   useEffect(() => { try { if (current) sessionStorage.setItem('tadween-cat', current.name); else sessionStorage.removeItem('tadween-cat') } catch { /* ignore */ } }, [current])
   const shown = current ? lists.filter((l) => l.category_id === current.id) : lists
-  const catOf = (l: List) => categories.find((c) => c.id === l.category_id)?.name
+  const catOf = (l: List) => { const n = categories.find((c) => c.id === l.category_id)?.name; return n ? t(n) : undefined }
   const openCount = (cid: string) => items.filter((i) => !i.done && lists.some((l) => l.id === i.list_id && l.category_id === cid)).length
   const totalOpen = items.filter((i) => !i.done).length
 
   const saveCat = async () => {
-    const name = catName.trim() || 'New category'
+    const name = catName.trim() || t('New category')
     const c = await addCategory(name)
     setAdding(false); setCatName('')
     if (c) setCat(c.id)
@@ -165,17 +166,17 @@ export default function Lists() {
   const openNewList = () => { setListCat(current?.id ?? ''); setNewList(true) }
   const saveList = async () => {
     const c = categories.find((x) => x.id === listCat)
-    await addList(c?.id ?? null, listName.trim() || (c ? `${c.name} list` : 'New list'), { shared: listShared, verb: /grocer|shop|buy|market/i.test((c?.name ?? '') + listName) ? 'buy' : 'do' })
+    await addList(c?.id ?? null, listName.trim() || (c ? t('{name} list', { name: c.name }) : t('New list')), { shared: listShared, verb: /grocer|shop|buy|market/i.test((c?.name ?? '') + listName) ? 'buy' : 'do' })
     setNewList(false); setListName(''); setListShared(false)
   }
 
   // Quick actions from a long press
   const shareList = async (l: List) => {
     const todo = items.filter((i) => i.list_id === l.id && !i.done).map((i) => `• ${i.qty ? `${i.qty} ` : ''}${i.name}`)
-    const text = `${l.title}\n${todo.length ? todo.join('\n') : '(nothing left)'}\n\nFrom Tadween`
+    const text = `${l.title}\n${todo.length ? todo.join('\n') : t('(nothing left)')}\n\n${t('From Tadween')}`
     try {
       if (typeof navigator.share === 'function') await navigator.share({ title: l.title, text })
-      else { await navigator.clipboard.writeText(text); announce('List copied — paste it anywhere') }
+      else { await navigator.clipboard.writeText(text); announce(t('List copied — paste it anywhere')) }
     } catch { /* closed the share sheet */ }
   }
   const inviteTo = async (l: List) => {
@@ -183,10 +184,10 @@ export default function Lists() {
     if (!family) return
     if (!l.family_id) await updateList(l.id, { family_id: family.id })
     const link = window.location.origin + window.location.pathname
-    const text = `Join my “${l.title}” list on Tadween: open ${link} , sign in, then Settings › Join a family with code ${family.invite_code}`
+    const text = t('Join my “{title}” list on Tadween: open {link} , sign in, then Settings › Join a family with code {code}', { title: l.title, link, code: family.invite_code })
     try {
-      if (typeof navigator.share === 'function') await navigator.share({ title: `Join ${l.title}`, text })
-      else { await navigator.clipboard.writeText(text); announce('Invite copied — send it to family') }
+      if (typeof navigator.share === 'function') await navigator.share({ title: t('Join {title}', { title: l.title }), text })
+      else { await navigator.clipboard.writeText(text); announce(t('Invite copied — send it to family')) }
     } catch { /* closed the share sheet */ }
   }
 
@@ -207,101 +208,101 @@ export default function Lists() {
     <main className="screen">
       <div className="hd" style={{ minHeight: 60 }}>
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 4 }}>
-          <span className="cap">{lists.length} lists · {totalOpen} open</span>
-          <h1 className="h1">Lists</h1>
+          <span className="cap">{t('Lists: {n}', { n: lists.length })} · {t('Open: {n}', { n: totalOpen })}</span>
+          <h1 className="h1">{t('Lists')}</h1>
         </div>
         <div className="row" style={{ gap: 8 }}>
-          <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? 'Done' : 'Edit'}</button>
-          <Link to="/settings" className="ib" aria-label="Settings"><I n="gear" s={19} /></Link>
+          <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? t('Done') : t('Edit')}</button>
+          <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
         </div>
       </div>
 
       <div className="rowhead">
-        <span className="cap" id="cats-label">Categories</span>
-        {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />Add category</button>}
+        <span className="cap" id="cats-label">{t('Categories')}</span>
+        {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />{t('Add category')}</button>}
       </div>
       <div className="chips" role="tablist" aria-labelledby="cats-label">
-        {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat('all')}>All<span className="n">{lists.length}</span></button>}
+        {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat('all')}>{t('All')}<span className="n">{lists.length}</span></button>}
         {categories.map((c) => editing ? (
-          <span key={c.id} className={c.id === current?.id ? 'chip on' : 'chip'} style={{ paddingRight: 10 }}>{c.name}
-            <button aria-label={`Delete category ${c.name}`} onClick={() => confirm(`Delete “${c.name}” and its lists?`) && deleteCategory(c.id)} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
+          <span key={c.id} className={c.id === current?.id ? 'chip on' : 'chip'} style={{ paddingRight: 10 }}>{t(c.name)}
+            <button aria-label={t('Delete category {name}', { name: c.name })} onClick={() => confirm(t('Delete “{name}” and its lists?', { name: c.name })) && deleteCategory(c.id)} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
           </span>
         ) : (
-          <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{c.name}<span className="n">{openCount(c.id)}</span></button>
+          <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{t(c.name)}<span className="n">{openCount(c.id)}</span></button>
         ))}
         {adding && (
           <form className="chip" style={{ width: 210, padding: '0 4px 0 18px', boxShadow: 'var(--edge), 0 0 0 2px var(--acc)' }} onSubmit={(e) => { e.preventDefault(); saveCat() }}>
-            <label className="sr" htmlFor="catname">Category name</label>
-            <input id="catname" autoFocus className="inp" style={{ fontSize: 15 }} placeholder="Category name" value={catName} onChange={(e) => setCatName(e.target.value)} />
-            <button type="submit" className="ib sm acc" aria-label="Save category"><I n="check" s={15} w={3} /></button>
+            <label className="sr" htmlFor="catname">{t('Category name')}</label>
+            <input id="catname" autoFocus className="inp" style={{ fontSize: 15 }} placeholder={t('Category name')} value={catName} onChange={(e) => setCatName(e.target.value)} />
+            <button type="submit" className="ib sm acc" aria-label={t('Save category')}><I n="check" s={15} w={3} /></button>
           </form>
         )}
       </div>
 
       <div className="stack mt16" role="tabpanel">
-        {shown.map((l) => <ListCard key={l.id} list={l} editing={editing} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? 'No category'} />)}
-        {!shown.length && <div className="card empty"><span className="ttl">{current ? `No lists in ${current.name} yet` : 'No lists yet'}</span><span className="sub">Make one, or just say “add milk to groceries”.</span></div>}
-        {lists.length > 0 && <p className="sub" style={{ textAlign: 'center', fontSize: 13 }}>Tip: press and hold a list for more actions.</p>}
-        <button className="btn dash" style={{ height: 56, color: 'var(--ink2)', fontSize: 16 }} onClick={openNewList}><I n="plus" s={18} w={2.4} />New list{current ? ` in ${current.name}` : ''}</button>
+        {shown.map((l) => <ListCard key={l.id} list={l} editing={editing} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? t('No category')} />)}
+        {!shown.length && <div className="card empty"><span className="ttl">{current ? t('No lists in {name} yet', { name: current.name }) : t('No lists yet')}</span><span className="sub">{t('Make one, or just say “add milk to groceries”.')}</span></div>}
+        {lists.length > 0 && <p className="sub" style={{ textAlign: 'center', fontSize: 13 }}>{t('Tip: press and hold a list for more actions.')}</p>}
+        <button className="btn dash" style={{ height: 56, color: 'var(--ink2)', fontSize: 16 }} onClick={openNewList}><I n="plus" s={18} w={2.4} />{current ? t('New list in {name}', { name: current.name }) : t('New list')}</button>
       </div>
 
       {newItem && (
-        <Sheet label={current ? `New item in ${current.name}` : 'New item'} onClose={() => setNewItem(false)}>
-          <div className="hd3 mt12"><button className="ib" aria-label="Cancel" onClick={() => setNewItem(false)}><I n="close" s={15} w={2.6} /></button><h1>New item</h1><span /></div>
+        <Sheet label={current ? t('New item in {name}', { name: current.name }) : t('New item')} onClose={() => setNewItem(false)}>
+          <div className="hd3 mt12"><button className="ib" aria-label={t('Cancel')} onClick={() => setNewItem(false)}><I n="close" s={15} w={2.6} /></button><h1>{t('New item')}</h1><span /></div>
           <form onSubmit={(e) => { e.preventDefault(); saveItem() }}>
             <div className="form mt20">
-              <label className="frow"><span className="fl">Item</span><input autoFocus className="inp" placeholder={/grocer|shop/i.test(current?.name ?? '') ? 'e.g. Tomatoes' : 'e.g. Milk'} value={itemName} onChange={(e) => setItemName(e.target.value)} /></label>
-              <label className="frow"><span className="fl">Amount</span><input className="inp" placeholder="Optional" value={itemQty} onChange={(e) => setItemQty(e.target.value)} /></label>
-              {shown.length > 1 && <label className="frow"><span className="fl">List</span><select className="inp" style={{ background: 'transparent' }} value={itemList} onChange={(e) => setItemList(e.target.value)}>{shown.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}</select></label>}
+              <label className="frow"><span className="fl">{t('Item')}</span><input autoFocus className="inp" placeholder={/grocer|shop/i.test(current?.name ?? '') ? t('e.g. Tomatoes') : t('e.g. Milk')} value={itemName} onChange={(e) => setItemName(e.target.value)} /></label>
+              <label className="frow"><span className="fl">{t('Amount')}</span><input className="inp" placeholder={t('Optional')} value={itemQty} onChange={(e) => setItemQty(e.target.value)} /></label>
+              {shown.length > 1 && <label className="frow"><span className="fl">{t('List')}</span><select className="inp" style={{ background: 'transparent' }} value={itemList} onChange={(e) => setItemList(e.target.value)}>{shown.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}</select></label>}
             </div>
-            <p className="ffoot">Adds to {shown.length > 1 ? 'the list you pick' : shown[0]?.title}{current ? ` in ${current.name}` : ''}.</p>
-            <button className="btn pri mt24" type="submit" disabled={!itemName.trim()}>Add item<I n="next" s={16} w={2.6} /></button>
+            <p className="ffoot">{shown.length > 1 ? t('Adds to the list you pick.') : t('Adds to {title}.', { title: shown[0]?.title ?? '' })}</p>
+            <button className="btn pri mt24" type="submit" disabled={!itemName.trim()}>{t('Add item')}<I n="next" s={16} w={2.6} /></button>
           </form>
         </Sheet>
       )}
 
       {newList && (
-        <Sheet label="New list" onClose={() => setNewList(false)}>
-          <div className="hd3 mt12"><button className="ib" aria-label="Cancel" onClick={() => setNewList(false)}><I n="close" s={15} w={2.6} /></button><h1>New list</h1><span /></div>
+        <Sheet label={t('New list')} onClose={() => setNewList(false)}>
+          <div className="hd3 mt12"><button className="ib" aria-label={t('Cancel')} onClick={() => setNewList(false)}><I n="close" s={15} w={2.6} /></button><h1>{t('New list')}</h1><span /></div>
           <div className="form mt20">
-            <label className="frow"><span className="fl">Name</span><input autoFocus className="inp" placeholder="e.g. Weekend BBQ" value={listName} onChange={(e) => setListName(e.target.value)} /></label>
-            <label className="frow"><span className="fl">Category</span><select className="inp" style={{ background: 'transparent' }} value={listCat} onChange={(e) => setListCat(e.target.value)}><option value="">No category</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
-            <div className="frow"><span className="grow" style={{ fontSize: 17 }}>Share with family</span><Switch on={listShared} onChange={setListShared} label="Share with family" /></div>
+            <label className="frow"><span className="fl">{t('Name')}</span><input autoFocus className="inp" placeholder={t('e.g. Weekend BBQ')} value={listName} onChange={(e) => setListName(e.target.value)} /></label>
+            <label className="frow"><span className="fl">{t('Category')}</span><select className="inp" style={{ background: 'transparent' }} value={listCat} onChange={(e) => setListCat(e.target.value)}><option value="">{t('No category')}</option>{categories.map((c) => <option key={c.id} value={c.id}>{t(c.name)}</option>)}</select></label>
+            <div className="frow"><span className="grow" style={{ fontSize: 17 }}>{t('Share with family')}</span><Switch on={listShared} onChange={setListShared} label={t('Share with family')} /></div>
           </div>
-          <p className="ffoot">Category is optional — you can move the list later. Shared lists update for everyone in your family space.</p>
-          <button className="btn pri mt24" onClick={saveList}>Create list<I n="next" s={16} w={2.6} /></button>
+          <p className="ffoot">{t('Category is optional — you can move the list later. Shared lists update for everyone in your family space.')}</p>
+          <button className="btn pri mt24" onClick={saveList}>{t('Create list')}<I n="next" s={16} w={2.6} /></button>
         </Sheet>
       )}
       {act && (
-        <Sheet label={`${act.title} actions`} onClose={() => setAct(null)}>
-          <div className="hd3 mt12"><button className="ib" aria-label="Close" onClick={() => (moving ? setMoving(false) : setAct(null))}><I n={moving ? 'back' : 'close'} s={15} w={2.6} /></button><h1>{moving ? 'Move to category' : act.title}</h1><span /></div>
+        <Sheet label={t('{title} actions', { title: act.title })} onClose={() => setAct(null)}>
+          <div className="hd3 mt12"><button className="ib" aria-label={t('Close')} onClick={() => (moving ? setMoving(false) : setAct(null))}><I n={moving ? 'back' : 'close'} s={15} w={2.6} /></button><h1>{moving ? t('Move to category') : act.title}</h1><span /></div>
           {!moving ? (
-            <div className="qa mt20" role="menu" aria-label={`${act.title} actions`}>
-              <button role="menuitem" className="qa-b" onClick={() => setMoving(true)}><span className="qa-i"><I n="folder" s={22} /></span>Move</button>
-              <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); shareList(l) }}><span className="qa-i"><I n="share" s={22} /></span>Share</button>
-              <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); inviteTo(l) }}><span className="qa-i"><I n="people" s={22} /></span>Invite</button>
-              <button role="menuitem" className="qa-b danger" onClick={() => { const l = act; if (confirm(`Delete “${l.title}” and its items?`)) { deleteList(l.id); setAct(null); announce('List deleted') } }}><span className="qa-i"><I n="trash" s={22} /></span>Delete</button>
+            <div className="qa mt20" role="menu" aria-label={t('{title} actions', { title: act.title })}>
+              <button role="menuitem" className="qa-b" onClick={() => setMoving(true)}><span className="qa-i"><I n="folder" s={22} /></span>{t('Move')}</button>
+              <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); shareList(l) }}><span className="qa-i"><I n="share" s={22} /></span>{t('Share')}</button>
+              <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); inviteTo(l) }}><span className="qa-i"><I n="people" s={22} /></span>{t('Invite')}</button>
+              <button role="menuitem" className="qa-b danger" onClick={() => { const l = act; if (confirm(t('Delete “{title}” and its items?', { title: l.title }))) { deleteList(l.id); setAct(null); announce(t('List deleted')) } }}><span className="qa-i"><I n="trash" s={22} /></span>{t('Delete')}</button>
             </div>
           ) : (
-            <div className="form mt20" role="radiogroup" aria-label="Category">
-              {[{ id: '', name: 'No category' }, ...categories].map((c) => {
+            <div className="form mt20" role="radiogroup" aria-label={t('Category')}>
+              {[{ id: '', name: t('No category') }, ...categories].map((c) => {
                 const on = (act.category_id ?? '') === c.id
                 return (
-                  <button key={c.id || 'none'} role="radio" aria-checked={on} className="frow" style={{ width: '100%', textAlign: 'left' }}
-                    onClick={async () => { await updateList(act.id, { category_id: c.id || null }); announce(c.id ? `Moved to ${c.name}` : 'Moved out of categories'); setAct(null); setMoving(false) }}>
-                    <span className="grow" style={{ fontSize: 17 }}>{c.name}</span>{on && <I n="check" s={18} w={2.6} />}
+                  <button key={c.id || 'none'} role="radio" aria-checked={on} className="frow" style={{ width: '100%', textAlign: 'start' }}
+                    onClick={async () => { await updateList(act.id, { category_id: c.id || null }); announce(c.id ? t('Moved to {name}', { name: c.name }) : t('Moved out of categories')); setAct(null); setMoving(false) }}>
+                    <span className="grow" style={{ fontSize: 17 }}>{t(c.name)}</span>{on && <I n="check" s={18} w={2.6} />}
                   </button>
                 )
               })}
             </div>
           )}
-          <p className="ffoot">{moving ? 'Lists with no category show under All.' : act.family_id ? 'This list is shared with your family.' : 'Invite shares this list with your family space.'}</p>
+          <p className="ffoot">{moving ? t('Lists with no category show under All.') : act.family_id ? t('This list is shared with your family.') : t('Invite shares this list with your family space.')}</p>
         </Sheet>
       )}
-      <Fab label="Add to lists" actions={[
-        { icon: 'plus', label: current ? `Item in ${current.name}` : 'New item', onSelect: openItem },
-        { icon: 'list', label: current ? `New list in ${current.name}` : 'New list', onSelect: openNewList },
-        { icon: 'folder', label: 'New category', onSelect: () => { setAdding(true); window.scrollTo({ top: 0, behavior: 'smooth' }) } }
+      <Fab label={t('Add to lists')} actions={[
+        { icon: 'plus', label: current ? t('Item in {name}', { name: current.name }) : t('New item'), onSelect: openItem },
+        { icon: 'list', label: current ? t('New list in {name}', { name: current.name }) : t('New list'), onSelect: openNewList },
+        { icon: 'folder', label: t('New category'), onSelect: () => { setAdding(true); window.scrollTo({ top: 0, behavior: 'smooth' }) } }
       ]} />
     </main>
   )

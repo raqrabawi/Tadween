@@ -1,5 +1,6 @@
 import { applyTheme, storedMode, storedPalette, watchSystem, type Mode, type Palette } from './theme'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { t } from './i18n'
 type Session = { user: { id: string; email?: string | null; phone?: string | null } }
 import { db } from './db'
 import { GUEST_FAMILY, guestProfile, loadGuest, migrateGuest, newId, now, saveGuest } from './guest'
@@ -167,7 +168,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // Starter note categories, once, for anyone who has none yet
     if (!(cats.data ?? []).some((c) => c.scope === 'notes')) {
       const { data: nc } = await db.from('categories').insert([
-        { name: 'Personal', position: 0, scope: 'notes' }, { name: 'Ideas', position: 1, scope: 'notes' }, { name: 'Work', position: 2, scope: 'notes' }
+        { name: t('Personal'), position: 0, scope: 'notes' }, { name: t('Ideas'), position: 1, scope: 'notes' }, { name: t('Work'), position: 2, scope: 'notes' }
       ]).select()
       if (nc) setCategories((c) => [...c, ...(nc as Category[])])
     }
@@ -175,13 +176,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!seeded.current && !(cats.data ?? []).some((c) => c.scope !== 'notes') && (ls.data ?? []).length === 0 && fid) {
       seeded.current = true
       const { data: made } = await db.from('categories').insert([
-        { name: 'Groceries', position: 0 }, { name: 'Home', position: 1 }, { name: 'Personal', position: 2 }
+        { name: t('Groceries'), position: 0 }, { name: t('Home'), position: 1 }, { name: t('Personal'), position: 2 }
       ]).select()
       const byName = (n: string) => (made ?? []).find((c) => c.name === n)?.id
       await db.from('lists').insert([
-        { title: 'Family Groceries', category_id: byName('Groceries'), family_id: fid, tone: 'mint', verb: 'buy', staples: ['Rice', 'Eggs', 'Milk', 'Bread'] },
-        { title: 'Home Fixes', category_id: byName('Home'), tone: 'sand', verb: 'do' },
-        { title: 'My To-dos', category_id: byName('Personal'), tone: 'moss', verb: 'do' }
+        { title: t('Family Groceries'), category_id: byName('Groceries'), family_id: fid, tone: 'mint', verb: 'buy', staples: [t('Rice'), t('Eggs'), t('Milk'), t('Bread')] },
+        { title: t('Home Fixes'), category_id: byName('Home'), tone: 'sand', verb: 'do' },
+        { title: t('My To-dos'), category_id: byName('Personal'), tone: 'moss', verb: 'do' }
       ])
       await loadOnce()
     }
@@ -300,7 +301,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const addEvent = useCallback(async (e: Partial<EventRow> & { title: string; starts_at: string }) => {
     if (!uid) {
-      const row = { id: newId(), owner_id: 'guest', family_id: null, ends_at: null, location: null, calendar: 'Personal', alert_minutes: null, source: 'manual', ...e } as EventRow
+      const row = { id: newId(), owner_id: 'guest', family_id: null, ends_at: null, location: null, calendar: t('Personal'), alert_minutes: null, source: 'manual', ...e } as EventRow
       setEvents((xs) => [...xs, row].sort((a, b) => a.starts_at.localeCompare(b.starts_at))); nudge(); return
     }
     const { data } = await db.from('events').insert(e).select().single()
@@ -364,7 +365,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         await addReminder({ title: d.title, remind_at: d.due ? iso(d.due) : null, source: 'voice' }); n++
       } else if (d.kind === 'item') {
         const l = findList(d.listHint)
-        if (l) { await addItem(l.id, d.name, d.qty ?? 'Added by voice'); n++ }
+        if (l) { await addItem(l.id, d.name, d.qty ?? t('Added by voice')); n++ }
       } else if (d.kind === 'note') {
         const category_id = opts?.noteCategory ?? null
         if (d.items) await saveNote({ title: d.title, body: d.items.map((i) => `[ ] ${i}`).join('\n'), kind: 'list', category_id })
@@ -376,7 +377,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, [addEvent, addReminder, addItem, saveNote, findList])
 
   const joinFamily = useCallback(async (code: string) => {
-    if (!uid) { setSavePromptState(true); return 'Sign in first to join a family space.' }
+    if (!uid) { setSavePromptState(true); return t('Sign in first to join a family space.') }
     const { error } = await db.rpc('join_family', { code })
     if (error) return error.message
     await loadAll()

@@ -5,6 +5,7 @@ import { addDays, hm, sameDay, startOfDay, weekStart } from '../lib/dates'
 import { I } from '../components/Icon'
 import { Fab } from '../components/Fab'
 import type { EventRow } from '../lib/types'
+import { LOC, t } from '../lib/i18n'
 
 // Birthdays repeat every year on the same day
 const onDay = (e: EventRow, d: Date) => {
@@ -49,19 +50,19 @@ export default function Calendar() {
     <main className="screen">
       <div className="hd" style={{ minHeight: 60 }}>
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 4 }}>
-          <span className="cap">{week.getFullYear()} · {weekCount} this week</span>
-          <h1 className="h1">{day.toLocaleDateString([], { month: 'long' })}</h1>
+          <span className="cap">{week.getFullYear()} · {t('This week: {n}', { n: weekCount })}</span>
+          <h1 className="h1">{day.toLocaleDateString(LOC, { month: 'long' })}</h1>
         </div>
         <div className="row" style={{ gap: 8 }}>
-          <button className="ib" aria-label="Jump to today" onClick={() => { setWeek(weekStart(now)); pick(now) }}><I n="target" /></button>
-          <Link to="/settings" className="ib" aria-label="Settings"><I n="gear" s={19} /></Link>
+          <button className="ib" aria-label={t('Jump to today')} onClick={() => { setWeek(weekStart(now)); pick(now) }}><I n="target" /></button>
+          <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
         </div>
       </div>
 
       <div className="spread mt20">
-        <button className="ib sm" aria-label="Previous week" onClick={() => shiftWeek(-1)}><I n="back" s={16} w={2.4} /></button>
-        <span className="sub" style={{ fontWeight: 600 }}>{days[0].toLocaleDateString([], { day: 'numeric', month: 'short' })} – {days[6].toLocaleDateString([], { day: 'numeric', month: 'short' })}</span>
-        <button className="ib sm" aria-label="Next week" onClick={() => shiftWeek(1)}><I n="chev" s={16} w={2.4} /></button>
+        <button className="ib sm" aria-label={t('Previous week')} onClick={() => shiftWeek(-1)}><I n="back" s={16} w={2.4} /></button>
+        <span className="sub" style={{ fontWeight: 600 }}>{days[0].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })} – {days[6].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })}</span>
+        <button className="ib sm" aria-label={t('Next week')} onClick={() => shiftWeek(1)}><I n="chev" s={16} w={2.4} /></button>
       </div>
 
       <div className="mt12" style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0,1fr))', gap: 6 }}>
@@ -69,9 +70,9 @@ export default function Calendar() {
           const on = sameDay(d, day)
           const n = events.filter((e) => onDay(e, d)).length
           return (
-            <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' })}
+            <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })}
               className={on ? 'card' : 'card'} style={{ height: 84, borderRadius: 24, padding: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, ...(on ? { background: 'var(--hot)', color: 'var(--hotInk)', backdropFilter: 'none' } : {}) }}>
-              <span style={{ fontSize: 12, fontWeight: 700, opacity: .7 }}>{d.toLocaleDateString([], { weekday: 'short' })}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, opacity: .7 }}>{d.toLocaleDateString(LOC, { weekday: 'short' })}</span>
               <span className="num" style={{ fontSize: 19, fontWeight: 600, color: !on && sameDay(d, now) ? 'var(--acc)' : undefined }}>{d.getDate()}</span>
               <span style={{ display: 'flex', gap: 3, height: 5 }}>{Array.from({ length: Math.min(n, 3) }, (_, i) => <span key={i} style={{ width: 5, height: 5, borderRadius: 3, background: 'currentColor', opacity: .6 }} />)}</span>
             </button>
@@ -79,7 +80,7 @@ export default function Calendar() {
         })}
       </div>
 
-      <div className="sec"><h2>{isToday ? 'Today' : day.toLocaleDateString([], { weekday: 'long' })}, {day.getDate()} {day.toLocaleDateString([], { month: 'short' })}</h2><span className="sub">{dayEvents.length ? `${dayEvents.length} ${dayEvents.length === 1 ? 'event' : 'events'}` : 'Free day'}</span></div>
+      <div className="sec"><h2>{isToday ? t('Today') : day.toLocaleDateString(LOC, { weekday: 'long' })}, {day.getDate()} {day.toLocaleDateString(LOC, { month: 'short' })}</h2><span className="sub">{dayEvents.length ? t('Events: {n}', { n: dayEvents.length }) : t('Free day')}</span></div>
 
       <div className="stack" style={{ gap: 10 }}>
         {dayEvents.map((e) => {
@@ -97,13 +98,13 @@ export default function Calendar() {
                   <span className="ttl">{e.title}</span><p className="sub">{[e.location, e.calendar].filter(Boolean).join(' · ')}</p>
                   <div className="row mt12" style={{ gap: 10 }}>
                     <div className="bar grow" style={{ height: 6 }}><span style={{ width: `${en ? Math.min(100, Math.round(((now.getTime() - s.getTime()) / (en.getTime() - s.getTime())) * 100)) : 50}%` }} /></div>
-                    <span className="sub" style={{ fontWeight: 700, fontSize: 13 }}>Now</span>
+                    <span className="sub" style={{ fontWeight: 700, fontSize: 13 }}>{t('Now')}</span>
                   </div>
                 </div>
               ) : (
                 <div className={`card tight grow ${TONE[e.calendar] ?? 'tone-lilac'}`} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <span className="rail" />
-                  <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="ttl" style={{ fontSize: 17 }}>{e.title}</span><span className="sub">{e.source === 'birthday' ? (() => { const age = day.getFullYear() - s.getFullYear(); return age > 0 && age < 120 ? `Turns ${age}` : 'All day' })() : [e.location, e.source === 'voice' ? 'Added by voice' : null].filter(Boolean).join(' · ') || e.calendar}</span></span>
+                  <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="ttl" style={{ fontSize: 17 }}>{e.title}</span><span className="sub">{e.source === 'birthday' ? (() => { const age = day.getFullYear() - s.getFullYear(); return age > 0 && age < 120 ? t('Turns {n}', { n: age }) : t('All day') })() : [e.location, e.source === 'voice' ? t('Added by voice') : null].filter(Boolean).join(' · ') || t(e.calendar)}</span></span>
                   <span className="tag sm">{e.calendar}</span>
                 </div>
               )}
@@ -113,30 +114,30 @@ export default function Calendar() {
 
         {free && (
           <div className="row" style={{ alignItems: 'stretch' }}>
-            <div style={{ width: 46, flexShrink: 0, paddingTop: 18, textAlign: 'right' }}><span className="num" style={{ fontSize: 15, fontWeight: 600 }}>{hm(free.from)}</span></div>
+            <div style={{ width: 46, flexShrink: 0, paddingTop: 18, textAlign: 'end' }}><span className="num" style={{ fontSize: 15, fontWeight: 600 }}>{hm(free.from)}</span></div>
             <div className="dash grow" style={{ padding: '12px 12px 12px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="ttl" style={{ fontSize: 17, fontWeight: 500 }}>Free for {Math.round((free.to.getTime() - free.from.getTime()) / 3600000)} hours</span><span className="sub">Good for focus work</span></span>
-              <Link to="/add?type=Event" className="tag"><I n="plus" s={14} w={2.6} />Plan</Link>
+              <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}><span className="ttl" style={{ fontSize: 17, fontWeight: 500 }}>{t('Free for {n} hours', { n: Math.round((free.to.getTime() - free.from.getTime()) / 3600000) })}</span><span className="sub">{t('Good for focus work')}</span></span>
+              <Link to="/add?type=Event" className="tag"><I n="plus" s={14} w={2.6} />{t('Plan')}</Link>
             </div>
           </div>
         )}
 
         {dayRems.map((r) => (
           <div key={r.id} className="row" style={{ alignItems: 'stretch' }}>
-            <div style={{ width: 46, flexShrink: 0, paddingTop: 18, textAlign: 'right' }}><span className="num" style={{ fontSize: 15, fontWeight: 600 }}>{hm(r.remind_at!)}</span></div>
+            <div style={{ width: 46, flexShrink: 0, paddingTop: 18, textAlign: 'end' }}><span className="num" style={{ fontSize: 15, fontWeight: 600 }}>{hm(r.remind_at!)}</span></div>
             <div className="card tight grow tone-sand" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button className={r.done ? 'ck on' : 'ck'} onClick={() => toggleReminder(r)} aria-label={`Mark ${r.title} done`}><span>{r.done && <I n="check" s={14} w={3} />}</span></button>
-              <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span className="ttl" style={{ fontSize: 17, textDecoration: r.done ? 'line-through' : undefined }}>{r.title}</span><span className="sub">Reminder</span></span>
+              <button className={r.done ? 'ck on' : 'ck'} onClick={() => toggleReminder(r)} aria-label={t('Mark {title} done', { title: r.title })}><span>{r.done && <I n="check" s={14} w={3} />}</span></button>
+              <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span className="ttl" style={{ fontSize: 17, textDecoration: r.done ? 'line-through' : undefined }}>{r.title}</span><span className="sub">{t('Reminder')}</span></span>
             </div>
           </div>
         ))}
 
-        {!dayEvents.length && !dayRems.length && !free && <div className="card empty"><span className="ttl">Nothing here</span><span className="sub">Tap the mic and say what’s coming up.</span></div>}
+        {!dayEvents.length && !dayRems.length && !free && <div className="card empty"><span className="ttl">{t('Nothing here')}</span><span className="sub">{t('Tap the mic and say what’s coming up.')}</span></div>}
       </div>
-      <Fab label="Add to calendar" actions={[
-        { icon: 'cal', label: 'Event', hint: 'Meeting, appointment', onSelect: () => nav(`/add?type=Event&date=${dkey(day)}`) },
-        { icon: 'bell', label: 'Task or reminder', onSelect: () => nav(`/add?type=Reminder&date=${dkey(day)}`) },
-        { icon: 'gift', label: 'Birthday', hint: 'Repeats every year', onSelect: () => nav(`/add?type=Birthday&date=${dkey(day)}`) }
+      <Fab label={t('Add to calendar')} actions={[
+        { icon: 'cal', label: t('Event'), hint: t('Meeting, appointment'), onSelect: () => nav(`/add?type=Event&date=${dkey(day)}`) },
+        { icon: 'bell', label: t('Task or reminder'), onSelect: () => nav(`/add?type=Reminder&date=${dkey(day)}`) },
+        { icon: 'gift', label: t('Birthday'), hint: t('Repeats every year'), onSelect: () => nav(`/add?type=Birthday&date=${dkey(day)}`) }
       ]} />
     </main>
   )

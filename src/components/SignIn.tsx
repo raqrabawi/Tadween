@@ -4,6 +4,7 @@ import { db, redirectTo } from '../lib/db'
 import { useStore } from '../lib/store'
 import { I } from './Icon'
 import { Sheet } from './ui'
+import { t } from '../lib/i18n'
 
 // Official Google "G" mark, served by Google (not redrawn here).
 const GOOGLE_MARK = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'
@@ -21,7 +22,7 @@ export function AuthButtons({ size = 'lg', verb = 'Continue', email = true }: { 
     if (error) {
       setBusy(null)
       setErr(/not enabled|unsupported|provider/i.test(error.message)
-        ? `${provider === 'apple' ? 'Apple' : 'Google'} sign-in isn’t switched on yet. Use email for now.`
+        ? t('{provider} sign-in isn’t switched on yet. Use email for now.', { provider: provider === 'apple' ? 'Apple' : 'Google' })
         : error.message)
     }
   }
@@ -30,13 +31,13 @@ export function AuthButtons({ size = 'lg', verb = 'Continue', email = true }: { 
     <div className="stack" style={{ gap: 10 }}>
       {IS_APPLE && (
         <button className="btn apple" style={{ height: h }} onClick={() => oauth('apple')} disabled={!!busy}>
-          <span className="apple-mark" aria-hidden="true">{''}</span>{busy === 'apple' ? 'Opening Apple…' : `${verb} with Apple`}
+          <span className="apple-mark" aria-hidden="true">{''}</span>{busy === 'apple' ? t('Opening Apple…') : t(verb + ' with Apple')}
         </button>
       )}
       <button className="btn google" style={{ height: h }} onClick={() => oauth('google')} disabled={!!busy}>
-        <img src={GOOGLE_MARK} width={20} height={20} alt="" />{busy === 'google' ? 'Opening Google…' : `${verb} with Google`}
+        <img src={GOOGLE_MARK} width={20} height={20} alt="" />{busy === 'google' ? t('Opening Google…') : t(verb + ' with Google')}
       </button>
-      {email && <Link to="/auth/register" className="btn line" style={{ height: h }}><I n="mail" s={17} />Continue with email</Link>}
+      {email && <Link to="/auth/register" className="btn line" style={{ height: h }}><I n="mail" s={17} />{t('Continue with email')}</Link>}
       {err && <p role="alert" className="sub" style={{ textAlign: 'center', color: 'var(--red)' }}>{err}</p>}
     </div>
   )
@@ -47,15 +48,15 @@ export function SavePrompt() {
   const { guest, savePrompt, setSavePrompt } = useStore()
   if (!guest || !savePrompt) return null
   return (
-    <Sheet label="Save your Tadween" onClose={() => setSavePrompt(false)}>
+    <Sheet label={t('Save your Tadween')} onClose={() => setSavePrompt(false)}>
       <div className="mt12" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 8 }}>
         <span className="vorb" style={{ width: 56, height: 56 }}><I n="check" s={24} w={2.6} /></span>
-        <h2 className="ttl" style={{ fontSize: 22, lineHeight: '28px', marginTop: 8 }}>Keep what you add</h2>
-        <p className="sub" style={{ fontSize: 15, lineHeight: '22px' }}>It’s saved on this phone for now. Sign in to keep it safe, use it on any device and share lists with your family.</p>
+        <h2 className="ttl" style={{ fontSize: 22, lineHeight: '28px', marginTop: 8 }}>{t('Keep what you add')}</h2>
+        <p className="sub" style={{ fontSize: 15, lineHeight: '22px' }}>{t('It’s saved on this phone for now. Sign in to keep it safe, use it on any device and share lists with your family.')}</p>
       </div>
       <div className="mt20"><AuthButtons size="md" /></div>
-      <p className="sub mt12" style={{ textAlign: 'center', fontSize: 15 }}>Have an account? <Link to="/auth/login" onClick={() => setSavePrompt(false)} style={{ color: 'var(--acc)', fontWeight: 700 }}>Sign in</Link></p>
-      <button className="btn" style={{ marginTop: 4, background: 'transparent', color: 'var(--ink2)' }} onClick={() => setSavePrompt(false)}>Not now</button>
+      <p className="sub mt12" style={{ textAlign: 'center', fontSize: 15 }}>{t('Have an account?')} <Link to="/auth/login" onClick={() => setSavePrompt(false)} style={{ color: 'var(--acc)', fontWeight: 700 }}>{t('Sign in')}</Link></p>
+      <button className="btn" style={{ marginTop: 4, background: 'transparent', color: 'var(--ink2)' }} onClick={() => setSavePrompt(false)}>{t('Not now')}</button>
     </Sheet>
   )
 }

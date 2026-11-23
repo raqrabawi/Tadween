@@ -1,3 +1,4 @@
+import { isAr } from './i18n'
 export type Mode = 'dark' | 'light' | 'system'
 export type Palette = 'marigold' | 'linen' | 'classic'
 
@@ -25,10 +26,10 @@ const LOADERS: Record<Font, () => Promise<unknown>> = {
   Newsreader: () => Promise.all([import('@fontsource/newsreader/latin-300.css'), import('@fontsource/newsreader/latin-400.css'), import('@fontsource/newsreader/latin-500.css'), import('@fontsource/newsreader/latin-600.css'), import('@fontsource/newsreader/latin-700.css')])
 }
 export const FONTS: { id: Font; meta: string; stack: string }[] = [
-  { id: 'Inter', meta: 'Clean sans', stack: 'Inter,-apple-system,BlinkMacSystemFont,system-ui,sans-serif' },
-  { id: 'Lora', meta: 'Warm serif', stack: 'Lora,Georgia,serif' },
-  { id: 'Merriweather', meta: 'Sturdy serif', stack: 'Merriweather,Georgia,serif' },
-  { id: 'Newsreader', meta: 'Book serif', stack: 'Newsreader,Georgia,serif' }
+  { id: 'Inter', meta: 'Clean sans', stack: 'Inter,"IBM Plex Sans Arabic",-apple-system,BlinkMacSystemFont,system-ui,sans-serif' },
+  { id: 'Lora', meta: 'Warm serif', stack: 'Lora,"Noto Naskh Arabic",Georgia,serif' },
+  { id: 'Merriweather', meta: 'Sturdy serif', stack: 'Merriweather,"Noto Naskh Arabic",Georgia,serif' },
+  { id: 'Newsreader', meta: 'Book serif', stack: 'Newsreader,"Noto Naskh Arabic",Georgia,serif' }
 ]
 export const storedFont = (): Font => {
   const f = (() => { try { return localStorage.getItem('tadween-font') } catch { return null } })()
@@ -40,8 +41,19 @@ export function loadFont(f: Font) {
   if (!loaded.has(def.id)) { loaded.add(def.id); LOADERS[def.id]().catch(() => loaded.delete(def.id)) }
   return def
 }
+// Arabic letters: Inter pairs with IBM Plex Sans Arabic, the serifs with Noto Naskh Arabic
+let arLoaded = false
+function loadArabic() {
+  if (arLoaded) return
+  arLoaded = true
+  Promise.all([
+    import('@fontsource/ibm-plex-sans-arabic/arabic-400.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-500.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-600.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-700.css'),
+    import('@fontsource/noto-naskh-arabic/arabic-400.css'), import('@fontsource/noto-naskh-arabic/arabic-600.css'), import('@fontsource/noto-naskh-arabic/arabic-700.css')
+  ]).catch(() => { arLoaded = false })
+}
 export function applyFont(f: Font) {
   const def = loadFont(f)
+  if (isAr) loadArabic()
   document.documentElement.style.setProperty('--font', def.stack)
   document.documentElement.dataset.font = def.id.toLowerCase()
   try { localStorage.setItem('tadween-font', def.id) } catch { /* private mode */ }

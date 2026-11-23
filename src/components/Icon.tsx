@@ -54,10 +54,14 @@ const P: Record<string, string> = {
 
 const FILLED = new Set(['spark', 'play', 'pause', 'stop', 'homeF', 'calF', 'listF', 'bookF', 'micF', 'mic'])
 
+// Direction icons point the other way in right-to-left (Arabic)
+const DIRECTIONAL = new Set(['back', 'chev', 'next', 'arrow'])
+
 export function I({ n, s = 20, w = 2, className }: { n: keyof typeof P | string; s?: number; w?: number; className?: string }) {
   const filled = FILLED.has(n)
+  const cls = DIRECTIONAL.has(n) ? ((className ? className + ' ' : '') + 'dir-ic') : className
   return (
-    <svg width={s} height={s} viewBox="0 0 24 24" aria-hidden="true" className={className}
+    <svg width={s} height={s} viewBox="0 0 24 24" aria-hidden="true" className={cls}
       fill={filled ? 'currentColor' : 'none'} stroke={filled ? 'none' : 'currentColor'} fillRule={filled ? 'evenodd' : undefined}
       strokeWidth={w} strokeLinecap="round" strokeLinejoin="round">
       <path d={P[n] ?? ''} />

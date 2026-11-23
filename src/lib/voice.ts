@@ -1,3 +1,4 @@
+import { isAr } from './i18n'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /* Speech in the browser:
@@ -32,7 +33,7 @@ export function useListener() {
     if (!C) { setError('unsupported'); return }
     setError(null)
     const r = new C()
-    r.lang = navigator.language?.startsWith('ar') ? 'ar-JO' : 'en-US'
+    r.lang = isAr || navigator.language?.startsWith('ar') ? 'ar-JO' : 'en-US'
     r.continuous = true
     r.interimResults = true
     r.maxAlternatives = 1
@@ -88,9 +89,11 @@ export function speak(text: string, style = 'Warm', onEnd?: () => void) {
   const s = STYLE[style] ?? STYLE.Warm
   u.rate = s.rate
   u.pitch = s.pitch
-  u.lang = 'en-US'
+  u.lang = isAr ? 'ar-SA' : 'en-US'
   const voices = window.speechSynthesis.getVoices()
-  const pick = voices.find((v) => /en(-|_)(US|GB)/i.test(v.lang) && /(Samantha|Karen|Google US English|Ava|Serena|Daniel)/i.test(v.name)) ?? voices.find((v) => /^en/i.test(v.lang))
+  const pick = isAr
+    ? voices.find((v) => /^ar/i.test(v.lang))
+    : voices.find((v) => /en(-|_)(US|GB)/i.test(v.lang) && /(Samantha|Karen|Google US English|Ava|Serena|Daniel)/i.test(v.name)) ?? voices.find((v) => /^en/i.test(v.lang))
   if (pick) u.voice = pick
   u.onend = () => onEnd?.()
   u.onerror = () => onEnd?.()

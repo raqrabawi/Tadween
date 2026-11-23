@@ -1,5 +1,6 @@
 import { db } from './db'
 import type { Category, EventRow, Item, List, Note, Profile, Reminder } from './types'
+import { t } from './i18n'
 
 /* Guest mode: everything someone adds before signing in lives on this device.
    On sign-in it is copied into their account, then cleared here. */
@@ -39,7 +40,7 @@ function seed(): GuestData {
     profile: {},
     categories: [groceries, home, personal, ncat('Personal', 0), ncat('Ideas', 1), ncat('Work', 2)],
     lists: [
-      list('Family Groceries', groceries.id, 'mint', 'buy', true, ['Rice', 'Eggs', 'Milk', 'Bread']),
+      list('Family Groceries', groceries.id, 'mint', 'buy', true, [t('Rice'), t('Eggs'), t('Milk'), t('Bread')]),
       list('Home Fixes', home.id, 'sand', 'do'),
       list('My To-dos', personal.id, 'moss', 'do')
     ],

@@ -6,6 +6,8 @@ import './styles.css'
 import App from './App'
 import { StoreProvider } from './lib/store'
 
+import { applyLang } from './lib/i18n'
+applyLang()
 applyTheme(storedMode(), storedPalette())
 applyFont(storedFont())
 

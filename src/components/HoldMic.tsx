@@ -7,6 +7,7 @@ import { SCOPES, type Scope } from '../lib/parse'
 import { VoiceWave } from './VoiceWave'
 import { I } from './Icon'
 import { Toast } from './ui'
+import { t } from '../lib/i18n'
 
 const CANCEL_PX = 90 // swipe up this far to cancel
 const TAP_MS = 280 // shorter than this is a tap: open hands-free voice
@@ -75,30 +76,30 @@ export function HoldMic({ from }: { from?: string }) {
   return (
     <>
       {holding && createPortal(
-        <div className={cancel ? 'hold-layer lvw cancel' : 'hold-layer lvw'} role="dialog" aria-label="Listening" aria-live="polite">
+        <div className={cancel ? 'hold-layer lvw cancel' : 'hold-layer lvw'} role="dialog" aria-label={t('Listening')} aria-live="polite">
           <div className="hold-top">
-            <span className="tag"><I n={info.icon} s={14} w={2.2} />{scope === 'all' ? 'Adding anything' : `Adding to ${info.name}`}</span>
+            <span className="tag"><I n={info.icon} s={14} w={2.2} />{scope === 'all' ? t('Adding anything') : t('Adding to {name}', { name: info.name })}</span>
             <span className="hold-dot" aria-hidden="true" />
           </div>
           <p className="hold-text">
-            {v.finalText || (!v.interim && <span className="muted">Listening…</span>)}
+            {v.finalText || (!v.interim && <span className="muted">{t('Listening…')}</span>)}
             {v.interim && <span className="muted"> {v.interim}</span>}
           </p>
-          {!v.text && <p className="sub hold-try">Try “{info.examples[0]}”</p>}
-          {v.error === 'denied' && <p role="alert" className="sub" style={{ color: 'var(--red)', marginTop: 12 }}>Microphone access is blocked. Allow it in your browser settings.</p>}
+          {!v.text && <p className="sub hold-try">{t('Try “{example}”', { example: info.examples[0] })}</p>}
+          {v.error === 'denied' && <p role="alert" className="sub" style={{ color: 'var(--red)', marginTop: 12 }}>{t('Microphone access is blocked. Allow it in your browser settings.')}</p>}
           <div className="hold-wave" style={{ transform: `translateY(${-Math.min(drag, 140) * 0.4}px)` }}>
             <VoiceWave level={level} height={200} muted={cancel} />
           </div>
           <div className="hold-hint" style={{ opacity: cancel ? 1 : 0.9 }}>
             <span className={cancel ? 'hold-x on' : 'hold-x'} style={{ transform: `translateY(${-Math.min(drag, CANCEL_PX)}px)` }}><I n="close" s={16} w={2.6} /></span>
-            <span>{cancel ? 'Release to cancel' : <>Release to save · <b>swipe up to cancel</b></>}</span>
+            <span>{cancel ? 'Release to cancel' : <>Release to save · <b>{t('swipe up to cancel')}</b></>}</span>
           </div>
         </div>,
         document.body
       )}
       <button
         className={holding ? (cancel ? 'mic holding cancel' : 'mic holding') : 'mic'}
-        aria-label={`Hold to talk${from ? ` to ${info.name}` : ''}. Tap for hands-free.`}
+        aria-label={from ? t('Hold to talk to {name}. Tap for hands-free.', { name: info.name }) : t('Hold to talk. Tap for hands-free.')}
         onPointerDown={down} onPointerMove={move}
         onPointerUp={() => finish(false)} onPointerCancel={() => finish(true)}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nav(listenUrl) } }}
