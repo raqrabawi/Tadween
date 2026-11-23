@@ -9,6 +9,7 @@ import { Avatar, Sheet, announce } from '../components/ui'
 import { lang, setLang, t } from '../lib/i18n'
 import { getTone, setTone, say, type Tone } from '../lib/tone'
 import { speak } from '../lib/voice'
+import { SHOW_TONE_PICKER } from '../lib/flags'
 import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
 import { PHONE_READY } from '../lib/phone'
 import { PhoneFlow } from '../components/PhoneFlow'
@@ -159,7 +160,8 @@ export default function Settings() {
         </button>
       </div>
 
-      {/* Speaking style: friendly (Jordanian in Arabic) or formal */}
+      {/* Speaking style: friendly (Jordanian in Arabic) or formal. Hidden for now (SHOW_TONE_PICKER) */}
+      {SHOW_TONE_PICKER && <>
       <p className="cap st-cap">{t('Speaking style')}</p>
       <section className="card st-tone">
         <Tabs active={tone} role="radiogroup" aria-label={t('Speaking style')}>
@@ -171,6 +173,7 @@ export default function Settings() {
         </Tabs>
         <p className="sub st-tone-hint">{t(tone === 'friendly' ? 'Casual, everyday talk. In Arabic, a Jordanian accent.' : 'Polite and proper. In Arabic, standard Arabic (فصحى).')}</p>
       </section>
+      </>}
 
       {/* Colour theme: mini phones */}
       <p className="cap st-cap">{t('Color theme')}</p>
