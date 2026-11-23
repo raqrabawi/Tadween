@@ -20,6 +20,17 @@ const PALETTES = [
   { id: 'classic' as const, label: 'Classic', meta: 'Paper & ink', light: ['#F3EDE2', '#5B4332', '#A3432C'], dark: ['#1D1915', '#D9C4A6', '#C65A3B'] }
 ]
 
+/** Drop the offline copy of the app (not your data) and reload the newest version */
+async function refreshApp() {
+  try {
+    const regs = await navigator.serviceWorker?.getRegistrations?.() ?? []
+    await Promise.all(regs.map((r) => r.unregister()))
+    const keys = await caches?.keys?.() ?? []
+    await Promise.all(keys.map((k) => caches.delete(k)))
+  } catch { /* nothing cached */ }
+  location.reload()
+}
+
 export default function Settings() {
   const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt, updateProfile, categories, noteCategories, lists, items, events, reminders, notes } = useStore()
   const [sheet, setSheet] = useState<null | 'invite' | 'join' | 'phone'>(null)
@@ -201,6 +212,11 @@ export default function Settings() {
           <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Accessibility')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Text size, contrast, motion and more')}</span></span>
           <I n="chev" s={15} w={2.4} />
         </Link>
+        <button className="rw" onClick={refreshApp}>
+          <span className="st-chip" style={{ background: '#5E8C6A' }}><I n="reset" s={18} /></span>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column', textAlign: 'start' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Refresh app')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Clear the cache and load the latest version. Your data stays.')}</span></span>
+          <I n="chev" s={15} w={2.4} />
+        </button>
         {!guest && (
           <button className="rw" onClick={() => setSheet('invite')}>
             <span className="st-chip" style={{ background: '#E0803A' }}><I n="people" s={18} /></span>
