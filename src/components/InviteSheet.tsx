@@ -3,14 +3,13 @@ import { useStore } from '../lib/store'
 import { t } from '../lib/i18n'
 import { I } from './Icon'
 import { Tabs } from './Tabs'
-import { Sheet, Switch, announce } from './ui'
+import { Sheet, announce } from './ui'
 
 /** Invite someone to a list or note with a link. They can view it only, or edit it with you. */
-export function InviteSheet({ kind, item, onClose }: { kind: 'list' | 'note'; item: { id: string; title: string; family_id?: string | null }; onClose: () => void }) {
-  const { createInvite, updateList, family, guest, setSavePrompt } = useStore()
+export function InviteSheet({ kind, item, onClose }: { kind: 'list' | 'note'; item: { id: string; title: string }; onClose: () => void }) {
+  const { createInvite, guest, setSavePrompt } = useStore()
   const [role, setRole] = useState<'view' | 'edit'>('edit')
   const [busy, setBusy] = useState(false)
-  const [inFamily, setInFamily] = useState(!!item.family_id)
 
   const send = async () => {
     if (guest) { onClose(); setSavePrompt(true); return }
@@ -24,12 +23,6 @@ export function InviteSheet({ kind, item, onClose }: { kind: 'list' | 'note'; it
       else { await navigator.clipboard.writeText(text); announce(t('Invite link copied — send it to anyone')) }
       onClose()
     } catch { /* closed the share sheet */ }
-  }
-  const flipFamily = async (on: boolean) => {
-    if (!family) return
-    setInFamily(on)
-    await updateList(item.id, { family_id: on ? family.id : null })
-    announce(on ? t('Shared with your family space') : t('No longer shared with your family space'))
   }
 
   return (
@@ -46,11 +39,6 @@ export function InviteSheet({ kind, item, onClose }: { kind: 'list' | 'note'; it
       <p className="ffoot">{t(role === 'view'
         ? 'They can open it and see your changes, but can’t change anything.'
         : kind === 'list' ? 'They can add and tick off items and rename the list. Changes show for everyone.' : 'They can change the note with you. Changes show for everyone.')}</p>
-      {kind === 'list' && family && (
-        <div className="form mt16">
-          <div className="frow"><span className="grow" style={{ fontSize: 17 }}>{t('Share with my family space')}</span><Switch on={inFamily} onChange={flipFamily} label={t('Share with my family space')} /></div>
-        </div>
-      )}
       <button className="btn pri mt24" onClick={send} disabled={busy}>{busy ? t('Making the link…') : t('Send invite link')}<I n="share" s={16} w={2.4} /></button>
       <p className="ffoot">{t('Whoever opens the link and signs in joins. Only you can delete it or invite more people.')}</p>
     </Sheet>
