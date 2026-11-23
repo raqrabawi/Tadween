@@ -50,21 +50,28 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
 
   return (
     <section className={`card tone-${list.tone}`} style={{ padding: 0 }} aria-label={list.title}>
-      <div className="row" style={{ padding: '16px 14px 14px 16px' }}>
-        <button className="row grow lp" style={{ gap: 14, textAlign: 'left' }} {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description="Long press for more actions">
-          <span className="ib"><I n={shared ? 'people' : 'list'} s={19} w={2.2} /></span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <span className="ttl">{list.title}</span>
-            <span className="sub">{todo.length ? `${todo.length} to ${list.verb}` : 'All done'}{shared ? ' · shared with family' : ''}{catName ? ` · ${catName}` : ''}</span>
-          </span>
-        </button>
-        {shared && <span className="avs">{others.slice(0, 3).map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} size={26} />)}</span>}
-        {editing
-          ? <button className="arr" style={{ color: 'var(--red)', boxShadow: 'inset 0 0 0 1px var(--red)' }} onClick={() => confirm(`Delete “${list.title}” and its items?`) && deleteList(list.id)} aria-label={`Delete ${list.title}`}><I n="trash" s={18} /></button>
-          : <>
-              <button className="arr" style={{ marginRight: 6 }} onClick={() => onActions(list)} aria-label={`More actions for ${list.title}`}><I n="more" s={16} w={2.6} /></button>
-              <button className="arr" onClick={() => setOpen(!open)} aria-label={open ? 'Fold list' : 'Unfold list'}><I n="down" s={14} w={2.6} className="" /></button>
-            </>}
+      <div className="lhead">
+        <div className="row" style={{ gap: 8 }}>
+          <button className="row grow lp" style={{ gap: 14, textAlign: 'left', minWidth: 0 }} {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description="Long press for more actions">
+            <span className="ib"><I n={shared ? 'people' : 'list'} s={19} w={2.2} /></span>
+            <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
+              <span className="ttl ell">{list.title}</span>
+              <span className="sub ell">{todo.length ? `${todo.length} to ${list.verb}` : 'All done'}{catName ? ` · ${catName}` : ''}</span>
+            </span>
+          </button>
+          {editing
+            ? <button className="arr" style={{ color: 'var(--red)', boxShadow: 'inset 0 0 0 1px var(--red)' }} onClick={() => confirm(`Delete “${list.title}” and its items?`) && deleteList(list.id)} aria-label={`Delete ${list.title}`}><I n="trash" s={18} /></button>
+            : <>
+                <button className="arr" onClick={() => onActions(list)} aria-label={`More actions for ${list.title}`}><I n="more" s={16} w={2.6} /></button>
+                <button className="arr" onClick={() => setOpen(!open)} aria-label={open ? 'Fold list' : 'Unfold list'}><I n="down" s={14} w={2.6} className="" /></button>
+              </>}
+        </div>
+        {shared && (
+          <div className="lshare">
+            {others.length > 0 && <span className="avs">{others.slice(0, 4).map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} size={24} />)}</span>}
+            <span className="sub ell">Shared with family{others.length ? ` · ${others.length} ${others.length === 1 ? 'person' : 'people'}` : ''}</span>
+          </div>
+        )}
       </div>
 
       {done > 0 && (
@@ -102,7 +109,7 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
             </div>
           )}
 
-          <form className="row" style={{ margin: '8px 12px 12px', minHeight: 52, borderRadius: 26, background: 'var(--s2)', padding: '0 6px 0 16px', gap: 10, color: 'var(--ink3)' }} onSubmit={(e) => { e.preventDefault(); submit() }}>
+          <form className="row addfield" style={{ margin: '8px 12px 12px', minHeight: 52, borderRadius: 26, padding: '0 6px 0 16px', gap: 10, color: 'var(--ink3)' }} onSubmit={(e) => { e.preventDefault(); submit() }}>
             <I n="plus" s={18} w={2.2} />
             <label className="sr" htmlFor={`add-${list.id}`}>Add item to {list.title}</label>
             <input id={`add-${list.id}`} className="inp" style={{ fontSize: 16 }} placeholder="Add item — type or say it" value={draft} onChange={(e) => setDraft(e.target.value)} enterKeyHint="done" />
