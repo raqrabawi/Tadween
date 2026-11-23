@@ -1,3 +1,4 @@
+import { haptic } from '../lib/a11y'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { I } from './Icon'
@@ -27,7 +28,7 @@ export function TabBar() {
 
   // A light tap of haptics when the tab changes
   useEffect(() => {
-    if (!first.current) navigator.vibrate?.(6)
+    if (!first.current) haptic(6)
     first.current = false
   }, [pathname])
 

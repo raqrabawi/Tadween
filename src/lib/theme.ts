@@ -9,7 +9,9 @@ export const storedPalette = (): Palette => (localStorage.getItem('nook-palette'
 
 export function applyTheme(m: Mode, p: Palette) {
   const r = resolve(m)
-  document.documentElement.className = `${r} ${p}`
+  const cl = document.documentElement.classList
+  cl.remove('dark', 'light', 'marigold', 'linen', 'classic')
+  cl.add(r, p)
   const bg = p === 'marigold' ? (r === 'dark' ? '#181A19' : '#FAF8F5') : p === 'classic' ? (r === 'dark' ? '#1D1915' : '#F3EDE2') : r === 'dark' ? '#0F181D' : '#F5F2EC'
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', bg)
   try { localStorage.setItem('nook-theme', m); localStorage.setItem('nook-palette', p) } catch { /* private mode */ }

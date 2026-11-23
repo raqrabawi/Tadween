@@ -15,6 +15,7 @@ import Add from './screens/Add'
 import Listen from './screens/Listen'
 import Review from './screens/Review'
 import Settings from './screens/Settings'
+import Accessibility from './screens/Accessibility'
 
 const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes']
 
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/listen" element={<Listen />} />
         <Route path="/review" element={<Review />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/accessibility" element={<Accessibility />} />
         <Route path="/setup" element={<Setup />} />
         <Route path="/welcome" element={session ? <Navigate to="/" replace /> : <Welcome />} />
         <Route path="/auth/login" element={session ? <Navigate to="/" replace /> : <Login />} />

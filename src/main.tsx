@@ -8,6 +8,8 @@ import { StoreProvider } from './lib/store'
 
 import { applyLang } from './lib/i18n'
 applyLang()
+import { applyA11y, loadA11y } from './lib/a11y'
+applyA11y(loadA11y())
 applyTheme(storedMode(), storedPalette())
 applyFont(storedFont())
 

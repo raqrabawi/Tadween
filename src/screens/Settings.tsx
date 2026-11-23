@@ -88,6 +88,14 @@ export default function Settings() {
         </div>
       </div>
 
+      <div className="card flush mt24">
+        <Link to="/settings/accessibility" className="rw">
+          <span className="ib sm"><I n="access" s={19} /></span>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Accessibility')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Text size, contrast, motion and more')}</span></span>
+          <I n="next" s={15} w={2.4} />
+        </Link>
+      </div>
+
       {guest ? (
         <div className="card flush mt24">
           <Link to="/welcome" className="rw">

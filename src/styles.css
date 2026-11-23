@@ -518,3 +518,47 @@ textarea.inp{resize:none;line-height:28px}
 [dir="rtl"] .dir-ic{transform:scaleX(-1)}
 [dir="rtl"] .h1,[dir="rtl"] .ttl,[dir="rtl"] .cap{letter-spacing:0}
 [dir="rtl"] .cap{text-transform:none}
+
+/* ── Accessibility (Settings › Accessibility) ── */
+.screen,.sheet,.toast,.fab-wrap,.hold-layer{zoom:var(--zoom,1)}
+.tabbar{zoom:min(var(--zoom,1),1.2)}
+.a11y-range{-webkit-appearance:none;appearance:none;height:28px;background:transparent;min-width:0}
+.a11y-range::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--s3)}
+.a11y-range::-moz-range-track{height:6px;border-radius:3px;background:var(--s3)}
+.a11y-range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--bg)}
+.a11y-range::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:var(--acc)}
+.ib:disabled{opacity:.35}
+/* Bold text */
+.a-bold body{font-weight:500}
+.a-bold :where(p,span,small,label,input,textarea,li,a,button):not(.h1):not(.ttl){font-weight:600}
+.a-bold .sub,.a-bold small,.a-bold .cap{font-weight:600}
+/* Higher contrast */
+.a-contrast .light,.a-contrast.light{--ink2:var(--ink);--ink3:color-mix(in srgb,var(--ink) 88%,transparent);--line:color-mix(in srgb,var(--ink) 40%,transparent);--fieldSep:color-mix(in srgb,var(--ink) 40%,transparent)}
+.a-contrast .dark,.a-contrast.dark{--ink2:var(--ink);--ink3:color-mix(in srgb,var(--ink) 90%,transparent);--line:color-mix(in srgb,var(--ink) 45%,transparent);--fieldSep:color-mix(in srgb,var(--ink) 45%,transparent)}
+.a-contrast .card,.a-contrast .ib,.a-contrast .chip,.a-contrast .tag,.a-contrast .fld,.a-contrast .form{box-shadow:inset 0 0 0 1.5px var(--line)}
+.a-contrast .muted{opacity:1}
+/* Reduce motion */
+.a-still *,.a-still *::before,.a-still *::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}
+/* Reduce transparency */
+.a-solid *{-webkit-backdrop-filter:none !important;backdrop-filter:none !important}
+.a-solid .app{background:var(--bg) !important}
+.a-solid{--s1:var(--s1-solid)}
+.a-solid .up-card.side{opacity:1 !important}
+.a-solid .sheet-wrap{background:rgba(0,0,0,.7)}
+/* Easier reading */
+.a-spacing body{letter-spacing:.04em;word-spacing:.12em}
+.a-spacing p,.a-spacing .sub{line-height:1.6 !important}
+[dir="rtl"].a-spacing body{letter-spacing:0;word-spacing:.2em}
+/* Underline links and outline buttons */
+.a-links a:not(.card):not(.vorb):not(.tb-link),.a-links .lnk{text-decoration:underline;text-underline-offset:3px}
+.a-links button:not(.vorb):not(.ck):not(.pw),.a-links .tag,.a-links .chip{outline:1.5px solid currentColor;outline-offset:-1.5px}
+/* Larger touch targets */
+.a-big .ib{width:56px;height:56px}
+.a-big .ib.sm{width:44px;height:44px}
+.a-big .tag,.a-big .chip{min-height:44px}
+.a-big .ck{width:52px;height:52px}
+.a-big .frow,.a-big .rw{min-height:64px}
+/* Zoomed layouts keep the phone's real width */
+.screen{width:calc(100vw / var(--zoom,1));max-width:calc(480px / var(--zoom,1))}
+.sheet{max-width:calc(480px / var(--zoom,1));width:calc(100vw / var(--zoom,1))}
+.hd{flex-wrap:wrap;row-gap:10px}

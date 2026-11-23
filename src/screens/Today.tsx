@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
+import { haptic } from '../lib/a11y'
 import { speak, stopSpeaking } from '../lib/voice'
 import { greeting, hm, relTime, sameDay } from '../lib/dates'
 import { I } from '../components/Icon'
@@ -60,7 +61,7 @@ export default function Today() {
   useEffect(() => { if (top >= n && n) setTop(n - 1) }, [n, top])
   const go = (i: number) => {
     const t = Math.max(0, Math.min(n - 1, i))
-    if (t !== top) { try { navigator.vibrate?.(8) } catch { /* ignore */ } }
+    if (t !== top) { haptic(8) }
     setTop(t); setDrag(0)
   }
   const onDown = (e: React.PointerEvent) => {

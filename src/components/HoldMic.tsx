@@ -1,3 +1,4 @@
+import { haptic } from '../lib/a11y'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
@@ -47,14 +48,14 @@ export function HoldMic({ from }: { from?: string }) {
     e.currentTarget.setPointerCapture(e.pointerId)
     start.current = { y: e.clientY, t: Date.now() }
     setCancel(false); setDrag(0); v.reset(); v.start(); setHolding(true)
-    navigator.vibrate?.(12)
+    haptic(12)
   }
   const move = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!holding) return
     const dy = Math.max(0, start.current.y - e.clientY)
     setDrag(dy)
     const c = dy > CANCEL_PX
-    if (c !== cancel) { setCancel(c); navigator.vibrate?.(c ? 20 : 8) }
+    if (c !== cancel) { setCancel(c); haptic(c ? 20 : 8) }
   }
   const finish = (aborted: boolean) => {
     if (!holding) return

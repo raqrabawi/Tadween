@@ -1,5 +1,21 @@
 // Arabic UI text. Keys are the English strings used in the code; {x} placeholders are filled in by t().
 export const AR: Record<string, string> = {
+  // Accessibility
+  'Accessibility': 'إمكانية الوصول', 'Text size, contrast, motion and more': 'حجم الخط والتباين والحركة والمزيد', 'Back to Settings': 'العودة إلى الإعدادات',
+  'Text size': 'حجم الخط', 'This is how your text will look. Drag or tap to make it bigger or smaller.': 'هكذا سيبدو النص. اسحب أو انقر لتكبيره أو تصغيره.',
+  'Smaller text': 'تصغير الخط', 'Larger text': 'تكبير الخط', 'Default size': 'الحجم الافتراضي',
+  'Reading': 'القراءة', 'Bold text': 'خط عريض', 'Heavier letters that are easier to see': 'حروف أثقل وأوضح للرؤية',
+  'Easier reading': 'قراءة أسهل', 'More space between letters, words and lines': 'مسافات أكبر بين الحروف والكلمات والأسطر',
+  'Underline links and buttons': 'تسطير الروابط والأزرار', 'Shows what you can tap without relying on colour': 'يوضح ما يمكن النقر عليه دون الاعتماد على اللون',
+  'Vision': 'الرؤية', 'Higher contrast': 'تباين أعلى', 'Darker text and stronger borders': 'نص أغمق وحدود أوضح',
+  'Reduce transparency': 'تقليل الشفافية', 'Solid backgrounds instead of see-through ones': 'خلفيات مصمتة بدل الشفافة',
+  'Motion and touch': 'الحركة واللمس', 'Reduce motion': 'تقليل الحركة', 'Turns off animations and sliding effects': 'يوقف الرسوم المتحركة وتأثيرات الانزلاق',
+  'Larger touch targets': 'أهداف لمس أكبر', 'Bigger buttons and more space to tap': 'أزرار أكبر ومساحة أوسع للنقر',
+  'Vibration': 'الاهتزاز', 'A small buzz when you switch tabs or hold the mic': 'اهتزاز خفيف عند تبديل التبويبات أو الضغط على الميكروفون',
+  'Hearing and voice': 'السمع والصوت', 'Speak replies': 'نطق الردود', 'Tadween reads what it saved and found out loud': 'يقرأ تدوين بصوت عالٍ ما حفظه وما وجده',
+  'These settings are saved on this phone.': 'هذه الإعدادات محفوظة على هذا الهاتف.', 'Accessibility settings reset': 'أُعيدت إعدادات إمكانية الوصول',
+  'Reset to default': 'إعادة إلى الافتراضي',
+
   // Navigation & common
   'Today': 'اليوم', 'Calendar': 'التقويم', 'Lists': 'القوائم', 'Notes': 'الملاحظات', 'Settings': 'الإعدادات', 'Main': 'التنقل الرئيسي',
   'Back': 'رجوع', 'Back to Notes': 'العودة إلى الملاحظات', 'Back to Today': 'العودة إلى اليوم', 'Close': 'إغلاق', 'Cancel': 'إلغاء', 'Done': 'تم', 'Edit': 'تعديل',
