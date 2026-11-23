@@ -918,3 +918,33 @@ textarea.inp{resize:none;line-height:28px}
 .ob-slide.on .ob-pill.p1,.ob-slide.on .ob-pill.p2{animation:obFloat 4s 1s ease-in-out infinite}
 @keyframes obFloat{50%{transform:translateY(-6px)}}
 @media (max-height:700px){.ob-h{font-size:32px;line-height:36px}.ob-ill{min-height:240px}}
+
+/* ---------- Add: bottom sheet (matches the design) ---------- */
+.add-bg{position:fixed;inset:0;z-index:30;background:color-mix(in srgb,var(--ink) 38%,var(--bg));animation:addFade .25s ease both}
+.add-sheet{position:absolute;inset:56px 0 0;display:flex;flex-direction:column;max-width:480px;margin:0 auto;border-radius:40px 40px 0 0;padding:8px 20px calc(env(safe-area-inset-bottom,0px) + 24px);overflow-y:auto;overscroll-behavior:contain;
+  background:radial-gradient(360px 260px at 108% -8%,var(--a1),transparent 68%),radial-gradient(320px 300px at -24% 60%,var(--a2),transparent 68%),var(--bg);box-shadow:inset 0 1px 0 var(--line);
+  animation:addUp .42s cubic-bezier(.22,1,.36,1) both}
+.add-sheet > .grab{align-self:center;flex:none}
+.add-types{margin-top:20px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+.add-types .orb{font-size:11px}
+.add-types .orb .ib{width:52px;height:52px;border-radius:26px}
+.add-spark{color:var(--acc);flex:none}
+.add-tiles{margin-top:20px;margin-bottom:24px;gap:10px}
+.tile{border-radius:22px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;text-align:start;min-height:72px;justify-content:center;min-width:0}
+.tile.wide{grid-column:1 / -1}
+.tile.row{flex-direction:row;align-items:center;justify-content:space-between;min-height:56px;padding:0 20px}
+.tile.row .val{text-align:end;flex:1;min-width:0;margin-inline-start:12px}
+.val{font:inherit;font-size:17px;line-height:22px;font-weight:600;letter-spacing:-.2px;color:inherit;background:transparent;border:0;outline:0;padding:0;width:100%;min-width:0;-webkit-appearance:none;appearance:none}
+.val::placeholder{color:currentColor;opacity:.5;font-weight:500}
+.val::-webkit-calendar-picker-indicator{opacity:.6;filter:var(--pickerFilter,none)}
+.hot .val::-webkit-calendar-picker-indicator{filter:invert(1);opacity:.7}
+.dark .hot .val::-webkit-calendar-picker-indicator{filter:none}
+textarea.val{resize:none;font-weight:500;font-size:16px;line-height:22px}
+select.val{cursor:pointer}
+select.val option{color:initial}
+.tile:focus-within{box-shadow:var(--edge),0 0 0 2px var(--acc)}
+.add-sheet .btn.pri{margin-top:auto;flex:none}
+
+@keyframes addUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes addFade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.add-bg,.add-sheet{animation:none}}

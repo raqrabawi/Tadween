@@ -113,13 +113,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const giveUp = setTimeout(() => setReady(true), 10000)
     db.auth.getSession()
       .then(({ data, error }: { data: { session: Session | null }; error: { message: string } | null }) => {
-        if (error) { setAuthError(error.message); setOffline(true); return }
+        if (error) { setAuthError(error.message); if (known) setOffline(true); return }
         setSession(data.session)
         if (!data.session) { setCachedUid(null); clearCache() }
         try { if (data.session) localStorage.setItem('tadween-signed-in', '1'); else localStorage.removeItem('tadween-signed-in') } catch { /* private mode */ }
       })
       // Network trouble: keep showing the last synced copy rather than an empty guest app
-      .catch((e: unknown) => { setAuthError(e instanceof Error ? e.message : String(e)); setOffline(true) })
+      .catch((e: unknown) => { setAuthError(e instanceof Error ? e.message : String(e)); if (known) setOffline(true) })
       .finally(() => { clearTimeout(giveUp); setReady(true) })
     const { data } = db.auth.onAuthStateChange((e: string, s: Session | null) => {
       setSession(s)

@@ -76,16 +76,10 @@ export default function Notes() {
         )}
       </Tabs>
 
-      <Link to="/listen?from=notes" className="card hot mt16" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <span className="vorb" style={{ width: 52, height: 52, boxShadow: 'none' }}><I n="mic" s={22} /></span>
-        <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span className="ttl">{t('Say what’s on your mind')}</span><span className="sub">{t('Talk it through, or say “make a list: …”.')}</span></span>
-        <span className="arr"><I n="arrow" s={16} /></span>
-      </Link>
-
       {shown.length === 0 ? (
-        <div className="card empty mt12"><span className="ttl">{current ? t('No notes in {name} yet', { name: t(current.name) }) : t('No notes yet')}</span><span className="sub">{t('Write or speak your first note.')}</span></div>
+        <div className="card empty mt16"><span className="ttl">{current ? t('No notes in {name} yet', { name: t(current.name) }) : t('No notes yet')}</span><span className="sub">{t('Write or speak your first note.')}</span></div>
       ) : (
-        <div className="grid2 mt12" style={{ alignItems: 'start' }}>
+        <div className="grid2 mt16" style={{ alignItems: 'start' }}>
           {cols.map((col, ci) => (
             <div key={ci} className="stack">
               {col.map((n, i) => {

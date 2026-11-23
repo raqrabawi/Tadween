@@ -3,7 +3,6 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { understand } from '../lib/parse'
 import { I } from '../components/Icon'
-import { Tabs } from '../components/Tabs'
 import { t } from '../lib/i18n'
 
 type T = 'Event' | 'Reminder' | 'Task' | 'Birthday' | 'Shopping' | 'Note'
@@ -60,61 +59,65 @@ export default function Add() {
     nav(-1)
   }
 
-  const row = (label: string, el: React.ReactNode) => <label className="frow"><span className="fl">{t(label)}</span>{el}</label>
+  // Each detail is a tile: label on top, the value editable in place (first two are highlighted, as in the design)
+  const tile = (label: string, el: React.ReactNode, cls = '') => <label className={'tile card ' + cls}><span className="cap">{t(label)}</span>{el}</label>
+  const name = type === 'Shopping' ? 'item' : type.toLowerCase()
+  const EXAMPLE: Record<T, string> = {
+    Event: 'Dentist Monday 5pm', Reminder: 'Call plumber tomorrow 9am', Task: 'Renew license by Friday',
+    Birthday: 'Mama, 14 March', Shopping: '2 kg rice', Note: 'Gift idea for Mama: scarf'
+  }
 
   return (
-    <main className="screen col">
-      <div className="hd3">
-        <Link to="/" className="ib" aria-label={t('Cancel')}><I n="close" s={15} w={2.6} /></Link>
-        <h1>{t('New ' + (type === 'Shopping' ? 'item' : type.toLowerCase()))}</h1>
-        <button className="ib acc" aria-label={t('Save')} onClick={save} disabled={!title.trim() || busy}><I n="check" s={18} w={2.8} /></button>
-      </div>
+    <div className="add-bg" onClick={(e) => { if (e.target === e.currentTarget) nav(-1) }}>
+      <main className="add-sheet col" role="dialog" aria-label={t('New ' + name)}>
+        <span className="grab" aria-hidden="true" />
+        <div className="hd3" style={{ marginTop: 12 }}>
+          <Link to="/" className="ib" aria-label={t('Cancel')}><I n="close" s={15} w={2.6} /></Link>
+          <h1>{t('New ' + name)}</h1>
+          <button className="ib acc" aria-label={t('Save')} onClick={save} disabled={!title.trim() || busy}><I n="check" s={18} w={2.8} /></button>
+        </div>
 
-      <div role="group" aria-label={t('Type')} className="mt20" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(0,1fr))' }}>
-        {TYPES.map(({ t: k, icon }) => <button key={k} className={k === type ? 'orb on' : 'orb'} aria-pressed={k === type} onClick={() => setType(k)}><span className="ib"><I n={icon} s={21} /></span>{t(k)}</button>)}
-      </div>
+        <div role="group" aria-label={t('Type')} className="add-types">
+          {TYPES.map(({ t: k, icon }) => <button key={k} className={k === type ? 'orb on' : 'orb'} aria-pressed={k === type} onClick={() => setType(k)}><span className="ib"><I n={icon} s={21} /></span>{t(k)}</button>)}
+        </div>
 
-      <label className="fld focus mt20" style={{ paddingRight: 8 }}>
-        <span className="sr">{t('Describe it')}</span>
-        <I n="spark" s={18} className="" />
-        <input className="inp" placeholder={t('Type it the way you’d say it…')} value={smart} onChange={(e) => setSmart(e.target.value)} />
-        <Link to="/listen" className="vorb" style={{ width: 36, height: 36, boxShadow: 'none' }} aria-label={t('Say it instead')}><I n="mic" s={16} w={2.2} /></Link>
-      </label>
-      <p className="ffoot">{t('e.g. “Dentist Monday at 5 at Smile Clinic” — the details below fill in.')}</p>
+        <label className="fld focus mt20" style={{ paddingInlineEnd: 8 }}>
+          <span className="sr">{t('Describe it')}</span>
+          <I n="spark" s={18} className="add-spark" />
+          <input className="inp" placeholder={t(EXAMPLE[type])} value={smart} onChange={(e) => { setSmart(e.target.value); if (!understand(e.target.value)[0]) setTitle(e.target.value) }} />
+          <Link to="/listen" className="vorb" style={{ width: 36, height: 36, boxShadow: 'none' }} aria-label={t('Say it instead')}><I n="mic" s={16} w={2.2} /></Link>
+        </label>
+        <p className="sub" style={{ margin: '10px 12px 0', fontSize: 13, lineHeight: '18px' }}>{t('Type it the way you’d say it. Tadween fills in the details.')}</p>
 
-      <p className="fhead mt24">{t('Details')}</p>
-      <div className="form">
-        {row(type === 'Shopping' ? 'Item' : type === 'Birthday' ? 'Whose' : 'Title', <input className="inp" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={type === 'Shopping' ? t('Rice') : type === 'Birthday' ? t('Name, e.g. Mama') : t('Title')} />)}
-        {type === 'Event' && <>
-          {row('Date', <input type="date" className="inp" value={date} onChange={(e) => setDate(e.target.value)} />)}
-          {row('Starts', <input type="time" className="inp" value={time} onChange={(e) => setTime(e.target.value)} />)}
-          {row('Ends', <input type="time" className="inp" value={endTime} onChange={(e) => setEndTime(e.target.value)} />)}
-          {row('Where', <input className="inp" value={where} onChange={(e) => setWhere(e.target.value)} placeholder={t('Optional')} />)}
-        </>}
-        {type === 'Birthday' && row('Date', <input type="date" className="inp" value={date} onChange={(e) => setDate(e.target.value)} />)}
-        {type === 'Reminder' && <>
-          {row('Date', <input type="date" className="inp" value={date} onChange={(e) => setDate(e.target.value)} />)}
-          {row('Time', <input type="time" className="inp" value={time} onChange={(e) => setTime(e.target.value)} />)}
-        </>}
-        {type === 'Task' && <>
-          <div className="frow"><span className="grow" style={{ fontSize: 17 }}>{t('Due date')}</span><button type="button" role="switch" aria-checked={hasTime} aria-label={t('Has a due date')} className={hasTime ? 'pw on' : 'pw'} onClick={() => setHasTime(!hasTime)}><span /></button></div>
-          {hasTime && row('Due', <input type="date" className="inp" value={date} onChange={(e) => setDate(e.target.value)} />)}
-        </>}
-        {type === 'Shopping' && <>
-          {row('Amount', <input className="inp" value={qty} onChange={(e) => setQty(e.target.value)} placeholder={t('2 kg')} />)}
-          {row('List', <select className="inp" value={listId} onChange={(e) => setListId(e.target.value)} style={{ background: 'transparent' }}>{lists.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}</select>)}
-        </>}
-        {type === 'Note' && <label className="frow" style={{ alignItems: 'flex-start', paddingTop: 14, paddingBottom: 14 }}><span className="sr">{t('Note')}</span><textarea className="inp" rows={5} value={body} onChange={(e) => setBody(e.target.value)} placeholder={t('Write it down…')} /></label>}
-      </div>
+        <div className="grid2 add-tiles">
+          {(type === 'Shopping' || type === 'Note' || type === 'Birthday') && tile(type === 'Shopping' ? 'Item' : type === 'Birthday' ? 'Whose' : 'Title',
+            <input className="val" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={type === 'Shopping' ? t('Rice') : type === 'Birthday' ? t('Name, e.g. Mama') : t('Title')} />, 'hot' + (type === 'Shopping' ? '' : ' wide'))}
+          {type === 'Event' && <>
+            {tile('Date', <input type="date" className="val" value={date} onChange={(e) => setDate(e.target.value)} />, 'hot')}
+            {tile('Starts', <input type="time" className="val" value={time} onChange={(e) => setTime(e.target.value)} />, 'hot')}
+            {tile('Ends', <input type="time" className="val" value={endTime} onChange={(e) => setEndTime(e.target.value)} />)}
+            {tile('Calendar', <select className="val" value={calendar} onChange={(e) => setCalendar(e.target.value)}>{['Personal', 'Work', 'Family'].map((c) => <option key={c} value={c}>{t(c)}</option>)}</select>)}
+            {tile('Where', <input className="val" value={where} onChange={(e) => setWhere(e.target.value)} placeholder={t('Optional')} />, 'wide row')}
+          </>}
+          {type === 'Reminder' && <>
+            {tile('Date', <input type="date" className="val" value={date} onChange={(e) => setDate(e.target.value)} />, 'hot')}
+            {tile('Time', <input type="time" className="val" value={time} onChange={(e) => setTime(e.target.value)} />, 'hot')}
+          </>}
+          {type === 'Task' && <>
+            {tile('Due', <input type="date" className="val" value={hasTime ? date : ''} onChange={(e) => { setHasTime(!!e.target.value); if (e.target.value) setDate(e.target.value) }} />, 'hot')}
+            <button type="button" className={'tile card' + (hasTime ? '' : ' hot')} aria-pressed={!hasTime} onClick={() => setHasTime(!hasTime)}><span className="cap">{t('Due date')}</span><span className="val">{hasTime ? t('On') : t('None')}</span></button>
+          </>}
+          {type === 'Birthday' && tile('Date', <input type="date" className="val" value={date} onChange={(e) => setDate(e.target.value)} />, 'wide row')}
+          {type === 'Shopping' && <>
+            {tile('Amount', <input className="val" value={qty} onChange={(e) => setQty(e.target.value)} placeholder={t('2 kg')} />, 'hot')}
+            {tile('List', <select className="val" value={listId} onChange={(e) => setListId(e.target.value)}>{lists.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}</select>, 'wide row')}
+          </>}
+          {type === 'Note' && tile('Note', <textarea className="val" rows={4} value={body} onChange={(e) => setBody(e.target.value)} placeholder={t('Write it down…')} />, 'wide')}
+        </div>
+        {type === 'Birthday' && <p className="ffoot">{t('Shows on your calendar every year.')}</p>}
 
-      {type === 'Birthday' && <p className="ffoot">{t('Shows on your calendar every year.')}</p>}
-      {type === 'Event' && (
-        <Tabs active={calendar} className="mt16" role="radiogroup" aria-label={t('Calendar')}>
-          {['Personal', 'Work', 'Family'].map((c) => <button key={c} role="radio" className={c === calendar ? 'on' : ''} aria-checked={c === calendar} onClick={() => setCalendar(c)}>{t(c)}</button>)}
-        </Tabs>
-      )}
-
-      <button className="btn pri mtauto" style={{ marginTop: 24 }} disabled={!title.trim() || busy} onClick={save}>{busy ? t('Saving…') : t('Add ' + (type === 'Shopping' ? 'item' : type.toLowerCase()))}<I n="next" s={16} w={2.6} /></button>
-    </main>
+        <button className="btn pri" style={{ marginTop: 'auto' }} disabled={!title.trim() || busy} onClick={save}>{busy ? t('Saving…') : t('Add ' + name)}<I n="next" s={16} w={2.6} /></button>
+      </main>
+    </div>
   )
 }
