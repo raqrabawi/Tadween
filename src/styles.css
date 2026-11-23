@@ -836,21 +836,65 @@ textarea.inp{resize:none;line-height:28px}
 .ob-slide.on .s3 .ob-node{animation:obNodePulse 2.4s 1.9s ease-in-out infinite}
 @keyframes obNodePulse{50%{box-shadow:0 0 0 7px var(--kc),0 0 0 9px var(--bg)}}
 @media (prefers-reduced-motion:reduce){.ob-path path{stroke-dashoffset:0}.ob-node,.ob-card,.ob-path path{transition:none!important;animation:none!important}}
-/* 3 family */
-.ob-family .ob-list{position:absolute;inset:6% 4% auto 4%;border-radius:26px;padding:14px;background:var(--s1-solid);box-shadow:var(--edge),var(--shadow);transform:translateY(20px)}
+/* 3 family: live, together */
+.ob-live{position:absolute;top:0;left:50%;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;border-radius:999px;background:var(--s1-solid);box-shadow:var(--edge),var(--shadow);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transform:translate(-50%,-8px);z-index:3}
+:root[dir=rtl] .ob-live{padding:6px 12px 6px 6px}
+.ob-slide.on .ob-live{transform:translate(-50%,0)}
+.ob-live .av{width:24px;height:24px;font-size:10px;box-shadow:0 0 0 2px var(--s1-solid)}
+.ob-live .avs .av + .av{margin-inline-start:-5px}
+.ob-pulse{width:8px;height:8px;border-radius:4px;background:#3FA66B;box-shadow:0 0 0 0 #3FA66B80}
+.ob-slide.on .ob-pulse{animation:obLive 1.8s ease-out infinite}
+@keyframes obLive{70%{box-shadow:0 0 0 7px #3FA66B00}100%{box-shadow:0 0 0 0 #3FA66B00}}
+.ob-ghost{position:absolute;top:calc(14% + 12px);inset-inline:9%;height:190px;border-radius:28px;background:color-mix(in srgb,var(--s1-solid) 55%,transparent);box-shadow:var(--edge);transition:transform .8s cubic-bezier(.22,1.2,.36,1),opacity .5s}
+.ob-slide .ob-ill > .ob-ghost{opacity:0}
+.ob-slide.on .ob-ill > .ob-ghost{opacity:1}
+.ob-slide.on .ob-ghost.g1{transform:rotate(-7deg) translateX(-14px);transition-delay:.15s}
+.ob-slide.on .ob-ghost.g2{transform:rotate(6deg) translateX(14px);transition-delay:.25s}
+.ob-family .ob-list{position:absolute;inset:14% 5% auto 5%;border-radius:26px;padding:14px;background:var(--s1-solid);box-shadow:var(--edge),var(--shadow);transform:translateY(20px)}
 .ob-slide.on .ob-family .ob-list{transform:none}
 .ob-lh{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 10px;font-size:16px}
-.ob-row{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 4px;border-top:1px solid var(--line);font-size:15px}
+.ob-lh small{font-size:12px;color:var(--ink3);font-weight:600}
+.ob-row{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 4px;border-top:1px solid var(--line);font-size:15px}
 .ob-ck{width:22px;height:22px;border-radius:11px;border:2px solid var(--ink3);flex:none;position:relative}
-.ob-slide.on .ob-row.r0 .ob-ck{animation:obTick .4s 1s forwards}
-.ob-slide.on .ob-row.r0 .grow{animation:obStrike .4s 1s forwards}
+.ob-slide.on .ob-row.r0 .ob-ck{animation:obTick .3s 1.45s forwards}
+.ob-slide.on .ob-row.r0 .grow{animation:obStrike .3s 1.45s forwards}
 @keyframes obTick{to{background:var(--acc);border-color:var(--acc);box-shadow:inset 0 0 0 4px var(--s1-solid)}}
 @keyframes obStrike{to{color:var(--ink3);text-decoration:line-through}}
-.ob-slide.on .ob-row.r1{animation:obNew .6s .5s both}
-@keyframes obNew{from{background:color-mix(in srgb,var(--cta,#DE7449) 22%,transparent)}to{background:transparent}}
-.ob-toast{position:absolute;bottom:8%;left:50%;display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:20px;white-space:nowrap;
-  background:var(--inkBtn);color:var(--inkBtnText);font-size:13px;font-weight:600;transform:translate(-50%,20px)}
-.ob-slide.on .ob-toast{transform:translate(-50%,0);transition-delay:.45s}
+.ob-type{display:inline-block;position:relative;clip-path:inset(0 100% 0 0)}
+:root[dir=rtl] .ob-type{clip-path:inset(0 0 0 100%)}
+.ob-slide.on .ob-type{animation:obType 1.1s .9s steps(9,end) forwards}
+@keyframes obType{to{clip-path:inset(0 -4px 0 0)}}
+:root[dir=rtl] .ob-slide.on .ob-type{animation-name:obTypeR}
+@keyframes obTypeR{to{clip-path:inset(0 0 0 -4px)}}
+.ob-row.r1{position:relative}
+.ob-row.r1 .grow::after{content:"";display:inline-block;width:2px;height:18px;margin-inline-start:2px;vertical-align:-3px;background:#B95333;opacity:0}
+.ob-slide.on .ob-row.r1 .grow::after{animation:obCaret .9s .9s step-end infinite}
+@keyframes obCaret{0%,100%{opacity:1}50%{opacity:0}}
+.ob-slide.on .ob-row.r1{animation:obNew 1.6s .8s both}
+@keyframes obNew{0%{background:color-mix(in srgb,#B95333 14%,transparent)}100%{background:transparent}}
+.ob-toast{position:absolute;top:calc(14% + 236px);inset-inline:7%;display:flex;align-items:center;gap:10px;padding:10px 14px 10px 10px;border-radius:20px;background:var(--inkBtn);color:var(--inkBtnText);transform:translateY(24px)}
+.ob-toast .av{width:32px;height:32px;font-size:13px;flex:none}
+.ob-toast .grow{display:flex;flex-direction:column;min-width:0}
+.ob-toast b{font-size:13px;line-height:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ob-toast small{font-size:11px;line-height:14px;opacity:.7}
+.ob-slide.on .ob-toast{transform:none;transition-delay:1.9s}
+.ob-slide.on .ob-ill > .ob-toast{transition-delay:1.9s}
+/* multiplayer cursors */
+.ob-cur{position:absolute;display:flex;align-items:flex-start;pointer-events:none;opacity:0;transition:opacity .3s;z-index:2}
+.ob-cur svg{flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2))}
+:root[dir=rtl] .ob-cur svg{transform:scaleX(-1)}
+.ob-tag{margin-top:12px;margin-inline-start:-4px;padding:3px 8px;border-radius:8px;background:var(--pc);color:#fff;font-size:11px;font-weight:700;white-space:nowrap}
+.ob-slide.on .ob-cur{opacity:1}
+.ob-cur.c0{top:150px;inset-inline-start:60%}
+.ob-slide.on .ob-cur.c0{animation:obC0 2.4s .35s cubic-bezier(.5,0,.2,1) forwards}
+@keyframes obC0{45%,60%{top:66px;inset-inline-start:24px}100%{top:84px;inset-inline-start:64%}}
+.ob-cur.c1{top:118px;inset-inline-start:38%;transition-delay:.7s}
+.ob-slide.on .ob-cur.c1{animation:obBob 3s 2s ease-in-out infinite}
+.ob-cur.c2{top:166px;inset-inline-start:68%;transition-delay:1s}
+.ob-slide.on .ob-cur.c2{animation:obDrift 4s 1s ease-in-out infinite}
+@keyframes obBob{50%{transform:translateY(-3px)}}
+@keyframes obDrift{50%{transform:translate(-12px,-6px)}}
+@media (prefers-reduced-motion:reduce){.ob-family *{animation:none!important}.ob-type{clip-path:none!important}.ob-cur.c0{top:84px;inset-inline-start:64%}}
 /* 4 private */
 .ob-shield{position:absolute;left:50%;top:40%;width:132px;height:150px;margin:-75px 0 0 -66px;display:grid;place-items:center;color:var(--on);
   background:linear-gradient(160deg,var(--acc),color-mix(in srgb,var(--acc) 70%,black));border-radius:60px 60px 66px 66px / 50px 50px 90px 90px;box-shadow:0 24px 40px -20px color-mix(in srgb,var(--acc) 60%,transparent);transform:scale(.7)}

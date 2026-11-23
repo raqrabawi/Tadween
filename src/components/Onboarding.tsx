@@ -51,16 +51,29 @@ function AllInOne() {
     </div>
   )
 }
+/* Live, together: the same list on three phones, with everyone's cursor on it */
+const PEOPLE = [{ n: 'Mona', c: '#304440' }, { n: 'Sara', c: '#B95333' }, { n: 'Rami', c: '#627A6B' }]
+function Cursor({ who, cls }: { who: { n: string, c: string }, cls: string }) {
+  return (
+    <span className={'ob-cur ' + cls} style={{ '--pc': who.c } as React.CSSProperties}>
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 1.5l13 6.2-5.6 1.6-2.2 5.4z" fill="var(--pc)" stroke="#fff" strokeWidth="1.5" strokeLinejoin="round" /></svg>
+      <span className="ob-tag">{t(who.n)}</span>
+    </span>
+  )
+}
 function Family() {
   return (
     <div className="ob-ill ob-family">
+      <div className="ob-live"><span className="ob-pulse" />{t('Live')}<span className="avs">{PEOPLE.map((p) => <span key={p.n} className="av" style={{ background: p.c }}>{t(p.n)[0]}</span>)}</span></div>
+      <div className="ob-ghost g1" /><div className="ob-ghost g2" />
       <div className="ob-list">
-        <div className="ob-lh"><b>{t('Family Groceries')}</b><span className="avs"><span className="av" style={{ background: '#304440' }}>M</span><span className="av" style={{ background: '#B95333' }}>S</span><span className="av" style={{ background: '#627A6B' }}>R</span></span></div>
-        {[[t('Rice'), 'M', '#304440'], [t('Olive oil'), 'S', '#B95333'], [t('Tomatoes'), 'R', '#627A6B']].map(([x, a, c], i) => (
-          <div key={x} className={'ob-row r' + i}><span className="ob-ck" /><span className="grow">{x}</span><span className="av" style={{ background: c, width: 22, height: 22, fontSize: 10 }}>{a}</span></div>
-        ))}
+        <div className="ob-lh"><b>{t('Family Groceries')}</b></div>
+        <div className="ob-row r0"><span className="ob-ck" /><span className="grow">{t('Rice')}</span></div>
+        <div className="ob-row r1"><span className="ob-ck" /><span className="grow"><span className="ob-type">{t('Olive oil')}</span></span></div>
+        <div className="ob-row r2"><span className="ob-ck" /><span className="grow">{t('Tomatoes')}</span></div>
+        <Cursor who={PEOPLE[0]} cls="c0" /><Cursor who={PEOPLE[1]} cls="c1" /><Cursor who={PEOPLE[2]} cls="c2" />
       </div>
-      <div className="ob-toast"><span className="av" style={{ background: '#B95333', width: 24, height: 24, fontSize: 11 }}>S</span>{t('Sara added Olive oil')}</div>
+      <div className="ob-toast"><span className="av" style={{ background: PEOPLE[1].c }}>{t('Sara')[0]}</span><span className="grow"><b>{t('Sara added Olive oil')}</b><small>{t('Family Groceries')}</small></span><small>{t('now')}</small></div>
     </div>
   )
 }
