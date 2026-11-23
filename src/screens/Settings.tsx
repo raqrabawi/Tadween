@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { db } from '../lib/db'
-import { speak } from '../lib/voice'
 import { I } from '../components/Icon'
-import { Avatar, Sheet, Switch } from '../components/ui'
+import { Avatar, Sheet } from '../components/ui'
 
 const PALETTES = [
   { id: 'marigold' as const, label: 'Marigold', meta: 'Sage & sun', light: ['#FAF8F5', '#3D6B5E', '#E08E26'], dark: ['#181A19', '#5C9484', '#F0A843'] },
@@ -13,7 +12,7 @@ const PALETTES = [
 ]
 
 export default function Settings() {
-  const { profile, family, members, session, updateProfile, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt } = useStore()
+  const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt } = useStore()
   const [sheet, setSheet] = useState<null | 'invite' | 'join'>(null)
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
@@ -48,27 +47,6 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="card tone-mint mt12">
-        <div className="row" style={{ gap: 14 }}>
-          <span className="vorb" style={{ width: 48, height: 48 }}><I n="mic" /></span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column', gap: 4 }}><span className="ttl">Tadween Voice</span><span className="bi" style={{ alignSelf: 'flex-start' }}><b>EN</b><b>AR</b>Auto</span></span>
-          <button className="ib plain" aria-label="Hear a sample" onClick={() => speak(`Hi ${name}, this is my ${profile?.voice_style?.toLowerCase()} voice.`, profile?.voice_style)}><I n="speaker" s={18} /></button>
-        </div>
-        <div className="spread mt16">
-          <span style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>Speak replies</span><span className="sub" style={{ fontSize: 13 }}>{profile?.speak_replies ? 'Tadween answers out loud' : 'Answers on screen only'}</span></span>
-          <Switch on={!!profile?.speak_replies} onChange={(v) => updateProfile({ speak_replies: v })} label="Speak replies" />
-        </div>
-        <div className="seg mt16" role="group" aria-label="Voice style">
-          {['Warm', 'Calm', 'Bright'].map((v) => <button key={v} className={profile?.voice_style === v ? 'on' : ''} aria-pressed={profile?.voice_style === v} onClick={() => { updateProfile({ voice_style: v }); speak(`This is ${v.toLowerCase()}.`, v) }}>{v}</button>)}
-        </div>
-      </div>
-
-      <div className="card tone-sky mt12" style={{ padding: '16px 6px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))' }}>
-          <button className={profile?.morning_brief ? 'orb on' : 'orb'} aria-pressed={!!profile?.morning_brief} onClick={() => updateProfile({ morning_brief: !profile?.morning_brief })}><span className="ib plain"><I n="sun" s={21} /></span>Morning brief</button>
-          <button className={profile?.close_day ? 'orb on' : 'orb'} aria-pressed={!!profile?.close_day} onClick={() => updateProfile({ close_day: !profile?.close_day })}><span className="ib plain"><I n="moon" s={21} /></span>Close the day</button>
-        </div>
-      </div>
 
       <p className="cap" style={{ margin: '24px 8px 10px' }}>Appearance</p>
       <div className="card" style={{ padding: 14 }}>
