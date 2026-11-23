@@ -17,23 +17,36 @@ export function applyTheme(m: Mode, p: Palette) {
 
 export const watchSystem = (cb: () => void) => { const q = mq(); q.addEventListener('change', cb); return () => q.removeEventListener('change', cb) }
 
-// Font choice (Settings › Appearance). Fonts ship with the app (latin subset) and load only when used.
-export type Font = 'Inter' | 'Lora' | 'Merriweather' | 'Newsreader'
+// Font choice (Settings › Font). English and Arabic each have their own list and remembered pick.
+// Fonts ship with the app and load only when used.
+export type Font = 'Inter' | 'Lora' | 'Merriweather' | 'Newsreader' | 'IBM Plex Sans Arabic' | 'Cairo' | 'Amiri' | 'Readex Pro'
 const LOADERS: Record<Font, () => Promise<unknown>> = {
   Inter: () => Promise.all([import('@fontsource/inter/latin-300.css'), import('@fontsource/inter/latin-400.css'), import('@fontsource/inter/latin-500.css'), import('@fontsource/inter/latin-600.css'), import('@fontsource/inter/latin-700.css')]),
   Lora: () => Promise.all([import('@fontsource/lora/latin-400.css'), import('@fontsource/lora/latin-500.css'), import('@fontsource/lora/latin-600.css'), import('@fontsource/lora/latin-700.css')]),
   Merriweather: () => Promise.all([import('@fontsource/merriweather/latin-300.css'), import('@fontsource/merriweather/latin-400.css'), import('@fontsource/merriweather/latin-700.css')]),
-  Newsreader: () => Promise.all([import('@fontsource/newsreader/latin-300.css'), import('@fontsource/newsreader/latin-400.css'), import('@fontsource/newsreader/latin-500.css'), import('@fontsource/newsreader/latin-600.css'), import('@fontsource/newsreader/latin-700.css')])
+  Newsreader: () => Promise.all([import('@fontsource/newsreader/latin-300.css'), import('@fontsource/newsreader/latin-400.css'), import('@fontsource/newsreader/latin-500.css'), import('@fontsource/newsreader/latin-600.css'), import('@fontsource/newsreader/latin-700.css')]),
+  'IBM Plex Sans Arabic': () => Promise.all([import('@fontsource/ibm-plex-sans-arabic/arabic-300.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-400.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-500.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-600.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-700.css'), import('@fontsource/ibm-plex-sans-arabic/latin-400.css'), import('@fontsource/ibm-plex-sans-arabic/latin-600.css'), import('@fontsource/ibm-plex-sans-arabic/latin-700.css')]),
+  Cairo: () => Promise.all([import('@fontsource/cairo/arabic-300.css'), import('@fontsource/cairo/arabic-400.css'), import('@fontsource/cairo/arabic-500.css'), import('@fontsource/cairo/arabic-600.css'), import('@fontsource/cairo/arabic-700.css'), import('@fontsource/cairo/latin-400.css'), import('@fontsource/cairo/latin-600.css'), import('@fontsource/cairo/latin-700.css')]),
+  Amiri: () => Promise.all([import('@fontsource/amiri/arabic-400.css'), import('@fontsource/amiri/arabic-700.css'), import('@fontsource/amiri/latin-400.css'), import('@fontsource/amiri/latin-700.css')]),
+  'Readex Pro': () => Promise.all([import('@fontsource/readex-pro/arabic-300.css'), import('@fontsource/readex-pro/arabic-400.css'), import('@fontsource/readex-pro/arabic-500.css'), import('@fontsource/readex-pro/arabic-600.css'), import('@fontsource/readex-pro/arabic-700.css'), import('@fontsource/readex-pro/latin-400.css'), import('@fontsource/readex-pro/latin-600.css'), import('@fontsource/readex-pro/latin-700.css')])
 }
-export const FONTS: { id: Font; meta: string; stack: string }[] = [
-  { id: 'Inter', meta: 'Clean sans', stack: 'Inter,"IBM Plex Sans Arabic",-apple-system,BlinkMacSystemFont,system-ui,sans-serif' },
-  { id: 'Lora', meta: 'Warm serif', stack: 'Lora,"Noto Naskh Arabic",Georgia,serif' },
-  { id: 'Merriweather', meta: 'Sturdy serif', stack: 'Merriweather,"Noto Naskh Arabic",Georgia,serif' },
-  { id: 'Newsreader', meta: 'Book serif', stack: 'Newsreader,"Noto Naskh Arabic",Georgia,serif' }
+const EN_FONTS: { id: Font; meta: string; stack: string }[] = [
+  { id: 'Inter', meta: 'Clean sans', stack: 'Inter,-apple-system,BlinkMacSystemFont,system-ui,sans-serif' },
+  { id: 'Lora', meta: 'Warm serif', stack: 'Lora,Georgia,serif' },
+  { id: 'Merriweather', meta: 'Sturdy serif', stack: 'Merriweather,Georgia,serif' },
+  { id: 'Newsreader', meta: 'Book serif', stack: 'Newsreader,Georgia,serif' }
 ]
+const AR_FONTS: { id: Font; meta: string; stack: string }[] = [
+  { id: 'IBM Plex Sans Arabic', meta: 'Clear and modern', stack: '"IBM Plex Sans Arabic",system-ui,sans-serif' },
+  { id: 'Cairo', meta: 'Rounded and friendly', stack: 'Cairo,system-ui,sans-serif' },
+  { id: 'Amiri', meta: 'Classic Naskh, like a book', stack: 'Amiri,"Times New Roman",serif' },
+  { id: 'Readex Pro', meta: 'Soft and easy to read', stack: '"Readex Pro",system-ui,sans-serif' }
+]
+export const FONTS = isAr ? AR_FONTS : EN_FONTS
+const FONT_KEY = isAr ? 'tadween-font-ar' : 'tadween-font'
 export const storedFont = (): Font => {
-  const f = (() => { try { return localStorage.getItem('tadween-font') } catch { return null } })()
-  return FONTS.some((x) => x.id === f) ? (f as Font) : 'Inter'
+  const f = (() => { try { return localStorage.getItem(FONT_KEY) } catch { return null } })()
+  return FONTS.some((x) => x.id === f) ? (f as Font) : FONTS[0].id
 }
 const loaded = new Set<Font>()
 export function loadFont(f: Font) {
@@ -41,20 +54,9 @@ export function loadFont(f: Font) {
   if (!loaded.has(def.id)) { loaded.add(def.id); LOADERS[def.id]().catch(() => loaded.delete(def.id)) }
   return def
 }
-// Arabic letters: Inter pairs with IBM Plex Sans Arabic, the serifs with Noto Naskh Arabic
-let arLoaded = false
-function loadArabic() {
-  if (arLoaded) return
-  arLoaded = true
-  Promise.all([
-    import('@fontsource/ibm-plex-sans-arabic/arabic-400.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-500.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-600.css'), import('@fontsource/ibm-plex-sans-arabic/arabic-700.css'),
-    import('@fontsource/noto-naskh-arabic/arabic-400.css'), import('@fontsource/noto-naskh-arabic/arabic-600.css'), import('@fontsource/noto-naskh-arabic/arabic-700.css')
-  ]).catch(() => { arLoaded = false })
-}
 export function applyFont(f: Font) {
   const def = loadFont(f)
-  if (isAr) loadArabic()
   document.documentElement.style.setProperty('--font', def.stack)
-  document.documentElement.dataset.font = def.id.toLowerCase()
-  try { localStorage.setItem('tadween-font', def.id) } catch { /* private mode */ }
+  document.documentElement.dataset.font = def.id.toLowerCase().replace(/ /g, '-')
+  try { localStorage.setItem(FONT_KEY, def.id) } catch { /* private mode */ }
 }

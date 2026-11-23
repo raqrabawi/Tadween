@@ -123,6 +123,7 @@ export const AR: Record<string, string> = {
   'Saved on this phone only': 'محفوظ على هذا الهاتف فقط', 'Family space': 'مساحة العائلة', 'Join': 'انضمام', 'Language': 'اللغة', 'Appearance': 'المظهر',
   'Color theme': 'نسق الألوان', 'Mode': 'الوضع', 'Dark': 'داكن', 'Light': 'فاتح', 'System': 'النظام', 'Font': 'الخط',
   'Marigold': 'آذريون', 'Linen': 'كتّان', 'Classic': 'كلاسيكي', 'Sage & sun': 'مريمية وشمس', 'Teal & seafoam': 'فيروزي وزَبَد', 'Paper & ink': 'ورق وحبر',
+  'Clear and modern': 'واضح وعصري', 'Rounded and friendly': 'دائري وودود', 'Classic Naskh, like a book': 'نسخ كلاسيكي كالكتب', 'Soft and easy to read': 'ناعم وسهل القراءة',
   'Clean sans': 'خط بسيط', 'Warm serif': 'خط دافئ', 'Sturdy serif': 'خط متين', 'Book serif': 'خط كتاب',
   'Sign in to save': 'سجّل الدخول للحفظ', 'Keep your lists safe and share with family': 'احفظ قوائمك بأمان وشاركها مع العائلة', 'Signed in as': 'مسجّل الدخول باسم', 'Sign out': 'تسجيل الخروج',
   'Invite family': 'ادعُ العائلة', 'Your family code': 'رمز عائلتك', 'Share invite': 'شارك الدعوة', 'Join a family': 'انضم إلى عائلة', 'Family code': 'رمز العائلة', 'CODE': 'الرمز',

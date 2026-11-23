@@ -502,7 +502,7 @@ textarea.inp{resize:none;line-height:28px}
 .classic.dark .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(198,90,59,.16),transparent 70%),var(--bg)}
 .light.classic .tabbar nav.tb-nav,.classic .light .tabbar nav.tb-nav{background:#FBF8F2}
 /* Serif font choices: soften the tight sans letter-spacing on big headings */
-[data-font="lora"] .h1,[data-font="merriweather"] .h1,[data-font="newsreader"] .h1{letter-spacing:-.3px;font-weight:600}
+[data-font="lora"] .h1,[data-font="merriweather"] .h1,[data-font="newsreader"] .h1,[data-font="amiri"] .h1{letter-spacing:-.3px;font-weight:600}
 .font-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border-radius:18px;background:var(--s2);text-align:start;box-shadow:inset 0 0 0 1.5px transparent;transition:box-shadow .2s;min-width:0}
 .font-opt[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--acc)}
 .font-opt .aa{font-size:26px;line-height:32px;font-weight:600}
