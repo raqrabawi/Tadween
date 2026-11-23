@@ -421,18 +421,17 @@ textarea.inp{resize:none;line-height:28px}
 .try li:nth-child(3){opacity:.3}
 
 /* Today: swipeable "up next" cards */
-.upnext{margin-left:0;margin-right:0}
-/* Up next: shuffle deck */
-.up-deck{display:grid;padding:0 6px 26px;touch-action:pan-y;outline:none;-webkit-user-select:none;user-select:none}
-.up-card{grid-area:1/1;margin:0;transform-origin:50% 100%;transition:transform .45s cubic-bezier(.22,1.2,.36,1),opacity .32s ease,filter .3s;will-change:transform;cursor:grab}
-.up-deck.dragging .up-card:not(.behind){transition:none;cursor:grabbing}
-.up-deck.dragging .up-card.behind{transition:transform .12s linear}
-.up-card.behind{pointer-events:none;filter:brightness(1.12) saturate(.9)}
-.dark .up-card.behind{filter:brightness(1.25) saturate(.9)}
-.up-card.behind > *{opacity:0;transition:opacity .2s}
-.up-deck:focus-visible .up-card:not(.behind){outline:2px solid var(--acc);outline-offset:3px}
+/* Up next: horizontal carousel — centre card in focus, faded neighbours peek at the sides */
+.upnext{margin-left:-20px;margin-right:-20px;overflow:hidden;perspective:1200px}
+.up-deck{display:grid;justify-items:center;padding:2px 0 4px;touch-action:pan-y;outline:none;-webkit-user-select:none;user-select:none}
+.up-card{grid-area:1/1;width:76%;margin:0;transition:transform .5s cubic-bezier(.22,1.1,.36,1),opacity .4s ease;will-change:transform,opacity;cursor:grab}
+.up-card:only-child{width:calc(100% - 40px)}
+.up-deck.dragging .up-card{transition:none;cursor:grabbing}
+.up-card.side{cursor:pointer}
+.up-card.side a,.up-card.side button{pointer-events:none}
+.up-deck:focus-visible .up-card:not(.side){outline:2px solid var(--acc);outline-offset:3px}
 @media (prefers-reduced-motion:reduce){.up-card{transition:opacity .2s}}
-.up-dots{display:flex;justify-content:center;gap:6px;margin-top:2px}
+.up-dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
 .up-dots button{width:6px;height:6px;border-radius:3px;background:var(--line);padding:0;transition:width .3s cubic-bezier(.34,1.56,.64,1),background .2s;position:relative}
 .up-dots button::after{content:"";position:absolute;inset:-12px -6px}
 .up-dots button.on{width:20px;background:var(--acc)}

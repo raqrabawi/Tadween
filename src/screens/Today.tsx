@@ -50,21 +50,21 @@ export default function Today() {
     const dated = [...evs, ...rem.filter((r) => r.at)].sort((a, b) => a.at!.getTime() - b.at!.getTime())
     return [...dated, ...rem.filter((r) => !r.at)].slice(0, 5)
   }, [events, reminders]) // eslint-disable-line react-hooks/exhaustive-deps
-  // Card deck: the top card can be flicked away; it shuffles to the back of the pile
+  // Up next carousel: centre card in focus, neighbours faded on the sides. Drag or tap to swap.
   const [top, setTop] = useState(0)
   const [drag, setDrag] = useState(0)
-  const [fling, setFling] = useState<0 | 1 | -1>(0)
+  const deckW = useRef(320)
   const start = useRef<{ x: number; y: number; id: number; lock?: 'x' | 'y' } | null>(null)
   const n = upNext.length
-  useEffect(() => { if (top >= n) setTop(0) }, [n, top])
-  const shuffle = (dir: 1 | -1) => {
-    if (n < 2 || fling) return
-    setFling(dir)
-    try { navigator.vibrate?.(8) } catch { /* ignore */ }
-    window.setTimeout(() => { setTop((t) => (dir === 1 ? (t + 1) % n : (t - 1 + n) % n)); setFling(0); setDrag(0) }, 320)
+  useEffect(() => { if (top >= n && n) setTop(n - 1) }, [n, top])
+  const go = (i: number) => {
+    const t = Math.max(0, Math.min(n - 1, i))
+    if (t !== top) { try { navigator.vibrate?.(8) } catch { /* ignore */ } }
+    setTop(t); setDrag(0)
   }
   const onDown = (e: React.PointerEvent) => {
     if (n < 2 || (e.target as HTMLElement).closest('a,button')) return
+    deckW.current = (e.currentTarget as HTMLElement).clientWidth
     start.current = { x: e.clientX, y: e.clientY, id: e.pointerId }
   }
   const onMove = (e: React.PointerEvent) => {
@@ -76,16 +76,26 @@ export default function Today() {
       st.lock = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
       if (st.lock === 'x') (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
     }
-    if (st.lock === 'x') setDrag(dx)
+    if (st.lock === 'x') {
+      // rubber-band at the ends
+      const edge = (top === 0 && dx > 0) || (top === n - 1 && dx < 0)
+      setDrag(edge ? dx / 3 : dx)
+    }
   }
-  const onUp = () => {
+  const onUp = (e: React.PointerEvent) => {
     const st = start.current
     start.current = null
-    if (!st || st.lock !== 'x') return
-    if (Math.abs(drag) > 80) shuffle(drag < 0 ? 1 : -1)
-    else setDrag(0)
+    if (!st) return
+    if (st.lock !== 'x') {
+      // a tap on a side card brings it to the centre
+      const card = (e.target as HTMLElement).closest('[data-i]') as HTMLElement | null
+      if (!st.lock && card) go(Number(card.dataset.i))
+      return
+    }
+    const step = deckW.current * 0.62
+    const moved = Math.round(-drag / step) || (Math.abs(drag) > 50 ? (drag < 0 ? 1 : -1) : 0)
+    go(top + moved)
   }
-  const lift = Math.min(Math.abs(drag) / 140, 1)
 
   return (
     <main className="screen">
@@ -106,19 +116,20 @@ export default function Today() {
 
       {upNext.length ? (
         <section className="upnext mt20" aria-label="Up next" aria-roledescription="carousel">
-          <div className={drag ? 'up-deck dragging' : 'up-deck'} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
-            tabIndex={0} onKeyDown={(e) => { if (e.key === 'ArrowRight') shuffle(1); if (e.key === 'ArrowLeft') shuffle(-1) }}>
+          <div className={drag ? 'up-deck dragging' : 'up-deck'} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={() => { start.current = null; setDrag(0) }}
+            tabIndex={0} onKeyDown={(e) => { if (e.key === 'ArrowRight') go(top + 1); if (e.key === 'ArrowLeft') go(top - 1) }}>
             {upNext.map((u, i) => {
-              const d = (i - top + n) % n
-              if (d > 3) return null
-              const isTop = d === 0
-              const eff = isTop ? 0 : Math.max(d - lift, 0)
-              const side = d % 2 ? -1 : 1
-              const style: React.CSSProperties = isTop
-                ? { zIndex: 10, transform: fling ? `translateX(${fling * -130}%) rotate(${fling * -16}deg)` : `translateX(${drag}px) rotate(${drag / 18}deg)`, opacity: fling ? 0 : 1 }
-                : { zIndex: 10 - d, transform: `translateY(${eff * 14}px) scale(${1 - eff * 0.05}) rotate(${side * eff * 2.2}deg)` }
+              const o = i - top + drag / (deckW.current * 0.62)
+              if (Math.abs(i - top) > 2) return null
+              const a = Math.min(Math.abs(o), 1.6)
+              const isTop = i === top
+              const style: React.CSSProperties = {
+                zIndex: 10 - Math.round(a * 3),
+                transform: `translateX(${o * 82}%) scale(${1 - a * 0.12}) rotateY(${-Math.max(-1, Math.min(1, o)) * 10}deg)`,
+                opacity: 1 - Math.min(a, 1) * 0.6
+              }
               return (
-              <article key={u.key} className={isTop ? 'card hot up-card' : 'card hot up-card behind'} style={style} aria-hidden={!isTop} aria-roledescription="slide" aria-label={`${i + 1} of ${n}: ${u.title}`}>
+              <article key={u.key} data-i={i} className={isTop ? 'card hot up-card' : 'card hot up-card side'} style={style} aria-hidden={!isTop} aria-roledescription="slide" aria-label={`${i + 1} of ${n}: ${u.title}`}>
                 <div className="spread" style={{ alignItems: 'flex-start' }}>
                   <span className="ib"><I n={u.kind === 'event' ? (u.detail.startsWith('Birthday') ? 'gift' : 'cal') : u.kind === 'reminder' ? 'bell' : 'check'} /></span>
                   <span className="tag" style={{ minHeight: 30, fontSize: 12 }}>{u.kind === 'event' ? 'Event' : u.kind === 'reminder' ? 'Reminder' : 'Task'}</span>
