@@ -41,32 +41,34 @@ const LOADERS: Record<Font, () => Promise<unknown>> = {
   Amiri: () => Promise.all([import('@fontsource/amiri/arabic-400.css'), import('@fontsource/amiri/arabic-700.css'), import('@fontsource/amiri/latin-400.css'), import('@fontsource/amiri/latin-700.css')]),
   'Readex Pro': () => Promise.all([import('@fontsource/readex-pro/arabic-300.css'), import('@fontsource/readex-pro/arabic-400.css'), import('@fontsource/readex-pro/arabic-500.css'), import('@fontsource/readex-pro/arabic-600.css'), import('@fontsource/readex-pro/arabic-700.css'), import('@fontsource/readex-pro/latin-400.css'), import('@fontsource/readex-pro/latin-600.css'), import('@fontsource/readex-pro/latin-700.css')])
 }
-const NOTO = { id: 'Noto Sans Arabic' as Font, meta: 'Tadween default', stack: '"Noto Sans Arabic",system-ui,sans-serif' }
+const NOTO = { id: 'Noto Sans Arabic' as Font, meta: 'Design system font', stack: '"Noto Sans Arabic",system-ui,sans-serif' }
 const EN_FONTS: { id: Font; meta: string; stack: string }[] = [
-  NOTO,
+  { id: 'Merriweather', meta: 'Default · sturdy serif', stack: 'Merriweather,"IBM Plex Sans Arabic",Georgia,serif' },
   { id: 'Inter', meta: 'Clean sans', stack: 'Inter,-apple-system,BlinkMacSystemFont,system-ui,sans-serif' },
   { id: 'Lora', meta: 'Warm serif', stack: 'Lora,Georgia,serif' },
-  { id: 'Merriweather', meta: 'Sturdy serif', stack: 'Merriweather,Georgia,serif' },
+  NOTO,
   { id: 'Newsreader', meta: 'Book serif', stack: 'Newsreader,Georgia,serif' }
 ]
 const AR_FONTS: { id: Font; meta: string; stack: string }[] = [
-  NOTO,
-  { id: 'IBM Plex Sans Arabic', meta: 'Clear and modern', stack: '"IBM Plex Sans Arabic",system-ui,sans-serif' },
+  { id: 'IBM Plex Sans Arabic', meta: 'Default · clear and modern', stack: '"IBM Plex Sans Arabic",system-ui,sans-serif' },
   { id: 'Cairo', meta: 'Rounded and friendly', stack: 'Cairo,system-ui,sans-serif' },
   { id: 'Amiri', meta: 'Classic Naskh, like a book', stack: 'Amiri,"Times New Roman",serif' },
-  { id: 'Readex Pro', meta: 'Soft and easy to read', stack: '"Readex Pro",system-ui,sans-serif' }
+  { id: 'Readex Pro', meta: 'Soft and easy to read', stack: '"Readex Pro",system-ui,sans-serif' },
+  NOTO
 ]
 export const FONTS = isAr ? AR_FONTS : EN_FONTS
+const DEFAULT_FONT: Font = isAr ? 'IBM Plex Sans Arabic' : 'Merriweather'
 const FONT_KEY = isAr ? 'tadween-font-ar' : 'tadween-font'
 export const storedFont = (): Font => {
   const f = (() => {
     try {
       // Design system: Noto Sans Arabic is the shared default, applied once
-      if (!localStorage.getItem('tadween-ds-font')) { localStorage.setItem('tadween-ds-font', '1'); localStorage.removeItem('tadween-font'); localStorage.removeItem('tadween-font-ar') }
+      // Defaults: Merriweather (English), IBM Plex Sans Arabic (Arabic). Applied once to everyone.
+      if (localStorage.getItem('tadween-font-defaults') !== '2') { localStorage.setItem('tadween-font-defaults', '2'); localStorage.removeItem('tadween-font'); localStorage.removeItem('tadween-font-ar') }
       return localStorage.getItem(FONT_KEY)
     } catch { return null }
   })()
-  return FONTS.some((x) => x.id === f) ? (f as Font) : FONTS[0].id
+  return FONTS.some((x) => x.id === f) ? (f as Font) : DEFAULT_FONT
 }
 const loaded = new Set<Font>()
 export function loadFont(f: Font) {
