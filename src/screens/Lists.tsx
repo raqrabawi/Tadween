@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { haptic } from '../lib/a11y'
+import { useLongPress } from '../lib/longpress'
 import type { List } from '../lib/types'
 import { I } from '../components/Icon'
 import { PageSkeleton } from '../components/Skeleton'
@@ -11,25 +11,6 @@ import { Avatar, Sheet, Switch, announce } from '../components/ui'
 import { Fab } from '../components/Fab'
 import { t } from '../lib/i18n'
 
-/** Long press (or right-click) opens the list's quick actions; a normal tap still works. */
-function useLongPress(onLong: () => void, ms = 480) {
-  const timer = useRef<number | undefined>(undefined)
-  const fired = useRef(false)
-  const at = useRef({ x: 0, y: 0 })
-  const clear = () => { window.clearTimeout(timer.current) }
-  return {
-    fired,
-    handlers: {
-      onPointerDown: (e: React.PointerEvent) => {
-        fired.current = false; at.current = { x: e.clientX, y: e.clientY }
-        timer.current = window.setTimeout(() => { fired.current = true; haptic(15); onLong() }, ms)
-      },
-      onPointerMove: (e: React.PointerEvent) => { if (Math.hypot(e.clientX - at.current.x, e.clientY - at.current.y) > 10) clear() },
-      onPointerUp: clear, onPointerLeave: clear, onPointerCancel: clear,
-      onContextMenu: (e: React.MouseEvent) => { e.preventDefault(); clear(); fired.current = true; onLong() }
-    }
-  }
-}
 
 function ListCard({ list, onActions, catName }: { list: List; onActions: (l: List) => void; catName?: string }) {
   const { items, members, addItem, toggleItem, resetDone, memberFor } = useStore()
@@ -121,7 +102,10 @@ export default function Lists() {
   // 'all' shows every list; 'none' the lists with no category (used while the All tab is hidden)
   const [cat, setCat] = useState<string>('all')
   const [act, setAct] = useState<List | null>(null)
-  const [moving, setMoving] = useState(false)
+  // List options sheet: 'menu' shows the actions, 'edit' renames the list and sets its category
+  const [actMode, setActMode] = useState<'menu' | 'edit'>('menu')
+  const [editName, setEditName] = useState('')
+  const [editCat, setEditCat] = useState('')
   const [listCat, setListCat] = useState<string>('')
   const [renaming, setRenaming] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -239,7 +223,7 @@ export default function Lists() {
       </div>
 
       <div className="stack lc-stack mt16" role="tabpanel">
-        {shown.map((l) => <ListCard key={l.id} list={l} onActions={(x) => { setMoving(false); setAct(x) }} catName={current || cat === 'none' ? undefined : catOf(l) ?? t('No category')} />)}
+        {shown.map((l) => <ListCard key={l.id} list={l} onActions={(x) => { setActMode('menu'); setAct(x) }} catName={current || cat === 'none' ? undefined : catOf(l) ?? t('No category')} />)}
         {!shown.length && <div className="card empty"><span className="ttl">{current ? t('No lists in {name} yet', { name: current.name }) : t('No lists yet')}</span><span className="sub">{t('Make one, or just say “add milk to groceries”.')}</span></div>}
         {lists.length > 0 && <p className="sub" style={{ textAlign: 'center', fontSize: 13 }}>{t('Tip: press and hold a list for more actions.')}</p>}
         <button className="btn dash" style={{ height: 56, color: 'var(--ink2)', fontSize: 16 }} onClick={openNewList}><I n="plus" s={18} w={2.4} />{current ? t('New list in {name}', { name: current.name }) : t('New list')}</button>
@@ -274,28 +258,24 @@ export default function Lists() {
       )}
       {act && (
         <Sheet label={t('{title} actions', { title: act.title })} onClose={() => setAct(null)}>
-          <div className="hd3 mt12"><button className="ib" aria-label={t('Close')} onClick={() => (moving ? setMoving(false) : setAct(null))}><I n={moving ? 'back' : 'close'} s={15} w={2.6} /></button><h1>{moving ? t('Move to category') : act.title}</h1><span /></div>
-          {!moving ? (
+          <div className="hd3 mt12"><button className="ib" aria-label={actMode === 'edit' ? t('Back') : t('Close')} onClick={() => (actMode === 'edit' ? setActMode('menu') : setAct(null))}><I n={actMode === 'edit' ? 'back' : 'close'} s={15} w={2.6} /></button><h1>{actMode === 'edit' ? t('Edit list') : act.title}</h1><span /></div>
+          {actMode === 'menu' ? (
             <div className="qa mt20" role="menu" aria-label={t('{title} actions', { title: act.title })}>
-              <button role="menuitem" className="qa-b" onClick={() => setMoving(true)}><span className="qa-i"><I n="folder" s={22} /></span>{t('Move')}</button>
+              <button role="menuitem" className="qa-b" onClick={() => { setEditName(act.title); setEditCat(act.category_id ?? ''); setActMode('edit') }}><span className="qa-i"><I n="pen" s={22} /></span>{t('Edit')}</button>
               <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); shareList(l) }}><span className="qa-i"><I n="share" s={22} /></span>{t('Share')}</button>
               <button role="menuitem" className="qa-b" onClick={() => { const l = act; setAct(null); inviteTo(l) }}><span className="qa-i"><I n="people" s={22} /></span>{t('Invite')}</button>
               <button role="menuitem" className="qa-b danger" onClick={() => { const l = act; if (confirm(t('Delete “{title}” and its items?', { title: l.title }))) { deleteList(l.id); setAct(null); announce(t('List deleted')) } }}><span className="qa-i"><I n="trash" s={22} /></span>{t('Delete')}</button>
             </div>
           ) : (
-            <div className="form mt20" role="radiogroup" aria-label={t('Category')}>
-              {[{ id: '', name: t('No category') }, ...categories].map((c) => {
-                const on = (act.category_id ?? '') === c.id
-                return (
-                  <button key={c.id || 'none'} role="radio" aria-checked={on} className="frow" style={{ width: '100%', textAlign: 'start' }}
-                    onClick={async () => { await updateList(act.id, { category_id: c.id || null }); announce(c.id ? t('Moved to {name}', { name: c.name }) : t('Moved out of categories')); setAct(null); setMoving(false) }}>
-                    <span className="grow" style={{ fontSize: 17 }}>{t(c.name)}</span>{on && <I n="check" s={18} w={2.6} />}
-                  </button>
-                )
-              })}
-            </div>
+            <form onSubmit={async (e) => { e.preventDefault(); const title = editName.trim(); if (!title) return; await updateList(act.id, { title, category_id: editCat || null }); setAct(null); announce(t('List updated')) }}>
+              <div className="form mt20">
+                <label className="frow"><span className="fl">{t('Name')}</span><input autoFocus className="inp" value={editName} onChange={(e) => setEditName(e.target.value)} /></label>
+                <label className="frow"><span className="fl">{t('Category')}</span><select className="inp" style={{ background: 'transparent' }} value={editCat} onChange={(e) => setEditCat(e.target.value)}><option value="">{t('No category')}</option>{categories.map((c) => <option key={c.id} value={c.id}>{t(c.name)}</option>)}</select></label>
+              </div>
+              <button className="btn pri mt24" type="submit" disabled={!editName.trim()}>{t('Save')}<I n="check" s={16} w={2.6} /></button>
+            </form>
           )}
-          <p className="ffoot">{moving ? t('Lists with no category show under All.') : act.family_id ? t('This list is shared with your family.') : t('Invite shares this list with your family space.')}</p>
+          {actMode === 'menu' && <p className="ffoot">{act.family_id ? t('This list is shared with your family.') : t('Invite shares this list with your family space.')}</p>}
         </Sheet>
       )}
       <Fab label={t('Add to lists')} actions={[

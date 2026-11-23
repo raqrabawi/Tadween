@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useLongPress } from '../lib/longpress'
+import type { Note } from '../lib/types'
+import { Sheet, announce } from '../components/ui'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { I } from '../components/Icon'
@@ -11,10 +14,33 @@ import { LOC, t } from '../lib/i18n'
 
 const TONES = ['mint', 'sky', 'sand', 'lilac', 'moss']
 
+/** A note card: tap opens it, long press (or right-click) opens its options. */
+function NoteCard({ note, className, onActions, children }: { note: Note; className: string; onActions: (n: Note) => void; children: React.ReactNode }) {
+  const lp = useLongPress(() => onActions(note))
+  return (
+    <Link to={`/note/${note.id}`} className={className + ' lp'} style={{ display: 'flex', flexDirection: 'column', gap: 8 }} {...lp.handlers}
+      onClick={(e) => { if (lp.fired.current) { e.preventDefault(); lp.fired.current = false } }} aria-description={t('Long press for more actions')}>
+      {children}
+    </Link>
+  )
+}
+
 import { SHOW_ALL_TAB } from '../lib/flags'
 
 export default function Notes() {
-  const { notes, saveNote, noteCategories, addCategory, deleteCategory, renameCategory, firstLoad } = useStore()
+  const { notes, saveNote, deleteNote, noteCategories, addCategory, deleteCategory, renameCategory, firstLoad } = useStore()
+  // Note options sheet: 'menu' shows the actions, 'edit' renames the note and sets its category
+  const [act, setAct] = useState<Note | null>(null)
+  const [actMode, setActMode] = useState<'menu' | 'edit'>('menu')
+  const [editName, setEditName] = useState('')
+  const [editCat, setEditCat] = useState('')
+  const shareNote = async (n: Note) => {
+    const text = `${n.title}\n${n.body ?? ''}\n\n${t('From Tadween')}`
+    try {
+      if (typeof navigator.share === 'function') await navigator.share({ title: n.title, text })
+      else { await navigator.clipboard.writeText(text); announce(t('Note copied — paste it anywhere')) }
+    } catch { /* closed the share sheet */ }
+  }
   const nav = useNavigate()
   // null = All; 'none' = notes with no category (used while the All tab is hidden)
   const [cat, setCat] = useState<string | null>(() => { try { return sessionStorage.getItem('tadween-notecat') || null } catch { return null } })
@@ -103,19 +129,39 @@ export default function Notes() {
                 const locked = n.opens_at && new Date(n.opens_at) > now
                 const tone = TONES[(ci + i * 2) % TONES.length]
                 return (
-                  <Link key={n.id} to={`/note/${n.id}`} className={`card tight tone-${locked ? 'lilac' : tone}`} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <NoteCard key={n.id} note={n} className={`card tight tone-${locked ? 'lilac' : tone}`} onActions={(x) => { setActMode('menu'); setAct(x) }}>
                     <span className="spread"><span className="cap">{locked ? t('Time capsule') : n.kind === 'voice' ? t('Voice') : n.kind === 'list' ? t('List') : n.kind === 'photo' ? t('Photo') : t('Note')}{!current && cat !== 'none' && n.category_id && noteCategories.find((c) => c.id === n.category_id) ? ` · ${noteCategories.find((c) => c.id === n.category_id)!.name}` : ''}</span>{locked ? <I n="lock" s={15} /> : n.kind === 'voice' ? <I n="mic" s={15} /> : n.kind === 'list' ? <I n="checklist" s={15} /> : null}</span>
                     {!locked && n.image && <img className="nimg" src={n.image} alt="" style={{ maxHeight: 180 }} />}
                     <span className="ttl" style={{ fontSize: 17, lineHeight: '22px' }}>{n.title}</span>
                     {!locked && n.kind === 'list' && n.body && <span className="sub" style={{ fontSize: 13, lineHeight: '20px', whiteSpace: 'pre-line' }}>{n.body.split('\n').slice(0, 5).map((l) => l.replace(/^\[x\] /, '☑ ').replace(/^\[ \] /, '☐ ')).join('\n')}</span>}
                     {!locked && n.kind !== 'list' && n.body && <span className="sub" style={{ fontSize: 13, lineHeight: '19px', display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{n.body}</span>}
                     <span className="cap" style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 500 }}>{locked ? t('Opens {date}', { date: new Date(n.opens_at!).toLocaleDateString(LOC, { day: 'numeric', month: 'short', year: 'numeric' }) }) : new Date(n.updated_at).toLocaleDateString(LOC, { day: 'numeric', month: 'short' })}</span>
-                  </Link>
+                  </NoteCard>
                 )
               })}
             </div>
           ))}
         </div>
+      )}
+      {act && (
+        <Sheet label={t('{title} actions', { title: act.title })} onClose={() => setAct(null)}>
+          <div className="hd3 mt12"><button className="ib" aria-label={actMode === 'edit' ? t('Back') : t('Close')} onClick={() => (actMode === 'edit' ? setActMode('menu') : setAct(null))}><I n={actMode === 'edit' ? 'back' : 'close'} s={15} w={2.6} /></button><h1>{actMode === 'edit' ? t('Edit note') : act.title}</h1><span /></div>
+          {actMode === 'menu' ? (
+            <div className="qa mt20" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }} role="menu" aria-label={t('{title} actions', { title: act.title })}>
+              <button role="menuitem" className="qa-b" onClick={() => { setEditName(act.title); setEditCat(act.category_id ?? ''); setActMode('edit') }}><span className="qa-i"><I n="pen" s={22} /></span>{t('Edit')}</button>
+              <button role="menuitem" className="qa-b" onClick={() => { const n = act; setAct(null); shareNote(n) }}><span className="qa-i"><I n="share" s={22} /></span>{t('Share')}</button>
+              <button role="menuitem" className="qa-b danger" onClick={() => { const n = act; if (confirm(t('Delete “{title}”?', { title: n.title }))) { void deleteNote(n.id); setAct(null); announce(t('Note deleted')) } }}><span className="qa-i"><I n="trash" s={22} /></span>{t('Delete')}</button>
+            </div>
+          ) : (
+            <form onSubmit={async (e) => { e.preventDefault(); const title = editName.trim(); if (!title) return; await saveNote({ id: act.id, title, category_id: editCat || null }); setAct(null); announce(t('Note updated')) }}>
+              <div className="form mt20">
+                <label className="frow"><span className="fl">{t('Name')}</span><input autoFocus className="inp" value={editName} onChange={(e) => setEditName(e.target.value)} /></label>
+                <label className="frow"><span className="fl">{t('Category')}</span><select className="inp" style={{ background: 'transparent' }} value={editCat} onChange={(e) => setEditCat(e.target.value)}><option value="">{t('No category')}</option>{noteCategories.map((c) => <option key={c.id} value={c.id}>{t(c.name)}</option>)}</select></label>
+              </div>
+              <button className="btn pri mt24" type="submit" disabled={!editName.trim()}>{t('Save')}<I n="check" s={16} w={2.6} /></button>
+            </form>
+          )}
+        </Sheet>
       )}
       <Fab label={t('Add to notes')} actions={[
         { icon: 'text', label: t('Text note'), hint: current ? t('In {name}', { name: current.name }) : undefined, onSelect: () => nav(`/note/new?${q}`) },
