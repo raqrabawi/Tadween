@@ -114,7 +114,7 @@ export const AR: Record<string, string> = {
   'Rice': 'رز', 'Eggs': 'بيض', 'Milk': 'حليب', 'Bread': 'خبز', 'Other': 'أخرى', 'Pantry': 'المؤونة', 'to buy': 'للشراء',
 
   // Notes
-  'Notes: {n}': 'الملاحظات: {n}', 'Voice: {n}': 'صوتية: {n}', 'Delete “{name}”? Its notes stay, under All.': 'حذف «{name}»؟ ملاحظاته تبقى تحت «الكل».',
+  'Notes: {n}': 'الملاحظات: {n}', 'Voice: {n}': 'صوتية: {n}', 'Delete “{name}”? Its notes stay, under All.': 'حذف «{name}»؟ ملاحظاته تبقى تحت «الكل».', 'Delete “{name}”? Its notes move to No category.': 'حذف «{name}»؟ ستنتقل ملاحظاته إلى «بلا تصنيف».',
   'Time capsule': 'كبسولة زمنية', 'Voice': 'صوتية', 'Photo': 'صورة', 'Opens {date}': 'تُفتح {date}', 'In {name}': 'في {name}',
   'Text note': 'ملاحظة نصية', 'Tick items off': 'أشّر على العناصر', 'Take a photo': 'التقط صورة', 'From gallery': 'من المعرض',
   'Ideas': 'أفكار', 'Write or speak your first note.': 'اكتب أو قل ملاحظتك الأولى.', 'Talk it through, or say “make a list: …”.': 'تحدّث بحرية، أو قل «اعمل قائمة: …».',

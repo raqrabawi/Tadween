@@ -11,15 +11,22 @@ import { LOC, t } from '../lib/i18n'
 
 const TONES = ['mint', 'sky', 'sand', 'lilac', 'moss']
 
+import { SHOW_ALL_TAB } from '../lib/flags'
+
 export default function Notes() {
   const { notes, saveNote, noteCategories, addCategory, deleteCategory, renameCategory, firstLoad } = useStore()
   const nav = useNavigate()
-  // null = All
+  // null = All; 'none' = notes with no category (used while the All tab is hidden)
   const [cat, setCat] = useState<string | null>(() => { try { return sessionStorage.getItem('tadween-notecat') || null } catch { return null } })
   const [renaming, setRenaming] = useState(false)
   const [adding, setAdding] = useState(false)
   const [catName, setCatName] = useState('')
   const current = noteCategories.find((c) => c.id === cat) ?? null
+  // Notes whose category is missing or deleted
+  const loose = notes.filter((n) => !noteCategories.some((c) => c.id === n.category_id))
+  const ok = cat === null ? SHOW_ALL_TAB : cat === 'none' ? !SHOW_ALL_TAB && loose.length > 0 : !!current
+  // With the All tab hidden, fall back to the first category (or the loose notes)
+  useEffect(() => { if (!ok) setCat(SHOW_ALL_TAB ? null : noteCategories[0]?.id ?? (loose.length ? 'none' : null)) }, [ok, noteCategories, loose.length])
   // Voice and new notes go into the category on screen
   useEffect(() => { try { if (current) sessionStorage.setItem('tadween-notecat', current.id); else sessionStorage.removeItem('tadween-notecat') } catch { /* ignore */ } }, [current])
   const q = current ? `cat=${current.id}` : ''
@@ -41,11 +48,11 @@ export default function Notes() {
     setRenaming(false); setCatName('')
   }
   const removeCat = () => {
-    if (!current || !confirm(t('Delete “{name}”? Its notes stay, under All.', { name: t(current.name) }))) return
+    if (!current || !confirm(t(SHOW_ALL_TAB ? 'Delete “{name}”? Its notes stay, under All.' : 'Delete “{name}”? Its notes move to No category.', { name: t(current.name) }))) return
     void deleteCategory(current.id); setCat(null)
   }
   const now = new Date()
-  const shown = notes.filter((n) => !current || n.category_id === current.id)
+  const shown = cat === 'none' ? loose : notes.filter((n) => !current || n.category_id === current.id)
   const countIn = (id: string) => notes.filter((n) => n.category_id === id).length
   const voiceCount = notes.filter((n) => n.kind === 'voice').length
   const cols: (typeof shown)[] = [[], []]
@@ -75,11 +82,12 @@ export default function Notes() {
         </div>
       </div>
       <div className="tabs-wrap">
-        <Tabs active={`${current?.id ?? ''}|${adding}|${renaming}`} className="scroll" role="tablist" aria-labelledby="ncats-label">
-          <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat(null)}>{t('All')}<span className="n">{notes.length}</span></button>
+        <Tabs active={`${cat ?? ''}|${adding}|${renaming}`} className="scroll" role="tablist" aria-labelledby="ncats-label">
+          {SHOW_ALL_TAB && <button role="tab" aria-selected={cat === null} className={cat === null ? 'chip on' : 'chip'} onClick={() => setCat(null)}>{t('All')}<span className="n">{notes.length}</span></button>}
           {noteCategories.map((c) => (
             <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{t(c.name)}<span className="n">{countIn(c.id)}</span></button>
           ))}
+          {!SHOW_ALL_TAB && loose.length > 0 && <button role="tab" aria-selected={cat === 'none'} className={cat === 'none' ? 'chip on' : 'chip'} onClick={() => setCat('none')}>{t('No category')}<span className="n">{loose.length}</span></button>}
         </Tabs>
         {adding && <CategoryAdd id="ncatname" value={catName} onChange={setCatName} onDone={saveCat} onCancel={() => { setAdding(false); setCatName('') }} />}
         {renaming && current && <CategoryAdd id="ncat-rename" rename value={catName} onChange={setCatName} onDone={saveRename} onCancel={() => { setRenaming(false); setCatName('') }} />}
@@ -96,7 +104,7 @@ export default function Notes() {
                 const tone = TONES[(ci + i * 2) % TONES.length]
                 return (
                   <Link key={n.id} to={`/note/${n.id}`} className={`card tight tone-${locked ? 'lilac' : tone}`} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <span className="spread"><span className="cap">{locked ? t('Time capsule') : n.kind === 'voice' ? t('Voice') : n.kind === 'list' ? t('List') : n.kind === 'photo' ? t('Photo') : t('Note')}{!current && n.category_id && noteCategories.find((c) => c.id === n.category_id) ? ` · ${noteCategories.find((c) => c.id === n.category_id)!.name}` : ''}</span>{locked ? <I n="lock" s={15} /> : n.kind === 'voice' ? <I n="mic" s={15} /> : n.kind === 'list' ? <I n="checklist" s={15} /> : null}</span>
+                    <span className="spread"><span className="cap">{locked ? t('Time capsule') : n.kind === 'voice' ? t('Voice') : n.kind === 'list' ? t('List') : n.kind === 'photo' ? t('Photo') : t('Note')}{!current && cat !== 'none' && n.category_id && noteCategories.find((c) => c.id === n.category_id) ? ` · ${noteCategories.find((c) => c.id === n.category_id)!.name}` : ''}</span>{locked ? <I n="lock" s={15} /> : n.kind === 'voice' ? <I n="mic" s={15} /> : n.kind === 'list' ? <I n="checklist" s={15} /> : null}</span>
                     {!locked && n.image && <img className="nimg" src={n.image} alt="" style={{ maxHeight: 180 }} />}
                     <span className="ttl" style={{ fontSize: 17, lineHeight: '22px' }}>{n.title}</span>
                     {!locked && n.kind === 'list' && n.body && <span className="sub" style={{ fontSize: 13, lineHeight: '20px', whiteSpace: 'pre-line' }}>{n.body.split('\n').slice(0, 5).map((l) => l.replace(/^\[x\] /, '☑ ').replace(/^\[ \] /, '☐ ')).join('\n')}</span>}

@@ -114,9 +114,11 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
   )
 }
 
+import { SHOW_ALL_TAB } from '../lib/flags'
+
 export default function Lists() {
   const { categories, lists, items, addCategory, deleteCategory, renameCategory, addList, addItem, updateList, deleteList, family, guest, setSavePrompt, firstLoad } = useStore()
-  // 'all' shows every list, including ones with no category
+  // 'all' shows every list; 'none' the lists with no category (used while the All tab is hidden)
   const [cat, setCat] = useState<string>('all')
   const [act, setAct] = useState<List | null>(null)
   const [moving, setMoving] = useState(false)
@@ -133,10 +135,14 @@ export default function Lists() {
   const [itemList, setItemList] = useState('')
 
   const current = categories.find((c) => c.id === cat) ?? null
-  useEffect(() => { if (cat !== 'all' && !current) setCat('all') }, [cat, current])
+  // Lists whose category is missing or deleted
+  const loose = lists.filter((l) => !categories.some((c) => c.id === l.category_id))
+  const ok = cat === 'all' ? SHOW_ALL_TAB : cat === 'none' ? !SHOW_ALL_TAB && loose.length > 0 : !!current
+  // With the All tab hidden, fall back to the first category (or the loose lists)
+  useEffect(() => { if (!ok) setCat(SHOW_ALL_TAB ? 'all' : categories[0]?.id ?? (loose.length ? 'none' : 'all')) }, [ok, categories, loose.length])
   // The mic uses this to put spoken items in the category you're looking at
   useEffect(() => { try { if (current) sessionStorage.setItem('tadween-cat', current.name); else sessionStorage.removeItem('tadween-cat') } catch { /* ignore */ } }, [current])
-  const shown = current ? lists.filter((l) => l.category_id === current.id) : lists
+  const shown = cat === 'none' ? loose : current ? lists.filter((l) => l.category_id === current.id) : lists
   const catOf = (l: List) => { const n = categories.find((c) => c.id === l.category_id)?.name; return n ? t(n) : undefined }
   const openCount = (cid: string) => items.filter((i) => !i.done && lists.some((l) => l.id === i.list_id && l.category_id === cid)).length
   const totalOpen = items.filter((i) => !i.done).length
@@ -221,18 +227,19 @@ export default function Lists() {
         </div>
       </div>
       <div className="tabs-wrap">
-        <Tabs active={`${current?.id ?? 'all'}|${adding}|${renaming}`} className="scroll" role="tablist" aria-labelledby="cats-label">
-          <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat('all')}>{t('All')}<span className="n">{lists.length}</span></button>
+        <Tabs active={`${cat}|${adding}|${renaming}`} className="scroll" role="tablist" aria-labelledby="cats-label">
+          {SHOW_ALL_TAB && <button role="tab" aria-selected={cat === 'all'} className={cat === 'all' ? 'chip on' : 'chip'} onClick={() => setCat('all')}>{t('All')}<span className="n">{lists.length}</span></button>}
           {categories.map((c) => (
             <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{t(c.name)}<span className="n">{openCount(c.id)}</span></button>
           ))}
+          {!SHOW_ALL_TAB && loose.length > 0 && <button role="tab" aria-selected={cat === 'none'} className={cat === 'none' ? 'chip on' : 'chip'} onClick={() => setCat('none')}>{t('No category')}<span className="n">{items.filter((i) => !i.done && loose.some((l) => l.id === i.list_id)).length}</span></button>}
         </Tabs>
         {adding && <CategoryAdd id="catname" value={catName} onChange={setCatName} onDone={saveCat} onCancel={() => { setAdding(false); setCatName('') }} />}
         {renaming && current && <CategoryAdd id="cat-rename" rename value={catName} onChange={setCatName} onDone={saveRename} onCancel={() => { setRenaming(false); setCatName('') }} />}
       </div>
 
       <div className="stack lc-stack mt16" role="tabpanel">
-        {shown.map((l) => <ListCard key={l.id} list={l} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? t('No category')} />)}
+        {shown.map((l) => <ListCard key={l.id} list={l} onActions={(x) => { setMoving(false); setAct(x) }} catName={current || cat === 'none' ? undefined : catOf(l) ?? t('No category')} />)}
         {!shown.length && <div className="card empty"><span className="ttl">{current ? t('No lists in {name} yet', { name: current.name }) : t('No lists yet')}</span><span className="sub">{t('Make one, or just say “add milk to groceries”.')}</span></div>}
         {lists.length > 0 && <p className="sub" style={{ textAlign: 'center', fontSize: 13 }}>{t('Tip: press and hold a list for more actions.')}</p>}
         <button className="btn dash" style={{ height: 56, color: 'var(--ink2)', fontSize: 16 }} onClick={openNewList}><I n="plus" s={18} w={2.4} />{current ? t('New list in {name}', { name: current.name }) : t('New list')}</button>
