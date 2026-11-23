@@ -212,11 +212,6 @@ export default function Settings() {
           <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Accessibility')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Text size, contrast, motion and more')}</span></span>
           <I n="chev" s={15} w={2.4} />
         </Link>
-        <button className="rw" onClick={refreshApp}>
-          <span className="st-chip" style={{ background: '#5E8C6A' }}><I n="reset" s={18} /></span>
-          <span className="grow" style={{ display: 'flex', flexDirection: 'column', textAlign: 'start' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Refresh app')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Clear the cache and load the latest version. Your data stays.')}</span></span>
-          <I n="chev" s={15} w={2.4} />
-        </button>
         {!guest && (
           <button className="rw" onClick={() => setSheet('invite')}>
             <span className="st-chip" style={{ background: '#E0803A' }}><I n="people" s={18} /></span>
@@ -240,6 +235,7 @@ export default function Settings() {
       </div>
 
       <p className="st-foot"><b>{t('Tadween')}</b> · {t('your day, in your words')}</p>
+      <button className="st-refresh" onClick={refreshApp}>{t('Clear cache & refresh')}</button>
 
       {sheet === 'phone' && (
         <Sheet label={t('Phone number')} onClose={() => setSheet(null)}>

@@ -631,6 +631,8 @@ textarea.inp{resize:none;line-height:28px}
 .st .rw + .rw::before{inset-inline-start:66px}
 .st-foot{margin:28px 0 8px;text-align:center;font-size:13px;color:var(--ink3)}
 .st-foot b{color:var(--ink2)}
+.st-refresh{display:block;margin:0 auto 12px;padding:10px 12px;font-size:12px;font-weight:600;color:var(--ink3);text-decoration:underline;text-underline-offset:3px;background:none}
+.st-refresh:active{color:var(--acc)}
 
 /* ── Settings: Language & look (sky card with sliding switches) ── */
 .st-look{position:relative;overflow:hidden;display:grid;gap:10px;padding:18px 14px 14px;border-radius:28px;color:var(--ink);
