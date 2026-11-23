@@ -2,6 +2,7 @@
 export const AR: Record<string, string> = {
   // Settings v2
   'Language & look': 'اللغة والمظهر', 'Auto': 'تلقائي',
+  'Tadween default': 'خط تدوين الافتراضي', 'Evergreen & terracotta': 'أخضر داكن وطيني',
   'Quick controls': 'تحكم سريع', 'On': 'مفعّل', 'Off': 'متوقف', 'More': 'المزيد', 'Sign in to share lists': 'سجّل الدخول لمشاركة القوائم',
   'Share lists that update for everyone': 'قوائم مشتركة تتحدّث للجميع', 'your day, in your words': 'يومك، بكلماتك',
 

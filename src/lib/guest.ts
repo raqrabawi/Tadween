@@ -25,7 +25,7 @@ export const now = () => new Date().toISOString()
 export function guestProfile(p: Partial<Profile> = {}): Profile {
   return {
     id: 'guest', name: null, phone: null, email: null, voice_style: 'Warm', speak_replies: true,
-    morning_brief: true, close_day: true, theme: 'light', palette: 'marigold', onboarded: true, ...p
+    morning_brief: true, close_day: true, theme: 'light', palette: 'tadween', onboarded: true, ...p
   }
 }
 

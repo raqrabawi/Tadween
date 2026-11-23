@@ -1,18 +1,26 @@
 import { isAr } from './i18n'
 export type Mode = 'dark' | 'light' | 'system'
-export type Palette = 'marigold' | 'linen' | 'classic'
+export type Palette = 'tadween' | 'marigold' | 'linen' | 'classic'
 
 const mq = () => window.matchMedia('(prefers-color-scheme: light)')
 export const resolve = (m: Mode): 'dark' | 'light' => (m === 'system' ? (mq().matches ? 'light' : 'dark') : m)
 export const storedMode = (): Mode => (localStorage.getItem('nook-theme') as Mode) || 'light'
-export const storedPalette = (): Palette => (localStorage.getItem('nook-palette') as Palette) || 'marigold'
+// The Tadween design system (Nov 2026) is the default look. Switch everyone to it once;
+// the older themes stay available in Settings.
+export const DS_FLAG = 'tadween-ds-v1'
+export const storedPalette = (): Palette => {
+  try {
+    if (!localStorage.getItem(DS_FLAG)) { localStorage.setItem(DS_FLAG, 'pending'); localStorage.setItem('nook-palette', 'tadween') }
+    return (localStorage.getItem('nook-palette') as Palette) || 'tadween'
+  } catch { return 'tadween' }
+}
 
 export function applyTheme(m: Mode, p: Palette) {
   const r = resolve(m)
   const cl = document.documentElement.classList
-  cl.remove('dark', 'light', 'marigold', 'linen', 'classic')
+  cl.remove('dark', 'light', 'tadween', 'marigold', 'linen', 'classic')
   cl.add(r, p)
-  const bg = p === 'marigold' ? (r === 'dark' ? '#181A19' : '#FAF8F5') : p === 'classic' ? (r === 'dark' ? '#1D1915' : '#F3EDE2') : r === 'dark' ? '#0F181D' : '#F5F2EC'
+  const bg = p === 'tadween' ? (r === 'dark' ? '#181A19' : '#F5F4ED') : p === 'marigold' ? (r === 'dark' ? '#181A19' : '#FAF8F5') : p === 'classic' ? (r === 'dark' ? '#1D1915' : '#F3EDE2') : r === 'dark' ? '#0F181D' : '#F5F2EC'
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', bg)
   try { localStorage.setItem('nook-theme', m); localStorage.setItem('nook-palette', p) } catch { /* private mode */ }
 }
@@ -21,8 +29,9 @@ export const watchSystem = (cb: () => void) => { const q = mq(); q.addEventListe
 
 // Font choice (Settings › Font). English and Arabic each have their own list and remembered pick.
 // Fonts ship with the app and load only when used.
-export type Font = 'Inter' | 'Lora' | 'Merriweather' | 'Newsreader' | 'IBM Plex Sans Arabic' | 'Cairo' | 'Amiri' | 'Readex Pro'
+export type Font = 'Noto Sans Arabic' | 'Inter' | 'Lora' | 'Merriweather' | 'Newsreader' | 'IBM Plex Sans Arabic' | 'Cairo' | 'Amiri' | 'Readex Pro'
 const LOADERS: Record<Font, () => Promise<unknown>> = {
+  'Noto Sans Arabic': () => Promise.all([import('@fontsource/noto-sans-arabic/latin-300.css'), import('@fontsource/noto-sans-arabic/latin-400.css'), import('@fontsource/noto-sans-arabic/latin-500.css'), import('@fontsource/noto-sans-arabic/latin-600.css'), import('@fontsource/noto-sans-arabic/latin-700.css'), import('@fontsource/noto-sans-arabic/arabic-300.css'), import('@fontsource/noto-sans-arabic/arabic-400.css'), import('@fontsource/noto-sans-arabic/arabic-500.css'), import('@fontsource/noto-sans-arabic/arabic-600.css'), import('@fontsource/noto-sans-arabic/arabic-700.css')]),
   Inter: () => Promise.all([import('@fontsource/inter/latin-300.css'), import('@fontsource/inter/latin-400.css'), import('@fontsource/inter/latin-500.css'), import('@fontsource/inter/latin-600.css'), import('@fontsource/inter/latin-700.css')]),
   Lora: () => Promise.all([import('@fontsource/lora/latin-400.css'), import('@fontsource/lora/latin-500.css'), import('@fontsource/lora/latin-600.css'), import('@fontsource/lora/latin-700.css')]),
   Merriweather: () => Promise.all([import('@fontsource/merriweather/latin-300.css'), import('@fontsource/merriweather/latin-400.css'), import('@fontsource/merriweather/latin-700.css')]),
@@ -32,13 +41,16 @@ const LOADERS: Record<Font, () => Promise<unknown>> = {
   Amiri: () => Promise.all([import('@fontsource/amiri/arabic-400.css'), import('@fontsource/amiri/arabic-700.css'), import('@fontsource/amiri/latin-400.css'), import('@fontsource/amiri/latin-700.css')]),
   'Readex Pro': () => Promise.all([import('@fontsource/readex-pro/arabic-300.css'), import('@fontsource/readex-pro/arabic-400.css'), import('@fontsource/readex-pro/arabic-500.css'), import('@fontsource/readex-pro/arabic-600.css'), import('@fontsource/readex-pro/arabic-700.css'), import('@fontsource/readex-pro/latin-400.css'), import('@fontsource/readex-pro/latin-600.css'), import('@fontsource/readex-pro/latin-700.css')])
 }
+const NOTO = { id: 'Noto Sans Arabic' as Font, meta: 'Tadween default', stack: '"Noto Sans Arabic",system-ui,sans-serif' }
 const EN_FONTS: { id: Font; meta: string; stack: string }[] = [
+  NOTO,
   { id: 'Inter', meta: 'Clean sans', stack: 'Inter,-apple-system,BlinkMacSystemFont,system-ui,sans-serif' },
   { id: 'Lora', meta: 'Warm serif', stack: 'Lora,Georgia,serif' },
   { id: 'Merriweather', meta: 'Sturdy serif', stack: 'Merriweather,Georgia,serif' },
   { id: 'Newsreader', meta: 'Book serif', stack: 'Newsreader,Georgia,serif' }
 ]
 const AR_FONTS: { id: Font; meta: string; stack: string }[] = [
+  NOTO,
   { id: 'IBM Plex Sans Arabic', meta: 'Clear and modern', stack: '"IBM Plex Sans Arabic",system-ui,sans-serif' },
   { id: 'Cairo', meta: 'Rounded and friendly', stack: 'Cairo,system-ui,sans-serif' },
   { id: 'Amiri', meta: 'Classic Naskh, like a book', stack: 'Amiri,"Times New Roman",serif' },
@@ -47,7 +59,13 @@ const AR_FONTS: { id: Font; meta: string; stack: string }[] = [
 export const FONTS = isAr ? AR_FONTS : EN_FONTS
 const FONT_KEY = isAr ? 'tadween-font-ar' : 'tadween-font'
 export const storedFont = (): Font => {
-  const f = (() => { try { return localStorage.getItem(FONT_KEY) } catch { return null } })()
+  const f = (() => {
+    try {
+      // Design system: Noto Sans Arabic is the shared default, applied once
+      if (!localStorage.getItem('tadween-ds-font')) { localStorage.setItem('tadween-ds-font', '1'); localStorage.removeItem('tadween-font'); localStorage.removeItem('tadween-font-ar') }
+      return localStorage.getItem(FONT_KEY)
+    } catch { return null }
+  })()
   return FONTS.some((x) => x.id === f) ? (f as Font) : FONTS[0].id
 }
 const loaded = new Set<Font>()

@@ -9,6 +9,7 @@ import { lang, setLang, t } from '../lib/i18n'
 import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
 
 const PALETTES = [
+  { id: 'tadween' as const, label: 'Tadween', meta: 'Evergreen & terracotta', light: ['#F5F4ED', '#304440', '#B95333'], dark: ['#181A19', '#6B9C84', '#E99168'] },
   { id: 'marigold' as const, label: 'Marigold', meta: 'Sage & sun', light: ['#FAF8F5', '#3D6B5E', '#E08E26'], dark: ['#181A19', '#5C9484', '#F0A843'] },
   { id: 'linen' as const, label: 'Linen', meta: 'Teal & seafoam', light: ['#F5F2EC', '#075056', '#177A61'], dark: ['#0F181D', '#7CC6CA', '#5BE3BE'] },
   { id: 'classic' as const, label: 'Classic', meta: 'Paper & ink', light: ['#F3EDE2', '#5B4332', '#A3432C'], dark: ['#1D1915', '#D9C4A6', '#C65A3B'] }

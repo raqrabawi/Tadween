@@ -1,22 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <radialGradient id="o" cx="34%" cy="28%" r="80%">
-      <stop offset="0" stop-color="#E4EEF0"/>
-      <stop offset=".18" stop-color="#9ED3D6"/>
-      <stop offset=".5" stop-color="#0B6B72"/>
-      <stop offset=".78" stop-color="#075056"/>
-      <stop offset="1" stop-color="#03282C"/>
-    </radialGradient>
-    <radialGradient id="s" cx="72%" cy="84%" r="40%">
-      <stop offset="0" stop-color="#5BE3BE" stop-opacity=".7"/>
-      <stop offset="1" stop-color="#5BE3BE" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" fill="#0F181D"/>
-  <circle cx="256" cy="256" r="176" fill="url(#o)"/>
-  <circle cx="256" cy="256" r="176" fill="url(#s)"/>
-  <g fill="none" stroke="#E4EEF0" stroke-width="22" stroke-linecap="round">
-    <rect x="220" y="150" width="72" height="140" rx="36"/>
-    <path d="M172 250a84 84 0 0 0 168 0M256 336v36"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <rect width="180" height="180" rx="44" fill="#F5F4ED"/>
+  <g transform="translate(42 42) scale(1.5)" stroke="#304440" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M15 25.5c4.8-5.9 10.4-8.8 17-8.8s12.2 2.9 17 8.8"/>
+    <path d="M20.8 33c3.2-3.8 6.9-5.7 11.2-5.7s8 1.9 11.2 5.7"/>
+    <path d="M26.5 40.5c1.6-1.8 3.4-2.7 5.5-2.7s3.9.9 5.5 2.7"/>
+    <path d="M36 48h13"/>
   </g>
+  <circle cx="90" cy="114" r="5.7" fill="#304440"/>
 </svg>

@@ -1,4 +1,4 @@
-import { applyTheme, storedMode, storedPalette, watchSystem, type Mode, type Palette } from './theme'
+import { applyTheme, DS_FLAG, storedMode, storedPalette, watchSystem, type Mode, type Palette } from './theme'
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { t } from './i18n'
 type Session = { user: { id: string; email?: string | null; phone?: string | null } }
@@ -140,7 +140,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (p.data) {
       setProfile(p.data as Profile)
       if ((p.data as Profile).theme) setThemeState((p.data as Profile).theme)
-      if ((p.data as Profile).palette) setPaletteState((p.data as Profile).palette)
+      const migrating = (() => { try { return localStorage.getItem(DS_FLAG) === 'pending' } catch { return false } })()
+      if (migrating) {
+        // First run with the design system: move the saved account theme to Tadween once
+        try { localStorage.setItem(DS_FLAG, 'done') } catch { /* private mode */ }
+        setPaletteState('tadween')
+        if ((p.data as Profile).palette !== 'tadween') db.from('profiles').update({ palette: 'tadween' }).eq('id', uid).then(() => undefined)
+      } else if ((p.data as Profile).palette) setPaletteState((p.data as Profile).palette)
     }
     const mine = (fm.data ?? []) as Member[]
     const fid = mine.find((m) => m.user_id === uid && m.role === 'owner')?.family_id ?? mine.find((m) => m.user_id === uid)?.family_id

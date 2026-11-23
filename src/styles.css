@@ -587,11 +587,11 @@ textarea.inp{resize:none;line-height:28px}
 .st-step{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;width:100%;justify-content:space-between}
 .st-step button{width:30px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:var(--s2)}
 .st-step button:disabled{opacity:.35}
-.st-themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.st-themes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .st-theme{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px 12px;border-radius:24px;background:var(--s1);box-shadow:var(--edge),var(--shadow);transition:box-shadow .2s,transform .15s}
 .st-theme:active{transform:scale(.97)}
 .st-theme.on{box-shadow:inset 0 0 0 2px var(--acc),var(--shadow)}
-.st-phone{position:relative;width:64px;height:104px;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 6px 14px -8px rgba(0,0,0,.35);overflow:hidden;margin-bottom:8px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.st-phone{position:relative;width:58px;height:96px;border-radius:16px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 6px 14px -8px rgba(0,0,0,.35);overflow:hidden;margin-bottom:8px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 .st-theme.on .st-phone{transform:translateY(-3px) rotate(-3deg)}
 .st-phone .hero{position:absolute;left:7px;right:7px;top:12px;height:30px;border-radius:9px}
 .st-phone .ln{position:absolute;left:7px;right:14px;top:50px;height:6px;border-radius:3px;opacity:.35}
@@ -637,3 +637,77 @@ textarea.inp{resize:none;line-height:28px}
 .st-g{font-size:18px;font-weight:700;line-height:1}
 .st-mode button{min-height:44px;font-size:14px}
 .sky-auto .st-sw button:not(.on){color:#23272A}
+
+/* ══ Palette: Tadween design system (tokens from src/ds-tokens.css / tokens.json) ══
+   Evergreen structure, sage support, ivory & paper surfaces, a restrained terracotta voice/action cue.
+   Glass = fill + visible edge + blur + shadow. Page background stays neutral. */
+.tadween.light,.tadween .light{
+  color-scheme:light;
+  --bg:#F5F4ED; --s1:#FFFEF8BD; --s1-solid:#FFFEF8; --s2:#E9ECE3; --s3:#D5DDD3;
+  --ink:#273936; --ink2:rgba(39,57,54,.84); --ink3:#52645D; --line:#E2E7DD;
+  --acc:#304440; --on:#FFF8EE; --sea:#304440; --hotInk:#FFF8EE; --em:#B95333;
+  --cta:#B95333; --ctaFlat:#B95333; --ctaInk:#FFF8EE; --ctaPress:#A04429; --ctaRing:rgba(222,116,73,.45); --ctaEdge:#A04429; --ctaGlow:rgba(185,83,51,.25);
+  --grn:#304440; --mint:#627A6B; --teal:#304440; --sun:#8A6420; --honey:#8A6420; --red:#B94F48; --urgent:#B95333;
+  --hot:linear-gradient(135deg,color-mix(in srgb,#304440 90%,transparent),color-mix(in srgb,#304440 78%,#F5F4ED));
+  --edge:inset 0 1px 0 rgba(255,255,255,.92),inset 0 0 0 1px #FFFFFFD1; --shadow:0 14px 30px rgba(39,57,54,.09);
+  --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
+  --inkBtn:#304440; --inkBtnText:#FFF8EE;
+  --field:#FFFEF895; --fieldSep:#E2E7DD;
+  --swOn:#304440; --swOff:#D5DDD3; --segTrack:#E9ECE3; --segOn:#FFFEF8;
+  --orbInk:#FFF8EE; --orbRing:rgba(222,116,73,.48);
+  --k-event:#DCE6EA; --k-reminder:#F1E5CC; --k-item:#DCE8D9; --k-note:#E6E0EC; --k-task:#F3DED3;
+  --glass-filter:blur(18px) saturate(150%);
+}
+.tadween.dark,.tadween .dark{
+  color-scheme:dark;
+  --bg:#181A19; --s1:#232625D9; --s1-solid:#232625; --s2:#2C302E; --s3:#3A403D;
+  --ink:#F2EFE9; --ink2:rgba(242,239,233,.84); --ink3:#B6B9B5; --line:#3A403D;
+  --acc:#6B9C84; --on:#181A19; --sea:#304440; --hotInk:#181A19; --em:#E99168;
+  --cta:#E99168; --ctaFlat:#E99168; --ctaInk:#181A19; --ctaPress:#EFA482; --ctaRing:rgba(233,145,104,.45); --ctaEdge:#EFA482; --ctaGlow:rgba(233,145,104,.28);
+  --grn:#86A995; --mint:#86A995; --teal:#85B7B0; --sun:#E9C684; --honey:#E9C684; --red:#F07872; --urgent:#E99168;
+  --hot:linear-gradient(135deg,color-mix(in srgb,#6B9C84 90%,transparent),color-mix(in srgb,#6B9C84 78%,#181A19));
+  --edge:inset 0 1px 0 rgba(255,255,255,.10),inset 0 0 0 1px #E9E4D92E; --shadow:0 16px 34px rgba(0,0,0,.28);
+  --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
+  --inkBtn:#F2EFE9; --inkBtnText:#181A19;
+  --field:#323735C2; --fieldSep:#3A403D;
+  --swOn:#6B9C84; --swOff:#3A403D; --segTrack:#2C302E; --segOn:#3A403D;
+  --orbInk:#181A19; --orbRing:rgba(233,145,104,.48);
+  --k-event:#DCE6EA; --k-reminder:#F1E5CC; --k-item:#DCE8D9; --k-note:#E6E0EC; --k-task:#F3DED3;
+  --glass-filter:blur(18px) saturate(145%);
+}
+/* Quiet tinted glass for grouped content */
+.tadween .tone-mint{--tc:220,232,217;--ti:#DCE8D9}
+.tadween .tone-sky{--tc:220,230,234;--ti:#DCE6EA}
+.tadween .tone-sand{--tc:241,229,204;--ti:#F1E5CC}
+.tadween .tone-lilac{--tc:230,224,236;--ti:#E6E0EC}
+.tadween .tone-moss{--tc:243,222,211;--ti:#F3DED3}
+/* Glass surfaces: fill, visible edge, blur and shadow */
+.tadween .card,.tadween .gl,.tadween .chip,.tadween .st-tile,.tadween .st-theme,.tadween .st-font{-webkit-backdrop-filter:var(--glass-filter);backdrop-filter:var(--glass-filter)}
+.tadween .card:not(.hot),.tadween .gl{box-shadow:var(--edge),var(--shadow)}
+.tadween.light .card[class*="tone-"],.tadween .light .card[class*="tone-"]{background:color-mix(in srgb,rgb(var(--tc)) 40%,#FFFEF8BD);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 0 0 1px rgb(var(--tc)),var(--shadow)}
+.tadween.dark .card[class*="tone-"],.tadween .dark .card[class*="tone-"]{background:linear-gradient(rgba(var(--tc),.1),rgba(var(--tc),.1)),var(--s1);box-shadow:inset 0 0 0 1px rgba(var(--tc),.22),var(--shadow)}
+.tadween.dark [class*="tone-"] .ttl,.tadween .dark [class*="tone-"] .ttl{color:rgb(var(--tc))}
+/* Featured (evergreen glass) */
+.tadween .hot{border:1px solid color-mix(in srgb,var(--on) 22%,transparent);-webkit-backdrop-filter:blur(20px) saturate(145%);backdrop-filter:blur(20px) saturate(145%);
+  box-shadow:0 16px 32px color-mix(in srgb,var(--ink) 15%,transparent),inset 0 1px 0 color-mix(in srgb,var(--on) 20%,transparent)}
+.tadween .hot .pw.on{background:#DE7449}
+.tadween .hot .arr{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hotInk) 35%,transparent)}
+/* Buttons: glass base, terracotta glass primary */
+.tadween .btn.pri{background:linear-gradient(135deg,color-mix(in srgb,var(--cta) 92%,black),var(--cta));outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 8px 18px color-mix(in srgb,var(--cta) 25%,transparent)}
+.tadween .btn.line,.tadween .tag{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 8%,transparent)}
+.tadween .fld,.tadween .form{box-shadow:inset 0 0 0 1px var(--line);-webkit-backdrop-filter:var(--glass-filter);backdrop-filter:var(--glass-filter)}
+.tadween .fld.focus{box-shadow:0 0 0 2px #DE7449}
+.tadween :focus-visible{outline-color:#DE7449}
+/* Voice: terracotta orb with dashed halo */
+.tadween .vorb{background:linear-gradient(135deg,color-mix(in srgb,var(--cta) 92%,white),var(--cta));color:var(--orbInk);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38),0 10px 22px color-mix(in srgb,var(--cta) 26%,transparent)}
+.tadween .tabbar .mic .vorb{color:var(--orbInk)}
+.tadween .tabbar .mic .vorb::after{border-color:var(--orbRing)}
+.tadween .ring{border-color:var(--cta)}
+.tadween .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(222,116,73,.13),transparent 70%),var(--bg)}
+.tadween.dark .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(233,145,104,.18),transparent 70%),var(--bg)}
+/* Tab bar: glass with a soft selected surface */
+.tadween .tabbar nav.tb-nav{background:var(--s1);-webkit-backdrop-filter:var(--glass-filter);backdrop-filter:var(--glass-filter);box-shadow:inset 0 0 0 1px var(--line)}
+.tadween .tb-link.on{color:var(--acc)}
+/* Arabic letterforms stay untracked */
+[dir="rtl"].tadween .h1,[dir="rtl"] .tadween .h1{letter-spacing:0}

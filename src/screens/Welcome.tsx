@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { I } from '../components/Icon'
+import { LogoLockup } from '../components/Logo'
 import { AuthButtons } from '../components/SignIn'
 import { t } from '../lib/i18n'
 
@@ -10,7 +11,7 @@ export default function Welcome() {
   return (
     <main className="screen col">
       <div className="hd">
-        <span className="row" style={{ gap: 10 }}><span className="vorb" style={{ width: 32, height: 32, boxShadow: 'none' }} /><span style={{ fontSize: 20, fontWeight: 700, letterSpacing: -.4 }}>{t('tadween')}</span></span>
+        <LogoLockup width={92} dark={document.documentElement.classList.contains('dark')} />
         <span className="bi"><b>{t('EN')}</b><b>{t('AR')}</b>{t('Bilingual')}</span>
       </div>
 

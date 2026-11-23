@@ -10,7 +10,7 @@ export interface Profile {
   morning_brief: boolean
   close_day: boolean
   theme: 'dark' | 'light' | 'system'
-  palette: 'marigold' | 'linen' | 'classic'
+  palette: 'tadween' | 'marigold' | 'linen' | 'classic'
   onboarded: boolean
 }
 
