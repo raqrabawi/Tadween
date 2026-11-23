@@ -6,6 +6,16 @@ export const AR: Record<string, string> = {
   'Quick controls': 'تحكم سريع', 'On': 'مفعّل', 'Off': 'متوقف', 'More': 'المزيد', 'Sign in to share lists': 'سجّل الدخول لمشاركة القوائم',
   'Share lists that update for everyone': 'قوائم مشتركة تتحدّث للجميع', 'your day, in your words': 'يومك، بكلماتك',
 
+  // Phone sign-in
+  'Sign in with phone': 'الدخول برقم الهاتف', 'Use the number you added in Settings.': 'استخدم الرقم الذي أضفته في الإعدادات.', 'Country': 'الدولة', 'Phone': 'الهاتف',
+  'We’ll text a code to confirm it’s yours. Next time you can sign in with just your phone.': 'سنرسل رمزًا للتأكد أنه رقمك. في المرة القادمة يمكنك الدخول برقم هاتفك فقط.',
+  'We’ll text you a 6-digit code. Your phone must already be added to your Tadween account.': 'سنرسل لك رمزًا من 6 أرقام. يجب أن يكون رقمك مضافًا مسبقًا إلى حسابك في تدوين.',
+  'Text me a code': 'أرسل لي رمزًا', 'Enter the 6-digit code we texted to': 'أدخل الرمز المكوّن من 6 أرقام الذي أرسلناه إلى', 'Change number': 'غيّر الرقم',
+  'Check the number — it looks too short or too long.': 'تحقق من الرقم — يبدو قصيرًا أو طويلًا جدًا.', 'Phone number': 'رقم الهاتف', 'Add it to sign in with a text code': 'أضفه لتدخل برمز نصي',
+  'Phone added. You can now sign in with it.': 'أُضيف الرقم. يمكنك الآن الدخول به.', 'Phone sign-in isn’t available yet.': 'الدخول بالهاتف غير متاح بعد.',
+  'No Tadween account uses this number yet. Sign in with Google, then add your phone in Settings.': 'لا يوجد حساب في تدوين بهذا الرقم بعد. ادخل عبر Google ثم أضف رقمك من الإعدادات.',
+  'We couldn’t send a code right now. Try again in a moment.': 'تعذّر إرسال الرمز الآن. حاول بعد قليل.',
+
   // Accessibility
   'Accessibility': 'إمكانية الوصول', 'Text size, contrast, motion and more': 'حجم الخط والتباين والحركة والمزيد', 'Back to Settings': 'العودة إلى الإعدادات',
   'Text size': 'حجم الخط', 'This is how your text will look. Drag or tap to make it bigger or smaller.': 'هكذا سيبدو النص. اسحب أو انقر لتكبيره أو تصغيره.',

@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { db } from '../lib/db'
 import { I } from '../components/Icon'
-import { Avatar, Sheet } from '../components/ui'
+import { Avatar, Sheet, announce } from '../components/ui'
 import { lang, setLang, t } from '../lib/i18n'
 import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
+import { PHONE_READY } from '../lib/phone'
+import { PhoneFlow } from '../components/PhoneFlow'
 
 const PALETTES = [
   { id: 'tadween' as const, label: 'Tadween', meta: 'Evergreen & terracotta', light: ['#F5F4ED', '#304440', '#B95333'], dark: ['#181A19', '#6B9C84', '#E99168'] },
@@ -17,7 +19,7 @@ const PALETTES = [
 
 export default function Settings() {
   const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt, updateProfile } = useStore()
-  const [sheet, setSheet] = useState<null | 'invite' | 'join'>(null)
+  const [sheet, setSheet] = useState<null | 'invite' | 'join' | 'phone'>(null)
   const [font, setFont] = useState<Font>(storedFont)
   useEffect(() => { FONTS.forEach((f) => loadFont(f.id)) }, [])  // so each option previews in its own face
   const [code, setCode] = useState('')
@@ -160,6 +162,13 @@ export default function Settings() {
             <I n="chev" s={15} w={2.4} />
           </button>
         )}
+        {!guest && PHONE_READY && (
+          <button className="rw" onClick={() => setSheet('phone')}>
+            <span className="st-chip" style={{ background: '#3E7CB1' }}><I n="phone" s={18} /></span>
+            <span className="grow" style={{ display: 'flex', flexDirection: 'column', textAlign: 'start' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Phone number')}</span><span className="sub" style={{ fontSize: 13 }}>{(user as { phone?: string } | undefined)?.phone || t('Add it to sign in with a text code')}</span></span>
+            <I n="chev" s={15} w={2.4} />
+          </button>
+        )}
         {guest ? (
           <Link to="/welcome" className="rw">
             <span className="st-chip" style={{ background: '#2F8F6B' }}><I n="mail" s={18} /></span>
@@ -175,6 +184,13 @@ export default function Settings() {
       </div>
 
       <p className="st-foot"><b>{t('Tadween')}</b> · {t('your day, in your words')}</p>
+
+      {sheet === 'phone' && (
+        <Sheet label={t('Phone number')} onClose={() => setSheet(null)}>
+          <div className="hd3 mt12"><button className="ib" aria-label={t('Close')} onClick={() => setSheet(null)}><I n="close" s={15} w={2.6} /></button><h1>{t('Phone number')}</h1><span /></div>
+          <PhoneFlow link onDone={() => { setSheet(null); announce(t('Phone added. You can now sign in with it.')) }} />
+        </Sheet>
+      )}
 
       {sheet === 'invite' && (
         <Sheet label={t('Invite family')} onClose={() => setSheet(null)}>

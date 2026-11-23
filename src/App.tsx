@@ -15,6 +15,8 @@ import Listen from './screens/Listen'
 import Review from './screens/Review'
 import Settings from './screens/Settings'
 import Accessibility from './screens/Accessibility'
+import PhoneSignIn from './screens/PhoneSignIn'
+import { PHONE_READY } from './lib/phone'
 
 const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes']
 
@@ -44,6 +46,7 @@ export default function App() {
         <Route path="/setup" element={<Setup />} />
         <Route path="/welcome" element={session ? <Navigate to="/" replace /> : <Welcome />} />
         {/* Email sign-in is switched off: Google only (phone codes to come) */}
+        {PHONE_READY && <Route path="/auth/phone" element={session ? <Navigate to="/" replace /> : <PhoneSignIn />} />}
         <Route path="/auth/*" element={<Navigate to={session ? '/' : '/welcome'} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

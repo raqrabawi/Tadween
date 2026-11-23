@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { I } from '../components/Icon'
 import { LogoLockup } from '../components/Logo'
+import { PHONE_READY } from '../lib/phone'
 import { AuthButtons } from '../components/SignIn'
 import { t } from '../lib/i18n'
 
@@ -33,6 +34,7 @@ export default function Welcome() {
       <p className="sub mt12" style={{ fontSize: 16, lineHeight: '23px' }}>{t('Your calendar, lists, family groceries and notes — by voice, in English or Arabic.')}</p>
 
       <div className="mt24"><AuthButtons /></div>
+      {PHONE_READY && <Link to="/auth/phone" className="btn line mt12"><I n="phone" s={17} />{t('Sign in with phone')}</Link>}
       <Link to="/" className="btn" style={{ marginTop: 4, background: 'transparent', color: 'var(--ink2)', height: 44 }}>{t('Look around first')}<I n="next" s={15} w={2.4} /></Link>
       {authError && <p role="alert" className="sub mt12" style={{ textAlign: 'center', color: 'var(--red)' }}>{t('Can’t reach sign-in right now ({error}). Check your connection and try again.', { error: authError })}</p>}
     </main>
