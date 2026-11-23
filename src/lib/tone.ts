@@ -1,4 +1,5 @@
 import { isAr } from './i18n'
+import { SHOW_TONE_PICKER } from './flags'
 
 /* How Tadween talks out loud.
    - friendly: casual. In Arabic it speaks Jordanian (عامية أردنية).
@@ -9,6 +10,7 @@ export type Tone = 'friendly' | 'formal'
 const KEY = 'tadween-tone'
 
 export const getTone = (): Tone => {
+  if (!SHOW_TONE_PICKER) return 'friendly' // picker hidden: always the friendly (Jordanian) style
   try { return localStorage.getItem(KEY) === 'formal' ? 'formal' : 'friendly' } catch { return 'friendly' }
 }
 export const setTone = (v: Tone) => { try { localStorage.setItem(KEY, v) } catch { /* ignore */ } }
