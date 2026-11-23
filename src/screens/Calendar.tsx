@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
@@ -66,36 +66,30 @@ export default function Calendar() {
   const swipeStart = (e: React.PointerEvent) => { swipe.current = { x: e.clientX, y: e.clientY } }
   const swipeEnd = (e: React.PointerEvent) => {
     const s0 = swipe.current; swipe.current = null
-    if (!s0 || view === 'Week') return
+    if (!s0) return
     const dx = e.clientX - s0.x, dy = e.clientY - s0.y
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return
     step((dx < 0 ? 1 : -1) * (isAr ? -1 : 1))
   }
-  // Week view: one smooth-scrolling row with the days of last, this and next month
-  const stripDays = useMemo(() => {
-    const from = new Date(day.getFullYear(), day.getMonth() - 1, 1), to = new Date(day.getFullYear(), day.getMonth() + 2, 0)
-    const out: Date[] = []
-    for (let d = from; d <= to; d = addDays(d, 1)) out.push(d)
-    return out
-  }, [day.getFullYear(), day.getMonth()]) // eslint-disable-line react-hooks/exhaustive-deps
-  const strip = useRef<HTMLDivElement>(null)
-  const placed = useRef('')
-  useLayoutEffect(() => {
-    const el = strip.current, on = el?.querySelector<HTMLElement>('.on')
-    if (!el || !on) return
-    const win = `${day.getFullYear()}-${day.getMonth()}`
-    const left = on.offsetLeft - (el.clientWidth - on.offsetWidth) / 2
-    // Glide when picking within the same stretch of days; jump straight there otherwise
-    el.scrollTo({ left, behavior: placed.current === win ? 'smooth' : 'auto' })
-    placed.current = win
-  }, [day, view])
-
-  // Month grid, weeks starting on the same weekday as the week strip
-  const first = new Date(day.getFullYear(), day.getMonth(), 1)
-  const lead = Math.round((first.getTime() - weekStart(first).getTime()) / 86400000)
-  const inMonth = new Date(day.getFullYear(), day.getMonth() + 1, 0).getDate()
-  const monthDays: (Date | null)[] = [...Array.from({ length: lead }, () => null), ...Array.from({ length: inMonth }, (_, i) => new Date(day.getFullYear(), day.getMonth(), i + 1))]
   const isToday = sameDay(day, now)
+  // Month grid: always 6 full weeks, days from the neighbouring months shown faintly
+  const first = new Date(day.getFullYear(), day.getMonth(), 1)
+  const gridStart = weekStart(first)
+  const monthDays = Array.from({ length: 42 }, (_, i) => addDays(gridStart, i))
+  const evOn = (d: Date) => events.filter((e) => onDay(e, d))
+  const goToday = () => setDay(startOfDay(new Date()))
+  const onPeriod = view === 'Day' ? isToday : view === 'Week' ? sameDay(weekStart(day), weekStart(now)) : (day.getMonth() === now.getMonth() && day.getFullYear() === now.getFullYear())
+  const navLabel = view === 'Day'
+    ? (isToday ? t('Today') + ', ' : '') + day.toLocaleDateString(LOC, { weekday: isToday ? undefined : 'long', day: 'numeric', month: 'short' })
+    : view === 'Week'
+      ? `${days[0].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })} – ${days[6].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })}`
+      : day.toLocaleDateString(LOC, { month: 'long', year: 'numeric' })
+
+  // Day view: an hour-by-hour timeline. Today starts at the current hour; other days at 7:00.
+  const HOUR = 64
+  const startH = isToday ? Math.max(0, Math.min(now.getHours(), 20)) : 7
+  const hours = Array.from({ length: 24 - startH }, (_, i) => startH + i)
+  const topFor = (d: Date) => ((d.getHours() + d.getMinutes() / 60) - startH) * HOUR
 
   return (
     <main className="screen">
@@ -117,44 +111,82 @@ export default function Calendar() {
         </span>
       </div>
 
-      {/* Swipe sideways to move by a day, week or month */}
-      <div className="cal-swipe mt16" onPointerDown={swipeStart} onPointerUp={swipeEnd} onPointerCancel={() => { swipe.current = null }}>
-        <button className="sr" onClick={() => step(-1)}>{t(view === 'Day' ? 'Previous day' : view === 'Week' ? 'Previous week' : 'Previous month')}</button>
-        <button className="sr" onClick={() => step(1)}>{t(view === 'Day' ? 'Next day' : view === 'Week' ? 'Next week' : 'Next month')}</button>
+      {/* Period navigator: arrows move by a day, week or month; tap the label to come back to today */}
+      <div className="cal-nav mt16">
+        <button className="ib sm" aria-label={t(view === 'Day' ? 'Previous day' : view === 'Week' ? 'Previous week' : 'Previous month')} onClick={() => step(-1)}><I n="back" s={16} w={2.4} /></button>
+        <button className="cal-nav-lbl" onClick={goToday} aria-label={onPeriod ? navLabel : t('Back to today')}>
+          <span key={navLabel} className="cal-nav-txt">{navLabel}</span>
+          {!onPeriod && <span className="cal-today-chip">{t('Today')}</span>}
+        </button>
+        <button className="ib sm" aria-label={t(view === 'Day' ? 'Next day' : view === 'Week' ? 'Next week' : 'Next month')} onClick={() => step(1)}><I n="chev" s={16} w={2.4} /></button>
+      </div>
+
+      <div className="cal-swipe mt12" onPointerDown={swipeStart} onPointerUp={swipeEnd} onPointerCancel={() => { swipe.current = null }}>
         {view === 'Week' && (
-          <div className="cal-strip" ref={strip} role="listbox" aria-label={t('Days')}>
-            {stripDays.map((d) => {
+          <div key={days[0].toDateString()} className="cal-week">
+            {days.map((d) => {
               const on = sameDay(d, day)
-              const n = events.filter((e) => onDay(e, d)).length
-              const firstOfMonth = d.getDate() === 1
+              const n = evOn(d).length
               return (
-                <button key={d.toISOString()} role="option" aria-selected={on} onClick={() => pick(d)} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })} className={'card cal-day' + (on ? ' on' : '') + (firstOfMonth ? ' first' : '')}>
-                  <span style={{ fontSize: 12, fontWeight: 700, opacity: .7 }}>{firstOfMonth ? d.toLocaleDateString(LOC, { month: 'short' }) : d.toLocaleDateString(LOC, { weekday: 'short' })}</span>
-                  <span className="num" style={{ fontSize: 19, fontWeight: 600, color: !on && sameDay(d, now) ? 'var(--acc)' : undefined }}>{d.getDate()}</span>
-                  <span style={{ display: 'flex', gap: 3, height: 5 }}>{Array.from({ length: Math.min(n, 3) }, (_, i) => <span key={i} style={{ width: 5, height: 5, borderRadius: 3, background: 'currentColor', opacity: .6 }} />)}</span>
+                <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })} className={'card cal-day' + (on ? ' on' : '') + (sameDay(d, now) ? ' today' : '')}>
+                  <span className="cal-dw">{d.toLocaleDateString(LOC, { weekday: 'short' })}</span>
+                  <span className="num cal-dn">{d.getDate()}</span>
+                  <span className="cal-dots">{Array.from({ length: Math.min(n, 3) }, (_, i) => <i key={i} />)}</span>
                 </button>
               )
             })}
           </div>
         )}
         {view === 'Month' && (
-          <div className="cal-month">
-            {days.map((d) => <span key={'h' + d.getDay()} className="cal-wd">{d.toLocaleDateString(LOC, { weekday: 'narrow' })}</span>)}
-            {monthDays.map((d, i) => {
-              if (!d) return <span key={'x' + i} />
-              const on = sameDay(d, day)
-              const n = events.filter((e) => onDay(e, d)).length
+          <div key={first.toDateString()} className="cal-month">
+            <div className="cal-mhead">{days.map((d) => <span key={'h' + d.getDay()}>{d.toLocaleDateString(LOC, { weekday: 'short' })}</span>)}</div>
+            <div className="cal-mgrid">
+              {monthDays.map((d) => {
+                const on = sameDay(d, day)
+                const out = d.getMonth() !== day.getMonth()
+                const evs = evOn(d)
+                return (
+                  <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })}
+                    className={'cal-md' + (on ? ' on' : '') + (out ? ' out' : '') + (sameDay(d, now) ? ' today' : '')}>
+                    <span className="num">{d.getDate()}</span>
+                    <span className="cal-dots">{evs.slice(0, 3).map((e) => <i key={e.id} className={TONE[e.calendar] ?? 'tone-lilac'} />)}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+        {view === 'Day' && (
+          <div key={day.toDateString()} className="cal-tl card" style={{ height: hours.length * HOUR }}>
+            {hours.map((h) => (
+              <div key={h} className="cal-hr" style={{ top: (h - startH) * HOUR }}>
+                {!(isToday && Math.abs((h - startH) * HOUR + 12 - topFor(now)) < 16) && <span className="num">{String(h).padStart(2, '0')}:00</span>}
+              </div>
+            ))}
+            {isToday && <div className="cal-now" style={{ top: topFor(now) }}><span className="num">{hm(now)}</span></div>}
+            {dayEvents.filter((e) => e.source !== 'birthday').map((e) => {
+              const s0 = new Date(e.starts_at), en = e.ends_at ? new Date(e.ends_at) : new Date(s0.getTime() + 3600000)
+              const top = Math.max(0, topFor(s0)), h = Math.max(36, topFor(en) - topFor(s0) - 4)
+              if (topFor(en) < 0) return null
               return (
-                <button key={d.toISOString()} onClick={() => pick(d)} aria-pressed={on} aria-label={d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })} className={'cal-md' + (on ? ' on' : '') + (sameDay(d, now) ? ' today' : '')}>
-                  <span className="num">{d.getDate()}</span>
-                  <i style={{ opacity: n ? .6 : 0 }} />
-                </button>
+                <div key={e.id} className={'cal-ev ' + (TONE[e.calendar] ?? 'tone-lilac')} style={{ top, height: h }}>
+                  <b>{e.title}</b><small className="num">{hm(s0)} – {hm(en)}{e.location ? ' · ' + e.location : ''}</small>
+                </div>
               )
             })}
+            {dayRems.filter((r) => topFor(new Date(r.remind_at!)) >= 0).map((r) => (
+              <button key={r.id} className={'cal-rem tone-sand' + (r.done ? ' done' : '')} style={{ top: topFor(new Date(r.remind_at!)) }} onClick={() => toggleReminder(r)} aria-label={t('Mark {title} done', { title: r.title })}>
+                <I n={r.done ? 'check' : 'bell'} s={12} w={2.4} />{r.title}
+              </button>
+            ))}
+            {dayEvents.filter((e) => e.source === 'birthday').map((e) => (
+              <div key={e.id} className="cal-allday"><I n="gift" s={14} />{e.title}</div>
+            ))}
           </div>
         )}
       </div>
 
+      {view !== 'Day' && <>
       <div className="sec"><h2>{isToday ? t('Today') : day.toLocaleDateString(LOC, { weekday: 'long' })}, {day.getDate()} {day.toLocaleDateString(LOC, { month: 'short' })}</h2><span className="sub">{dayEvents.length ? t('Events: {n}', { n: dayEvents.length }) : t('Free day')}</span></div>
 
       <div className="stack" style={{ gap: 10 }}>
@@ -212,6 +244,7 @@ export default function Calendar() {
 
         {!dayEvents.length && !dayRems.length && !free && <div className="card empty"><span className="ttl">{t('Nothing here')}</span><span className="sub">{t('Tap the mic and say what’s coming up.')}</span></div>}
       </div>
+      </>}
       <Fab label={t('Add to calendar')} actions={[
         { icon: 'cal', label: t('Event'), hint: t('Meeting, appointment'), onSelect: () => nav(`/add?type=Event&date=${dkey(day)}`) },
         { icon: 'bell', label: t('Task or reminder'), onSelect: () => nav(`/add?type=Reminder&date=${dkey(day)}`) },
