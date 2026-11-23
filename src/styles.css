@@ -771,10 +771,12 @@ textarea.inp{resize:none;line-height:28px}
 .ob-p{font-size:17px;line-height:25px;color:var(--ink2);margin-top:12px;max-width:34ch;opacity:0;transform:translateY(14px);transition:all .55s .26s cubic-bezier(.22,1,.36,1)}
 .ob-slide.on .ob-k,.ob-slide.on .ob-h,.ob-slide.on .ob-p{opacity:1;transform:none}
 .ob-foot{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px 0;flex-wrap:wrap}
-.ob-dots{display:flex;gap:6px}
-.ob-dots button{width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .35s cubic-bezier(.34,1.56,.64,1),background .2s;position:relative}
-.ob-dots button::after{content:"";position:absolute;inset:-14px -4px}
-.ob-dots button.on{width:26px;background:var(--acc)}
+.ob-dots{display:flex;gap:0}
+/* 24px tap targets around small visual dots */
+.ob-dots button{width:24px;height:24px;display:grid;place-items:center;background:none;transition:width .35s cubic-bezier(.34,1.56,.64,1)}
+.ob-dots button::before{content:"";width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .35s cubic-bezier(.34,1.56,.64,1),background .2s}
+.ob-dots button.on{width:40px}
+.ob-dots button.on::before{width:26px;background:var(--acc)}
 .ob-next{position:relative;width:64px;height:64px;display:grid;place-items:center}
 .ob-next > svg{position:absolute;inset:0;transform:rotate(-90deg)}
 .ob-prog-bg{fill:none;stroke:var(--line);stroke-width:2.5}

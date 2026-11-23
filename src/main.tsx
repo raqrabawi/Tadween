@@ -5,6 +5,7 @@ import { HashRouter } from 'react-router-dom'
 import './styles.css'
 import App from './App'
 import { StoreProvider } from './lib/store'
+import { initGuestStore } from './lib/guest'
 
 import { applyLang } from './lib/i18n'
 applyLang()
@@ -21,7 +22,8 @@ if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloaded) { reloaded = true; location.reload() } })
 }
 
-createRoot(document.getElementById('root')!).render(
+// Read this device's saved guest data first (a few ms), then draw the app
+void initGuestStore().finally(() => createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
       <StoreProvider>
@@ -29,4 +31,4 @@ createRoot(document.getElementById('root')!).render(
       </StoreProvider>
     </HashRouter>
   </StrictMode>
-)
+))

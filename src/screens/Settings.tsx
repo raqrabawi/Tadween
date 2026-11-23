@@ -83,7 +83,7 @@ export default function Settings() {
               </span>
             </span>
             <button className="tag st-invite" disabled={signing} onClick={async () => { setSigning(true); const e = await signInWithGoogle(); if (e) { setSigning(false); announce(e) } }}>
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width={15} height={15} alt="" />{signing ? t('Opening…') : t('Sign in')}
+              <img src={import.meta.env.BASE_URL + 'google.svg'} width={15} height={15} alt="" />{signing ? t('Opening…') : t('Sign in')}
             </button>
           </div>
         ) : (
@@ -217,7 +217,7 @@ export default function Settings() {
           </button>
         )}
         {!guest && (
-          <button className="rw" onClick={async () => { try { await db.auth.signOut() } finally { try { localStorage.removeItem('tadween-signed-in') } catch { /* private mode */ } location.replace(location.pathname + '#/'); location.reload() } }}>
+          <button className="rw" onClick={async () => { try { await db.auth.signOut() } finally { try { localStorage.removeItem('tadween-signed-in'); localStorage.removeItem('tadween-cache') } catch { /* private mode */ } location.replace(location.pathname + '#/'); location.reload() } }}>
             <span className="st-chip" style={{ background: '#D2554A' }}><I n="out" s={18} /></span>
             <span className="grow" style={{ fontSize: 16, fontWeight: 600, textAlign: 'start', color: 'var(--red)' }}>{t('Sign out')}</span>
           </button>

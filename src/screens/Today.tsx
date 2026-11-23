@@ -103,7 +103,7 @@ export default function Today() {
   return (
     <main className="screen">
       <div className="hd">
-        <Link to="/settings" className="row" aria-label={t('Settings')}>
+        <Link to="/settings" className="row" aria-label={`${greeting()} ${first} · ${t('Settings')}`}>
           <span style={{ width: 48, height: 48, borderRadius: 24, background: 'var(--hot)', color: 'var(--hotInk)', fontSize: 19, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 0 2px var(--bg), 0 0 0 3.5px var(--acc)' }}>{first.charAt(0).toUpperCase()}</span>
           <span style={{ display: 'flex', flexDirection: 'column' }}><span className="sub">{greeting()}</span><span className="ttl">{first}</span></span>
         </Link>

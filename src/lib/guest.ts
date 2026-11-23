@@ -6,6 +6,36 @@ import { t } from './i18n'
    On sign-in it is copied into their account, then cleared here. */
 
 export const GUEST_KEY = 'tadween-guest'
+
+/* Guest data lives in IndexedDB (room for photos — localStorage tops out around 5 MB),
+   with an in-memory copy so the rest of the app can read it synchronously.
+   localStorage keeps a copy too while it fits, for older data and as a fallback. */
+let mem: string | null = null
+let conn: Promise<IDBDatabase> | null = null
+const idb = (): Promise<IDBDatabase> => (conn ??= new Promise<IDBDatabase>((ok, no) => {
+  const r = indexedDB.open('tadween', 1)
+  r.onupgradeneeded = () => r.result.createObjectStore('kv')
+  r.onsuccess = () => ok(r.result)
+  r.onerror = () => no(r.error)
+  r.onblocked = () => no(new Error('blocked'))
+}).catch((e) => { conn = null; throw e }))
+const idbDo = async (mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest) => {
+  const d = await idb()
+  return new Promise<unknown>((ok, no) => { const q = fn(d.transaction('kv', mode).objectStore('kv')); q.onsuccess = () => ok(q.result); q.onerror = () => no(q.error) })
+}
+/** Call once before the app renders. */
+export async function initGuestStore() {
+  // Never hold up the app for long if IndexedDB is slow or unavailable (some private modes)
+  const slow = new Promise<undefined>((ok) => setTimeout(() => ok(undefined), 1500))
+  try { mem = ((await Promise.race([idbDo('readonly', (s) => s.get(GUEST_KEY)), slow])) as string | undefined) ?? null } catch { mem = null }
+  if (mem == null) { try { mem = localStorage.getItem(GUEST_KEY) } catch { mem = null } }
+}
+const readRaw = () => mem ?? (() => { try { return localStorage.getItem(GUEST_KEY) } catch { return null } })()
+const clearGuest = () => {
+  mem = null
+  try { localStorage.removeItem(GUEST_KEY) } catch { /* ignore */ }
+  void idbDo('readwrite', (s) => s.delete(GUEST_KEY)).catch(() => undefined)
+}
 export const GUEST_FAMILY = 'guest-family'
 
 export interface GuestData {
@@ -50,7 +80,7 @@ function seed(): GuestData {
 
 export function loadGuest(): GuestData {
   try {
-    const raw = localStorage.getItem(GUEST_KEY)
+    const raw = readRaw()
     if (raw) {
       const d = { ...seed(), ...(JSON.parse(raw) as GuestData) }
       d.notes = d.notes.map((n) => (n.id ? n : { ...n, id: newId() })) // repair notes saved without an id
@@ -62,7 +92,11 @@ export function loadGuest(): GuestData {
 }
 
 export function saveGuest(d: GuestData) {
-  try { localStorage.setItem(GUEST_KEY, JSON.stringify(d)) } catch { /* storage full or private mode */ }
+  const raw = JSON.stringify(d)
+  mem = raw
+  void idbDo('readwrite', (s) => s.put(raw, GUEST_KEY)).catch(() => undefined)
+  // Big photo collections may not fit here; IndexedDB still has them
+  try { localStorage.setItem(GUEST_KEY, raw) } catch { /* full: IndexedDB has the latest */ }
 }
 
 /** True when the guest added anything of their own (not just the starter lists). */
@@ -74,7 +108,7 @@ export function hasGuestContent(d: GuestData | null) {
 
 export function peekGuest(): GuestData | null {
   try {
-    const raw = localStorage.getItem(GUEST_KEY)
+    const raw = readRaw()
     return raw ? (JSON.parse(raw) as GuestData) : null
   } catch { return null }
 }
@@ -86,7 +120,7 @@ export function peekGuest(): GuestData | null {
  */
 export async function migrateGuest(familyId: string | null): Promise<boolean> {
   const g = peekGuest()
-  if (!hasGuestContent(g) || !g) { try { localStorage.removeItem(GUEST_KEY) } catch { /* ignore */ } return false }
+  if (!hasGuestContent(g) || !g) { clearGuest(); return false }
 
   const [{ data: rc, error: e1 }, { data: rl, error: e2 }] = await Promise.all([db.from('categories').select('*'), db.from('lists').select('*')])
   // Can't see what the account already has: try again later rather than create duplicates
@@ -130,6 +164,6 @@ export async function migrateGuest(familyId: string | null): Promise<boolean> {
     reminders.length ? db.from('reminders').insert(reminders) : null,
     notes.length ? db.from('notes').insert(notes) : null
   ])
-  try { localStorage.removeItem(GUEST_KEY) } catch { /* ignore */ }
+  clearGuest()
   return true
 }

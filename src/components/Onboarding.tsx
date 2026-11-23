@@ -144,7 +144,7 @@ export function Onboarding({ onDone, live = true }: { onDone: () => void; live?:
           <div className="stack" style={{ gap: 10, width: '100%' }}>
             <button className="btn pri" onClick={finish}>{t('Start using Tadween')}<I n="next" s={16} w={2.6} /></button>
             <button className="btn line" disabled={busy} onClick={async () => { setBusy(true); try { localStorage.setItem(ONBOARD_KEY, '1') } catch { /* */ } const e = await signInWithGoogle(); if (e) { setBusy(false); finish() } }}>
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width={18} height={18} alt="" />{busy ? t('Opening…') : t('Sign in with Google')}
+              <img src={import.meta.env.BASE_URL + 'google.svg'} width={18} height={18} alt="" />{busy ? t('Opening…') : t('Sign in with Google')}
             </button>
           </div>
         ) : (

@@ -12,7 +12,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      injectRegister: 'script-defer',
+      includeAssets: ['icon.svg', 'google.svg'],
       manifest: {
         name: 'Tadween — just say it',
         short_name: 'Tadween',
@@ -29,7 +30,16 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
-      workbox: { navigateFallback: 'index.html', globPatterns: ['**/*.{js,css,html,svg,png,woff2}'] }
+      // Fonts are cached the first time they're used, not all 50+ files up front
+      workbox: {
+        navigateFallback: 'index.html',
+        globPatterns: ['**/*.{js,css,html,svg,png}'],
+        runtimeCaching: [{
+          urlPattern: ({ request }) => request.destination === 'font',
+          handler: 'CacheFirst',
+          options: { cacheName: 'tadween-fonts', expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 365 } }
+        }]
+      }
     })
   ]
 })

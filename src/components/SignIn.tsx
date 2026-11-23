@@ -5,7 +5,7 @@ import { I } from './Icon'
 import { t } from '../lib/i18n'
 
 // Official Google "G" mark, served by Google (not redrawn here).
-const GOOGLE_MARK = 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'
+const GOOGLE_MARK = import.meta.env.BASE_URL + 'google.svg'
 
 // Sign-in is Google only for now (email was switched off; phone codes are planned).
 export function AuthButtons({ size = 'lg', verb = 'Continue' }: { size?: 'lg' | 'md'; verb?: 'Continue' | 'Sign in' | 'Sign up' }) {

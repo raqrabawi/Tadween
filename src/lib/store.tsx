@@ -8,6 +8,8 @@ import type { Category, Draft, EventRow, Family, Item, List, Member, Note, Profi
 
 interface Store {
   ready: boolean
+  /** Showing the last synced copy because the server can't be reached */
+  offline: boolean
   guest: boolean
   savePrompt: boolean
   setSavePrompt: (v: boolean) => void
@@ -56,10 +58,24 @@ export const useStore = () => {
 }
 
 const TONES: Tone[] = ['mint', 'sky', 'sand', 'lilac', 'moss']
+
+/* Last synced account data, kept on the device so the app opens instantly and still shows
+   your things when the network is down. Cleared on sign-out. */
+const CACHE = 'tadween-cache'
+type Snapshot = { uid: string; profile: Profile | null; family: Family | null; members: Member[]; categories: Category[]; lists: List[]; items: Item[]; events: EventRow[]; reminders: Reminder[]; notes: Note[] }
+const readCache = (): Snapshot | null => { try { const r = localStorage.getItem(CACHE); return r ? (JSON.parse(r) as Snapshot) : null } catch { return null } }
+export const clearCache = () => { try { localStorage.removeItem(CACHE) } catch { /* private mode */ } }
+// Only replace state when the data really changed, so background syncs don't re-render every screen
+const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 const iso = (d: Date) => d.toISOString()
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
+  // Signed in on this device before, with data saved locally: open straight away from that copy
+  const [cachedUid, setCachedUid] = useState<string | null>(() => {
+    try { return localStorage.getItem('tadween-signed-in') === '1' ? readCache()?.uid ?? null : null } catch { return null }
+  })
+  const [offline, setOffline] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -80,6 +96,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const seeded = useRef(false)
   const loading_ = useRef(false)
   const reloadAgain = useRef(false)
+  const retryIn = useRef(0)
   const [savePrompt, setSavePromptState] = useState(false)
   const promptDismissed = useRef(false)
   const setSavePrompt = useCallback((v: boolean) => { if (!v) promptDismissed.current = true; setSavePromptState(v) }, [])
@@ -92,23 +109,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Show Welcome straight away for people who aren't signed in; returning users wait (at most 10 s) for their session
     const known = (() => { try { return localStorage.getItem('tadween-signed-in') === '1' } catch { return false } })()
-    if (!known) setReady(true)
+    if (!known || cachedUid) setReady(true)
     const giveUp = setTimeout(() => setReady(true), 10000)
     db.auth.getSession()
       .then(({ data, error }: { data: { session: Session | null }; error: { message: string } | null }) => {
-        if (error) setAuthError(error.message)
+        if (error) { setAuthError(error.message); setOffline(true); return }
         setSession(data.session)
+        if (!data.session) { setCachedUid(null); clearCache() }
         try { if (data.session) localStorage.setItem('tadween-signed-in', '1'); else localStorage.removeItem('tadween-signed-in') } catch { /* private mode */ }
       })
-      .catch((e: unknown) => setAuthError(e instanceof Error ? e.message : String(e)))
+      // Network trouble: keep showing the last synced copy rather than an empty guest app
+      .catch((e: unknown) => { setAuthError(e instanceof Error ? e.message : String(e)); setOffline(true) })
       .finally(() => { clearTimeout(giveUp); setReady(true) })
     const { data } = db.auth.onAuthStateChange((e: string, s: Session | null) => {
       setSession(s)
-      if (s) setReady(true)
+      if (s) { setReady(true); setOffline(false) }
+      if (e === 'SIGNED_OUT') { setCachedUid(null); clearCache() }
       try { if (s) localStorage.setItem('tadween-signed-in', '1'); else if (e === 'SIGNED_OUT') localStorage.removeItem('tadween-signed-in') } catch { /* private mode */ }
     })
     return () => data.subscription.unsubscribe()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const uid = session?.user.id ?? null
 
@@ -153,7 +173,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // Bring over anything added as a guest on this device, then reload
     // If anything failed to load, don't seed or copy guest data — that would duplicate what's already there
     const failed = [p, fm, cats, ls, its, evs, rems, ns].some((r) => r.error)
-    if (failed) { setLoading(false); setTimeout(() => void loadAll(), 3000); return }
+    if (failed) {
+      // Back off gently (3 s, 6 s … up to a minute) instead of hammering the server while offline
+      setLoading(false); setOffline(true)
+      retryIn.current = Math.min(60000, retryIn.current ? retryIn.current * 2 : 3000)
+      setTimeout(() => void loadAll(), retryIn.current)
+      return
+    }
+    retryIn.current = 0; setOffline(false)
     if (await migrateGuest(fid ?? null)) { seeded.current = true; return loadOnce() }
     if (fid) {
       const f = await db.from('families').select('*').eq('id', fid).single()
@@ -197,6 +224,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!uid) {
       if (!ready) return
+      if (cachedUid) {
+        const c = readCache()
+        if (c && c.uid === cachedUid) {
+          setProfile(c.profile); setFamily(c.family); setMembers(c.members); setCategories(c.categories)
+          setLists(c.lists); setItems(c.items); setEvents(c.events); setReminders(c.reminders); setNotes(c.notes)
+          return
+        }
+      }
       // Guest mode: work from this device until the person signs in
       const g = loadGuest()
       setProfile(guestProfile({ ...g.profile, theme, palette })); setFamily(null); setMembers([])
@@ -207,17 +242,38 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // Family sync for shared lists: refresh every 15 s and whenever the app comes back into view
     const refresh = async () => {
       const [ls, its] = await Promise.all([db.from('lists').select('*').order('created_at'), db.from('list_items').select('*').order('created_at')])
-      if (ls.data) setLists((ls.data as List[]).map((l) => ({ ...l, staples: l.staples ?? [] })))
-      if (its.data) setItems(its.data as Item[])
+      if (ls.data) { const next = (ls.data as List[]).map((l) => ({ ...l, staples: l.staples ?? [] })); setLists((cur) => (same(cur, next) ? cur : next)) }
+      if (its.data) { const next = its.data as Item[]; setItems((cur) => (same(cur, next) ? cur : next)) }
     }
-    const t = setInterval(() => { if (document.visibilityState === 'visible') refresh() }, 15000)
-    const onFocus = () => refresh()
-    window.addEventListener('focus', onFocus)
-    return () => { clearInterval(t); window.removeEventListener('focus', onFocus) }
-  }, [uid, loadAll, ready]) // eslint-disable-line react-hooks/exhaustive-deps
+    const t = setInterval(() => { if (document.visibilityState === 'visible' && navigator.onLine) refresh() }, 15000)
+    // Phones fire visibilitychange (not focus) when you come back to the app
+    const onBack = () => { if (document.visibilityState === 'visible') refresh() }
+    const onOnline = () => { retryIn.current = 0; void loadAll() }
+    window.addEventListener('focus', onBack)
+    document.addEventListener('visibilitychange', onBack)
+    window.addEventListener('online', onOnline)
+    return () => { clearInterval(t); window.removeEventListener('focus', onBack); document.removeEventListener('visibilitychange', onBack); window.removeEventListener('online', onOnline) }
+  }, [uid, loadAll, ready, cachedUid]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save the signed-in copy on the device (debounced) once it has loaded
+  useEffect(() => {
+    if (!uid || loading || !profile) return
+    const tm = setTimeout(() => {
+      try { localStorage.setItem(CACHE, JSON.stringify({ uid, profile, family, members, categories: allCats, lists, items, events, reminders, notes } satisfies Snapshot)); setCachedUid(uid) } catch { /* storage full */ }
+    }, 800)
+    return () => clearTimeout(tm)
+  }, [uid, loading, profile, family, members, allCats, lists, items, events, reminders, notes])
 
   // Keep guest data on the device as it changes
-  const guest = ready && !uid
+  const guest = ready && !uid && !cachedUid
+
+  // Tell people once when they're looking at the saved copy, so they know edits won't sync yet
+  const told = useRef(false)
+  useEffect(() => {
+    if (!offline || told.current) return
+    told.current = true
+    window.dispatchEvent(new CustomEvent('tadween-toast', { detail: t('You’re offline. Showing what was last synced.') }))
+  }, [offline])
   useEffect(() => {
     if (!guest || !profile) return
     saveGuest({ profile: { name: profile.name, voice_style: profile.voice_style, speak_replies: profile.speak_replies, morning_brief: profile.morning_brief, close_day: profile.close_day }, categories: allCats, lists, items, events, reminders, notes })
@@ -393,10 +449,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const memberFor = useCallback((userId: string | null) => members.find((m) => m.user_id === userId), [members])
 
   const value = useMemo<Store>(() => ({
-    ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
+    ready, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
-  }), [ready, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
+  }), [ready, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 
