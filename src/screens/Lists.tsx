@@ -59,13 +59,13 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
       <div className="lc-head">
         <button className="lc-main lp" {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description={t('Long press for more actions')}>
           <span className="lc-ring" aria-hidden="true">
-            <svg viewBox="0 0 36 36" width="40" height="40"><circle cx="18" cy="18" r={R} className="lc-track" /><circle cx="18" cy="18" r={R} className="lc-fill" strokeDasharray={`${pct * C} ${C}`} /></svg>
-            <b className="num">{todo.length || <I n="check" s={13} w={3} />}</b>
+            <svg viewBox="0 0 36 36" width="40" height="40"><circle cx="18" cy="18" r={R} className="lc-track" />{pct > 0 && <circle cx="18" cy="18" r={R} className="lc-fill" strokeDasharray={`${pct * C} ${C}`} />}</svg>
+            <b className="num">{todo.length ? todo.length : mine.length ? <I n="check" s={15} w={3} /> : 0}</b>
           </span>
           <span className="lc-txt">
             <span className="lc-title">{t(list.title)}</span>
             <span className="lc-meta">
-              {todo.length ? (list.verb === 'buy' ? t('To buy: {n}', { n: todo.length }) : t('To do: {n}', { n: todo.length })) : t('All done')}
+              {todo.length ? (list.verb === 'buy' ? t('To buy: {n}', { n: todo.length }) : t('To do: {n}', { n: todo.length })) : mine.length ? t('All done') : t('Empty')}
               {catName ? ` · ${catName}` : ''}
               {shared && <> · <I n="people" s={12} w={2.4} /> {others.length || ''}</>}
             </span>

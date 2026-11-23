@@ -1039,7 +1039,8 @@ html.light .card.lcard[class*="tone-"],html .light .card.lcard[class*="tone-"]{b
 [dir="rtl"] .lc-head{padding:14px 16px 12px 10px}
 .lc-main{flex:1;min-width:0;display:flex;align-items:center;gap:14px;text-align:start;color:inherit}
 .lc-ring{position:relative;flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,rgba(var(--tc),.7) 0 13px,transparent 13.5px);color:#1B2230}
-.lc-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.lc-ring > svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.lc-ring b svg{display:block}
 .lc-ring circle{fill:none;stroke-width:3}
 .lc-track{stroke:rgba(var(--tc),.35)}
 .lc-fill{stroke:var(--acc);stroke-linecap:round;transition:stroke-dasharray .5s cubic-bezier(.22,1,.36,1)}
