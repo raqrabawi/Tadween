@@ -1,15 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { speak, stopSpeaking } from '../lib/voice'
 import { greeting, hm, relTime, sameDay } from '../lib/dates'
 import { I } from '../components/Icon'
-import { Avatar, Switch } from '../components/ui'
+import { Avatar } from '../components/ui'
 
 export default function Today() {
-  const { profile, events, reminders, lists, items, members, toggleReminder, addEvent } = useStore()
+  const { profile, events, reminders, lists, items, members, toggleReminder } = useStore()
   const [briefing, setBriefing] = useState(false)
-  const [focus, setFocus] = useState(false)
   const now = new Date()
 
   const todays = useMemo(() => events.filter((e) => sameDay(new Date(e.starts_at), now)), [events]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -37,7 +36,33 @@ export default function Today() {
     speak(parts.join(' '), profile?.voice_style, () => setBriefing(false))
   }
 
-  const [remind, setRemind] = useState(true)
+  // Up next: the nearest events, reminders and tasks — swipe through up to five
+  type Up = { key: string; kind: 'event' | 'reminder' | 'task'; at: Date | null; title: string; detail: string; reminder?: typeof reminders[number] }
+  const upNext = useMemo<Up[]>(() => {
+    const evs: Up[] = events.filter((e) => new Date(e.ends_at ?? e.starts_at) >= now).map((e) => ({
+      key: 'e' + e.id, kind: 'event', at: new Date(e.starts_at), title: e.title,
+      detail: [e.location, e.source === 'birthday' ? 'Birthday' : e.calendar, e.ends_at ? `${Math.round((new Date(e.ends_at).getTime() - new Date(e.starts_at).getTime()) / 60000)} min` : null].filter(Boolean).join(' · ')
+    }))
+    const rem: Up[] = reminders.filter((r) => !r.done).map((r) => ({
+      key: 'r' + r.id, kind: r.remind_at ? 'reminder' : 'task', at: r.remind_at ? new Date(r.remind_at) : null, title: r.title,
+      detail: r.remind_at ? (new Date(r.remind_at) < now ? 'Overdue reminder' : 'Reminder') : 'Task · no time set', reminder: r
+    }))
+    const dated = [...evs, ...rem.filter((r) => r.at)].sort((a, b) => a.at!.getTime() - b.at!.getTime())
+    return [...dated, ...rem.filter((r) => !r.at)].slice(0, 5)
+  }, [events, reminders]) // eslint-disable-line react-hooks/exhaustive-deps
+  const track = useRef<HTMLDivElement>(null)
+  const [slide, setSlide] = useState(0)
+  useEffect(() => {
+    const el = track.current
+    if (!el) return
+    const on = () => setSlide(Math.round(el.scrollLeft / (el.firstElementChild as HTMLElement | null ?? el).clientWidth))
+    el.addEventListener('scroll', on, { passive: true })
+    return () => el.removeEventListener('scroll', on)
+  }, [upNext.length])
+  const goTo = (i: number) => {
+    const el = track.current, card = el?.children[i] as HTMLElement | undefined
+    if (el && card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' })
+  }
 
   return (
     <main className="screen">
@@ -55,42 +80,51 @@ export default function Today() {
       <p className="cap" style={{ margin: '24px 4px 6px' }}>{dateCap}</p>
       <h1 className="h1" style={{ margin: '0 4px' }}>{left === 0 ? 'All clear today.' : `${left} ${left === 1 ? 'thing' : 'things'} left today`}</h1>
 
-      {upcoming ? (
-        <Link to="/calendar" className="card hot mt20" style={{ display: 'block' }}>
-          <div className="spread" style={{ alignItems: 'flex-start' }}>
-            <span className="ib"><I n="cal" /></span>
-            <span className="arr"><I n="arrow" s={16} /></span>
+      {upNext.length ? (
+        <section className="upnext mt20" aria-label="Up next" aria-roledescription="carousel">
+          <div className="up-track" ref={track}>
+            {upNext.map((u, i) => (
+              <article key={u.key} className="card hot up-card" aria-roledescription="slide" aria-label={`${i + 1} of ${upNext.length}: ${u.title}`}>
+                <div className="spread" style={{ alignItems: 'flex-start' }}>
+                  <span className="ib"><I n={u.kind === 'event' ? (u.detail.startsWith('Birthday') ? 'gift' : 'cal') : u.kind === 'reminder' ? 'bell' : 'check'} /></span>
+                  <span className="tag" style={{ minHeight: 30, fontSize: 12 }}>{u.kind === 'event' ? 'Event' : u.kind === 'reminder' ? 'Reminder' : 'Task'}</span>
+                </div>
+                <div className="row mt12" style={{ alignItems: 'baseline', gap: 10 }}>
+                  <span className="num" style={{ fontSize: 40, lineHeight: '44px', fontWeight: 300, letterSpacing: -1.4 }}>{u.at ? hm(u.at) : 'Any time'}</span>
+                  <span className="sub" style={{ fontWeight: 700 }}>{!u.at ? '' : i === 0 && sameDay(u.at, now) ? 'Up next' : sameDay(u.at, now) ? 'Today' : u.at.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+                </div>
+                <p className="ttl" style={{ marginTop: 4 }}>{u.title}</p>
+                <p className="sub">{u.detail}</p>
+                <div className="spread mt16">
+                  {u.at ? <span className="tag"><I n="clock" s={15} w={2.2} />{relTime(u.at)}</span> : <span />}
+                  {u.kind === 'event'
+                    ? <Link to="/calendar" className="tag">Open<I n="arrow" s={13} w={2.4} /></Link>
+                    : <button className="tag" onClick={() => u.reminder && toggleReminder(u.reminder)}><I n="check" s={14} w={2.6} />Done</button>}
+                </div>
+              </article>
+            ))}
           </div>
-          <div className="row mt12" style={{ alignItems: 'baseline', gap: 10 }}>
-            <span className="num" style={{ fontSize: 44, lineHeight: '46px', fontWeight: 300, letterSpacing: -1.6 }}>{hm(upcoming.starts_at)}</span>
-            <span className="sub" style={{ fontWeight: 700 }}>{sameDay(new Date(upcoming.starts_at), now) ? 'Up next' : new Date(upcoming.starts_at).toLocaleDateString([], { weekday: 'long' })}</span>
-          </div>
-          <p className="ttl" style={{ marginTop: 4 }}>{upcoming.title}</p>
-          <p className="sub">{[upcoming.location, upcoming.calendar, upcoming.ends_at ? `${Math.round((new Date(upcoming.ends_at).getTime() - new Date(upcoming.starts_at).getTime()) / 60000)} min` : null].filter(Boolean).join(' · ')}</p>
-          <div className="spread mt16">
-            <span className="tag"><I n="clock" s={15} w={2.2} />{relTime(upcoming.starts_at)}</span>
-            <span className="row" style={{ gap: 10 }} onClick={(e) => e.preventDefault()}>
-              <span className="sub" style={{ fontWeight: 700 }}>Remind</span>
-              <Switch on={remind} onChange={setRemind} label={`Remind me before ${upcoming.title}`} />
-            </span>
-          </div>
-        </Link>
+          {upNext.length > 1 && (
+            <div className="up-dots" role="tablist" aria-label="Choose card">
+              {upNext.map((u, i) => <button key={u.key} role="tab" aria-selected={i === slide} aria-label={`Show ${u.title}`} className={i === slide ? 'on' : ''} onClick={() => goTo(i)} />)}
+            </div>
+          )}
+        </section>
       ) : (
         <div className="card hot mt20">
           <span className="ib"><I n="cal" /></span>
           <p className="ttl mt16">Nothing coming up</p>
-          <p className="sub">Say “lunch with Sara Friday at 1” or add it yourself.</p>
-          <button className="tag mt16" onClick={() => { const d = new Date(); d.setHours(d.getHours() + 1, 0, 0, 0); addEvent({ title: 'Focus time', starts_at: d.toISOString(), ends_at: new Date(d.getTime() + 3600000).toISOString() }) }}><I n="plus" s={14} w={2.6} />Block an hour for focus</button>
+          <p className="sub">Hold the mic and say “lunch with Sara Friday at 1”, or add it yourself.</p>
+          <Link to="/add" className="tag mt16"><I n="plus" s={14} w={2.6} />Add something</Link>
         </div>
       )}
 
       <div className="card tone-sky mt12" style={{ padding: '16px 6px' }} aria-label="Quick moments">
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0,1fr))' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))' }}>
           <button className={briefing ? 'orb on' : 'orb'} aria-pressed={briefing} onClick={brief}><span className="ib plain"><I n={briefing ? 'pause' : 'speaker'} /></span>Hear brief</button>
           <Link to="/note/new" className="orb"><span className="ib plain"><I n="pen" /></span>Note</Link>
           <Link to="/add?type=Reminder" className="orb"><span className="ib plain"><I n="bell" /></span>Remind</Link>
           <Link to="/lists" className="orb"><span className="ib plain"><I n="bag" /></span>Shop</Link>
-          <button className={focus ? 'orb on' : 'orb'} aria-pressed={focus} onClick={() => setFocus(!focus)}><span className="ib plain"><I n="target" /></span>Focus</button>
         </div>
       </div>
 

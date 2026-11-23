@@ -428,3 +428,20 @@ textarea.inp{resize:none;line-height:28px}
 .try li{font-size:19px;line-height:26px;font-weight:600;letter-spacing:-.3px;color:var(--ink)}
 .try li:nth-child(2){opacity:.55}
 .try li:nth-child(3){opacity:.3}
+
+/* Today: swipeable "up next" cards */
+.upnext{margin-left:-20px;margin-right:-20px}
+.up-track{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 20px;scroll-padding:0 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.up-track::-webkit-scrollbar{display:none}
+.up-card{flex:0 0 calc(100% - 28px);scroll-snap-align:start;margin:0}
+.up-card:only-child{flex-basis:100%}
+.up-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+.up-dots button{width:6px;height:6px;border-radius:3px;background:var(--line);padding:0;transition:width .3s cubic-bezier(.34,1.56,.64,1),background .2s;position:relative}
+.up-dots button::after{content:"";position:absolute;inset:-12px -6px}
+.up-dots button.on{width:20px;background:var(--acc)}
+
+/* Review: compact "adding now" bar */
+.autobar{padding:12px 12px 10px 16px;display:flex;flex-direction:column;gap:10px}
+.autobtn{height:32px;min-width:32px;padding:0 12px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:inherit;background:rgba(255,255,255,.18)}
+.autoprog{display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.25);overflow:hidden}
+.autoprog span{display:block;height:100%;background:currentColor;transition:width .05s linear}

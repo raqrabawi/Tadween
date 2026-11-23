@@ -105,13 +105,14 @@ export default function Review() {
       </div>
 
       {auto && (
-        <div className="card tight hot mt16" role="status" aria-live="polite" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 17, fontWeight: 600 }}><I n="spark" s={18} />Got it — adding {drafts.length === 1 ? 'this' : `these ${drafts.length}`} now</span>
-          <span aria-hidden="true" style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,.25)', overflow: 'hidden' }}><span style={{ display: 'block', height: '100%', width: `${(1 - left) * 100}%`, background: 'currentColor', transition: 'width .05s linear' }} /></span>
-          <div className="row" style={{ gap: 8 }}>
-            <button className="tag" style={{ minHeight: 40, background: 'rgba(255,255,255,.18)', color: 'inherit' }} onClick={() => setAuto(false)}><I n="pen" s={14} />Change</button>
-            <button className="tag" style={{ minHeight: 40, background: 'rgba(255,255,255,.18)', color: 'inherit' }} onClick={() => { setAuto(false); stopSpeaking(); nav(back, { replace: true }) }}><I n="close" s={13} w={2.6} />Cancel</button>
+        <div className="card hot mt16 autobar" role="status" aria-live="polite">
+          <div className="row" style={{ gap: 10 }}>
+            <I n="spark" s={16} />
+            <span className="grow" style={{ fontSize: 15, fontWeight: 600 }}>Adding {drafts.length === 1 ? 'this' : `these ${drafts.length}`} now</span>
+            <button className="autobtn" onClick={() => setAuto(false)}>Change</button>
+            <button className="autobtn" aria-label="Cancel, don’t save" onClick={() => { setAuto(false); stopSpeaking(); nav(back, { replace: true }) }}><I n="close" s={12} w={2.8} /></button>
           </div>
+          <span aria-hidden="true" className="autoprog"><span style={{ width: `${(1 - left) * 100}%` }} /></span>
         </div>
       )}
 
