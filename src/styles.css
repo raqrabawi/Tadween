@@ -711,3 +711,14 @@ textarea.inp{resize:none;line-height:28px}
 .tadween .tb-link.on{color:var(--acc)}
 /* Arabic letterforms stay untracked */
 [dir="rtl"].tadween .h1,[dir="rtl"] .tadween .h1{letter-spacing:0}
+
+/* Snackbar: guest sign-in nudge (sits above the tab bar) */
+.snack{position:fixed;z-index:36;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 112px);width:min(440px,calc(100% - 24px));
+  display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px;border-radius:22px;background:var(--inkBtn);color:var(--inkBtnText);
+  box-shadow:0 14px 30px -10px rgba(0,0,0,.4);animation:snackIn .35s cubic-bezier(.34,1.4,.64,1) both}
+@keyframes snackIn{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+.snack-ic{width:36px;height:36px;border-radius:18px;flex:none;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--inkBtnText) 14%,transparent)}
+.snack-go{flex:none;min-height:36px;padding:0 14px;border-radius:18px;background:var(--cta,var(--ctaFlat));color:var(--ctaInk);font-size:13px;font-weight:700}
+.snack-x{flex:none;width:32px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;opacity:.75}
+.snack-x::after{content:"";position:absolute;inset:-6px}
+.screen.notab ~ .snack,.app:not(:has(.tabbar)) .snack{bottom:calc(env(safe-area-inset-bottom,0px) + 20px)}

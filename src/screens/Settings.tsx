@@ -9,6 +9,8 @@ import { lang, setLang, t } from '../lib/i18n'
 import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
 import { PHONE_READY } from '../lib/phone'
 import { PhoneFlow } from '../components/PhoneFlow'
+import { signInWithGoogle } from '../components/SignIn'
+import { downloadBackup, makeBackup, readBackup, restoreBackup } from '../lib/backup'
 
 const PALETTES = [
   { id: 'tadween' as const, label: 'Tadween', meta: 'Evergreen & terracotta', light: ['#F5F4ED', '#304440', '#B95333'], dark: ['#181A19', '#6B9C84', '#E99168'] },
@@ -18,7 +20,7 @@ const PALETTES = [
 ]
 
 export default function Settings() {
-  const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt, updateProfile } = useStore()
+  const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt, updateProfile, categories, noteCategories, lists, items, events, reminders, notes } = useStore()
   const [sheet, setSheet] = useState<null | 'invite' | 'join' | 'phone'>(null)
   const [font, setFont] = useState<Font>(storedFont)
   useEffect(() => { FONTS.forEach((f) => loadFont(f.id)) }, [])  // so each option previews in its own face
@@ -37,6 +39,20 @@ export default function Settings() {
   const [langPick, setLangPick] = useState(lang)
   const pickLang = (l: 'en' | 'ar') => { if (l === lang) return; setLangPick(l); window.setTimeout(() => setLang(l), 380) }
   const speakOn = !!profile?.speak_replies
+  const [signing, setSigning] = useState(false)
+  const backup = async () => {
+    await downloadBackup(makeBackup({ profile: { name: profile?.name, voice_style: profile?.voice_style, speak_replies: profile?.speak_replies, morning_brief: profile?.morning_brief, close_day: profile?.close_day }, categories: [...categories, ...noteCategories], lists, items, events, reminders, notes }))
+    announce(t('Backup saved'))
+  }
+  const restore = async (f: File) => {
+    const d = readBackup(await f.text())
+    if (!d) { announce(t('That file isn’t a Tadween backup')); return }
+    const n = d.items.length + d.events.length + d.reminders.length + d.notes.length
+    if (!confirm(guest ? t('Replace what’s on this phone with this backup ({n} things)?', { n }) : t('Add this backup ({n} things) to your account?', { n }))) return
+    const ok = await restoreBackup(d, !guest, family?.id ?? null)
+    if (!ok && !guest) { announce(t('Couldn’t restore right now. Try again.')); return }
+    location.reload()
+  }
 
   return (
     <main className="screen notab st">
@@ -56,19 +72,34 @@ export default function Settings() {
             <span className="sub ell">{guest ? t('Saved on this phone only') : (user?.email ?? profile?.email ?? '')}</span>
           </span>
         </div>
-        <div className="st-fam">
-          <span className="row" style={{ gap: 10, minWidth: 0 }}>
-            {members.length ? <span className="avs">{members.slice(0, 4).map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} size={28} />)}</span> : <span className="st-fam-ic"><I n="people" s={16} /></span>}
-            <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <span className="ell" style={{ fontSize: 14, fontWeight: 700 }}>{family?.name ?? t('Family space')}</span>
-              <span className="ell" style={{ fontSize: 12, opacity: .8 }}>{guest ? t('Sign in to share lists') : t('People: {n}', { n: members.length })}</span>
+        {guest ? (
+          <div className="st-fam">
+            <span className="row" style={{ gap: 10, minWidth: 0 }}>
+              <span className="st-fam-ic"><I n="cloud" s={16} /></span>
+              <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span className="ell" style={{ fontSize: 14, fontWeight: 700 }}>{t('Sync & share')}</span>
+                <span className="ell" style={{ fontSize: 12, opacity: .8 }}>{t('Every device, plus family lists')}</span>
+              </span>
             </span>
-          </span>
-          <span className="row" style={{ gap: 6 }}>
-            <button className="tag" onClick={() => (guest ? setSavePrompt(true) : setSheet('join'))}>{t('Join')}</button>
-            <button className="tag st-invite" onClick={() => (guest ? setSavePrompt(true) : setSheet('invite'))}><I n="plus" s={13} w={2.6} />{t('Invite')}</button>
-          </span>
-        </div>
+            <button className="tag st-invite" disabled={signing} onClick={async () => { setSigning(true); const e = await signInWithGoogle(); if (e) { setSigning(false); announce(e) } }}>
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width={15} height={15} alt="" />{signing ? t('Opening…') : t('Sign in')}
+            </button>
+          </div>
+        ) : (
+        <div className="st-fam">
+            <span className="row" style={{ gap: 10, minWidth: 0 }}>
+              {members.length ? <span className="avs">{members.slice(0, 4).map((m) => <Avatar key={m.user_id} name={m.name} color={m.color} size={28} />)}</span> : <span className="st-fam-ic"><I n="people" s={16} /></span>}
+              <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <span className="ell" style={{ fontSize: 14, fontWeight: 700 }}>{family?.name ?? t('Family space')}</span>
+                <span className="ell" style={{ fontSize: 12, opacity: .8 }}>{guest ? t('Sign in to share lists') : t('People: {n}', { n: members.length })}</span>
+              </span>
+            </span>
+            <span className="row" style={{ gap: 6 }}>
+              <button className="tag" onClick={() => (guest ? setSavePrompt(true) : setSheet('join'))}>{t('Join')}</button>
+              <button className="tag st-invite" onClick={() => (guest ? setSavePrompt(true) : setSheet('invite'))}><I n="plus" s={13} w={2.6} />{t('Invite')}</button>
+            </span>
+          </div>
+        )}
       </section>
 
       {/* Language & look: every choice visible, with a sliding highlight */}
@@ -147,6 +178,23 @@ export default function Settings() {
         ))}
       </div>
 
+      {/* Backup & restore: works without an account */}
+      <p className="cap st-cap">{t('Backup & restore')}</p>
+      <div className="card flush">
+        <button className="rw" onClick={backup}>
+          <span className="st-chip" style={{ background: '#2F8F6B' }}><I n="download" s={18} /></span>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column', textAlign: 'start' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Back up to a file')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Lists, notes, calendar and reminders in one file')}</span></span>
+          <I n="chev" s={15} w={2.4} />
+        </button>
+        <label className="rw" style={{ cursor: 'pointer' }}>
+          <span className="st-chip" style={{ background: '#5A6FB0' }}><I n="upload" s={18} /></span>
+          <span className="grow" style={{ display: 'flex', flexDirection: 'column', textAlign: 'start' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Restore from a file')}</span><span className="sub" style={{ fontSize: 13 }}>{guest ? t('Replaces what’s on this phone') : t('Adds it to your account')}</span></span>
+          <input type="file" accept="application/json,.json" className="sr" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) restore(f) }} />
+          <I n="chev" s={15} w={2.4} />
+        </label>
+      </div>
+      <p className="ffoot">{guest ? t('Your data is kept on this phone. A backup file lets you move it or keep a copy, no account needed.') : t('Your data is synced to your account. A backup file is an extra copy you control.')}</p>
+
       {/* More */}
       <p className="cap st-cap">{t('More')}</p>
       <div className="card flush">
@@ -169,13 +217,7 @@ export default function Settings() {
             <I n="chev" s={15} w={2.4} />
           </button>
         )}
-        {guest ? (
-          <Link to="/welcome" className="rw">
-            <span className="st-chip" style={{ background: '#2F8F6B' }}><I n="mail" s={18} /></span>
-            <span className="grow" style={{ display: 'flex', flexDirection: 'column' }}><span style={{ fontSize: 16, fontWeight: 600 }}>{t('Sign in to save')}</span><span className="sub" style={{ fontSize: 13 }}>{t('Keep your lists safe and share with family')}</span></span>
-            <I n="chev" s={15} w={2.4} />
-          </Link>
-        ) : (
+        {!guest && (
           <button className="rw" onClick={() => db.auth.signOut()}>
             <span className="st-chip" style={{ background: '#D2554A' }}><I n="out" s={18} /></span>
             <span className="grow" style={{ fontSize: 16, fontWeight: 600, textAlign: 'start', color: 'var(--red)' }}>{t('Sign out')}</span>

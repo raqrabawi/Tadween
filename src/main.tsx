@@ -10,6 +10,8 @@ import { applyLang } from './lib/i18n'
 applyLang()
 import { applyA11y, loadA11y } from './lib/a11y'
 applyA11y(loadA11y())
+import { keepDataPermanently } from './lib/backup'
+keepDataPermanently()
 applyTheme(storedMode(), storedPalette())
 applyFont(storedFont())
 

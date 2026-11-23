@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { db, redirectTo } from '../lib/db'
 import { useStore } from '../lib/store'
 import { I } from './Icon'
-import { Sheet } from './ui'
 import { t } from '../lib/i18n'
 
 // Official Google "G" mark, served by Google (not redrawn here).
@@ -35,19 +34,45 @@ export function AuthButtons({ size = 'lg', verb = 'Continue' }: { size?: 'lg' | 
   )
 }
 
-/** Shown once per visit after a guest adds something: sign in to keep it. */
+/** Start Google sign-in; returns an error message or null (the page leaves for Google on success). */
+export async function signInWithGoogle(): Promise<string | null> {
+  const { error } = await db.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectTo() } })
+  if (!error) return null
+  return /not enabled|unsupported|provider/i.test(error.message) ? t('{provider} sign-in isn’t switched on yet.', { provider: 'Google' }) : error.message
+}
+
+const SNOOZE_KEY = 'tadween-sync-snooze'
+const snoozed = () => { try { return Date.now() < Number(localStorage.getItem(SNOOZE_KEY) || 0) } catch { return false } }
+
+/**
+ * Guests: a small snackbar suggesting sign-in to sync. Shows a few seconds after opening the app,
+ * and again after they add something. Dismissing hides it for 3 days.
+ */
 export function SavePrompt() {
   const { guest, savePrompt, setSavePrompt } = useStore()
-  if (!guest || !savePrompt) return null
+  const [show, setShow] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  useEffect(() => {
+    if (!guest || snoozed()) return
+    const tm = window.setTimeout(() => setShow(true), 2500)
+    return () => window.clearTimeout(tm)
+  }, [guest])
+  useEffect(() => { if (guest && savePrompt && !snoozed()) setShow(true) }, [guest, savePrompt])
+  if (!guest || !show) return null
+  const close = () => {
+    setShow(false); setSavePrompt(false)
+    try { localStorage.setItem(SNOOZE_KEY, String(Date.now() + 3 * 864e5)) } catch { /* private mode */ }
+  }
   return (
-    <Sheet label={t('Save your Tadween')} onClose={() => setSavePrompt(false)}>
-      <div className="mt12" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 8 }}>
-        <span className="vorb" style={{ width: 56, height: 56 }}><I n="check" s={24} w={2.6} /></span>
-        <h2 className="ttl" style={{ fontSize: 22, lineHeight: '28px', marginTop: 8 }}>{t('Keep what you add')}</h2>
-        <p className="sub" style={{ fontSize: 15, lineHeight: '22px' }}>{t('It’s saved on this phone for now. Sign in to keep it safe, use it on any device and share lists with your family.')}</p>
-      </div>
-      <div className="mt20"><AuthButtons size="md" /></div>
-      <button className="btn" style={{ marginTop: 4, background: 'transparent', color: 'var(--ink2)' }} onClick={() => setSavePrompt(false)}>{t('Not now')}</button>
-    </Sheet>
+    <div className="snack" role="status" aria-live="polite">
+      <span className="snack-ic"><I n="cloud" s={18} /></span>
+      <span className="grow" style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <span style={{ fontSize: 14, fontWeight: 700, lineHeight: '19px' }}>{t('Sign in to sync your data')}</span>
+        <span style={{ fontSize: 12, lineHeight: '16px', opacity: .8 }}>{err ?? t('It’s saved on this phone. Sign in to keep it safe on every device.')}</span>
+      </span>
+      <button className="snack-go" disabled={busy} onClick={async () => { setBusy(true); const e = await signInWithGoogle(); if (e) { setErr(e); setBusy(false) } }}>{busy ? t('Opening…') : t('Sign in')}</button>
+      <button className="snack-x" aria-label={t('Not now')} onClick={close}><I n="close" s={13} w={2.6} /></button>
+    </div>
   )
 }

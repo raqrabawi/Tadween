@@ -16,6 +16,17 @@ export const AR: Record<string, string> = {
   'No Tadween account uses this number yet. Sign in with Google, then add your phone in Settings.': 'لا يوجد حساب في تدوين بهذا الرقم بعد. ادخل عبر Google ثم أضف رقمك من الإعدادات.',
   'We couldn’t send a code right now. Try again in a moment.': 'تعذّر إرسال الرمز الآن. حاول بعد قليل.',
 
+  // Guest sync & backup
+  'Sign in to sync your data': 'سجّل الدخول لمزامنة بياناتك', 'It’s saved on this phone. Sign in to keep it safe on every device.': 'بياناتك محفوظة على هذا الهاتف. سجّل الدخول لتبقى آمنة على كل أجهزتك.',
+  'Opening…': 'جارٍ الفتح…', 'Sync & share': 'مزامنة ومشاركة', 'Every device, plus family lists': 'على كل أجهزتك، مع قوائم العائلة',
+  'Backup & restore': 'النسخ الاحتياطي والاستعادة', 'Back up to a file': 'نسخ احتياطي إلى ملف', 'Lists, notes, calendar and reminders in one file': 'القوائم والملاحظات والتقويم والتذكيرات في ملف واحد',
+  'Restore from a file': 'استعادة من ملف', 'Replaces what’s on this phone': 'يستبدل ما على هذا الهاتف', 'Adds it to your account': 'يضيفها إلى حسابك',
+  'Your data is kept on this phone. A backup file lets you move it or keep a copy, no account needed.': 'بياناتك محفوظة على هذا الهاتف. ملف النسخ الاحتياطي يتيح لك نقلها أو الاحتفاظ بنسخة، دون حساب.',
+  'Your data is synced to your account. A backup file is an extra copy you control.': 'بياناتك متزامنة مع حسابك. ملف النسخ الاحتياطي نسخة إضافية بيدك.',
+  'Backup saved': 'حُفظت النسخة الاحتياطية', 'That file isn’t a Tadween backup': 'هذا الملف ليس نسخة احتياطية من تدوين',
+  'Replace what’s on this phone with this backup ({n} things)?': 'استبدال ما على هذا الهاتف بهذه النسخة ({n} عنصرًا)؟', 'Add this backup ({n} things) to your account?': 'إضافة هذه النسخة ({n} عنصرًا) إلى حسابك؟',
+  'Couldn’t restore right now. Try again.': 'تعذّرت الاستعادة الآن. حاول مجددًا.',
+
   // Accessibility
   'Accessibility': 'إمكانية الوصول', 'Text size, contrast, motion and more': 'حجم الخط والتباين والحركة والمزيد', 'Back to Settings': 'العودة إلى الإعدادات',
   'Text size': 'حجم الخط', 'This is how your text will look. Drag or tap to make it bigger or smaller.': 'هكذا سيبدو النص. اسحب أو انقر لتكبيره أو تصغيره.',

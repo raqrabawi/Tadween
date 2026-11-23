@@ -1,5 +1,5 @@
 import { haptic } from '../lib/a11y'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { I } from './Icon'
 import { HoldMic } from './HoldMic'
@@ -18,13 +18,12 @@ const TABS = [
 /**
  * Floating tab bar with a notch for the mic.
  * The selected tab's icon fills in with a little pop; every tab shows its name.
- * Scrolling down tucks the bar in; scrolling up brings it back.
+ * It stays fixed in place while the page scrolls.
  */
 export function TabBar() {
   const { pathname } = useLocation()
   const from = FROM[pathname]
   const first = useRef(true)
-  const [tucked, setTucked] = useState(false)
 
   // A light tap of haptics when the tab changes
   useEffect(() => {
@@ -32,20 +31,8 @@ export function TabBar() {
     first.current = false
   }, [pathname])
 
-  // Tuck away while scrolling down, come back when scrolling up
-  useEffect(() => {
-    let last = window.scrollY
-    const on = () => {
-      const y = window.scrollY, d = y - last
-      if (Math.abs(d) > 6) { setTucked(d > 0 && y > 60); last = y }
-    }
-    window.addEventListener('scroll', on, { passive: true })
-    return () => window.removeEventListener('scroll', on)
-  }, [])
-  useEffect(() => { setTucked(false) }, [pathname])
-
   return (
-    <div className={tucked ? 'tabbar tucked' : 'tabbar'}>
+    <div className="tabbar">
       <div className="tb-shell">
         <nav aria-label={t('Main')} className="tb-nav">
           {TABS.map((tb, i) => tb ? (
