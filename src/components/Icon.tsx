@@ -12,7 +12,7 @@ const P: Record<string, string> = {
   bell: 'M6 9a6 6 0 0 1 12 0v4.5l1.5 2.5h-15L6 13.5zM10 19a2 2 0 0 0 4 0',
   bag: 'M5 8h14l-1.2 10.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8zM9 8V6.5a3 3 0 0 1 6 0V8',
   pen: 'M12 20h8M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
-  mic: 'M12 2.5a3 3 0 0 0-3 3v6.5a3 3 0 0 0 6 0V5.5a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3',
+  mic: 'M12 2.5a3.5 3.5 0 0 1 3.5 3.5v6a3.5 3.5 0 0 1-7 0V6A3.5 3.5 0 0 1 12 2.5zM5 11a1 1 0 0 1 2 0 5 5 0 0 0 10 0 1 1 0 0 1 2 0 7 7 0 0 1-6 6.93V20h2.5a1 1 0 0 1 0 2h-7a1 1 0 0 1 0-2H11v-2.07A7 7 0 0 1 5 11z',
   speaker: 'M4 9.5v5h3.5L12 18.5v-13L7.5 9.5zM15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11',
   target: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
   clock: 'M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5V12l3 2',
@@ -51,7 +51,7 @@ const P: Record<string, string> = {
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20.5c0-4 3.4-6.5 7.5-6.5s7.5 2.5 7.5 6.5'
 }
 
-const FILLED = new Set(['spark', 'play', 'pause', 'stop', 'homeF', 'calF', 'listF', 'bookF', 'micF'])
+const FILLED = new Set(['spark', 'play', 'pause', 'stop', 'homeF', 'calF', 'listF', 'bookF', 'micF', 'mic'])
 
 export function I({ n, s = 20, w = 2, className }: { n: keyof typeof P | string; s?: number; w?: number; className?: string }) {
   const filled = FILLED.has(n)
