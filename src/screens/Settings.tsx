@@ -7,6 +7,8 @@ import { I } from '../components/Icon'
 import { Tabs } from '../components/Tabs'
 import { Avatar, Sheet, announce } from '../components/ui'
 import { lang, setLang, t } from '../lib/i18n'
+import { getTone, setTone, say, type Tone } from '../lib/tone'
+import { speak } from '../lib/voice'
 import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
 import { PHONE_READY } from '../lib/phone'
 import { PhoneFlow } from '../components/PhoneFlow'
@@ -49,6 +51,9 @@ export default function Settings() {
   const setSize = (i: number) => { const n = { ...a11y, size: SIZES[Math.max(0, Math.min(SIZES.length - 1, i))] }; setA11y(n); saveA11y(n) }
   const resolved = theme === 'system' ? (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : theme
   const [langPick, setLangPick] = useState(lang)
+  // Speaking style: picking one plays a short sample in that style
+  const [tone, setToneState] = useState<Tone>(getTone)
+  const pickTone = (v: Tone) => { setTone(v); setToneState(v); speak(say('sample'), profile?.voice_style) }
   const pickLang = (l: 'en' | 'ar') => { if (l === lang) return; setLangPick(l); window.setTimeout(() => setLang(l), 380) }
   const speakOn = !!profile?.speak_replies
   const [signing, setSigning] = useState(false)
@@ -119,9 +124,9 @@ export default function Settings() {
         <span className="st-stars" aria-hidden="true" />
         <span className="st-sun" aria-hidden="true" />
         <Tabs active={langPick} role="radiogroup" aria-label={t('Language')}>
-          {([['en', 'Aa', 'English'], ['ar', 'ع', 'العربية']] as const).map(([code, glyph, label]) => (
+          {([['en', 'English'], ['ar', 'العربية']] as const).map(([code, label]) => (
             <button key={code} role="radio" aria-checked={langPick === code} lang={code} className={langPick === code ? 'on' : ''} onClick={() => pickLang(code)}>
-              <span className="st-g">{glyph}</span><span>{label}</span>
+              <span>{label}</span>
             </button>
           ))}
         </Tabs>
@@ -153,6 +158,19 @@ export default function Settings() {
           <span className="st-tv">{speakOn ? t('On') : t('Off')}</span>
         </button>
       </div>
+
+      {/* Speaking style: friendly (Jordanian in Arabic) or formal */}
+      <p className="cap st-cap">{t('Speaking style')}</p>
+      <section className="card st-tone">
+        <Tabs active={tone} role="radiogroup" aria-label={t('Speaking style')}>
+          {(['friendly', 'formal'] as const).map((v) => (
+            <button key={v} role="radio" aria-checked={tone === v} className={tone === v ? 'on' : ''} onClick={() => pickTone(v)}>
+              <span>{t(v === 'friendly' ? 'Friendly' : 'Formal')}</span>
+            </button>
+          ))}
+        </Tabs>
+        <p className="sub st-tone-hint">{t(tone === 'friendly' ? 'Casual, everyday talk. In Arabic, a Jordanian accent.' : 'Polite and proper. In Arabic, standard Arabic (فصحى).')}</p>
+      </section>
 
       {/* Colour theme: mini phones */}
       <p className="cap st-cap">{t('Color theme')}</p>

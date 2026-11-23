@@ -1,4 +1,5 @@
 import { isAr } from './i18n'
+import { getTone } from './tone'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /* Speech in the browser:
@@ -87,13 +88,16 @@ export function speak(text: string, style = 'Warm', onEnd?: () => void) {
   window.speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(text)
   const s = STYLE[style] ?? STYLE.Warm
-  u.rate = s.rate
+  const formal = getTone() === 'formal'
+  u.rate = s.rate * (formal ? 0.95 : 1)
   u.pitch = s.pitch
-  u.lang = isAr ? 'ar-SA' : 'en-US'
   const voices = window.speechSynthesis.getVoices()
+  // Arabic: a Jordanian voice if the phone has one, then another Levantine one, then any Arabic voice
+  const ar = (re: RegExp) => voices.find((v) => re.test(v.lang.replace('_', '-')))
   const pick = isAr
-    ? voices.find((v) => /^ar/i.test(v.lang))
+    ? ar(/^ar-JO/i) ?? ar(/^ar-(PS|LB|SY)/i) ?? ar(/^ar/i)
     : voices.find((v) => /en(-|_)(US|GB)/i.test(v.lang) && /(Samantha|Karen|Google US English|Ava|Serena|Daniel)/i.test(v.name)) ?? voices.find((v) => /^en/i.test(v.lang))
+  u.lang = pick?.lang ?? (isAr ? 'ar-JO' : 'en-US')
   if (pick) u.voice = pick
   u.onend = () => onEnd?.()
   u.onerror = () => onEnd?.()

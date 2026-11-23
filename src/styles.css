@@ -1077,3 +1077,8 @@ html.light .card.lcard[class*="tone-"],html .light .card.lcard[class*="tone-"]{b
 .sk-page .row > .sk:last-child:not([style*="width"]){flex:1}
 @keyframes skShine{0%{background-position:100% 50%}100%{background-position:0 50%}}
 @media (prefers-reduced-motion:reduce){.sk{animation:none}}
+
+/* Speaking style card */
+.st-tone{display:grid;gap:10px;padding:12px;border-radius:24px}
+.st-tone .tabs > :not(.tab-thumb){min-height:46px;gap:8px}
+.st-tone-hint{margin:0 6px 2px;font-size:13px;line-height:18px}

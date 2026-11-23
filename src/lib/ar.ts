@@ -90,7 +90,7 @@ export const AR: Record<string, string> = {
 
   // Lists
   'Categories': 'التصنيفات', 'Category': 'التصنيف', 'Add category': 'أضف تصنيفًا', 'Category name': 'اسم التصنيف', 'Save category': 'احفظ التصنيف',
-  'All': 'الكل', 'No category': 'بلا تصنيف', 'New category': 'تصنيف جديد', 'Delete category {name}': 'احذف التصنيف {name}',
+  'All': 'الكل', 'Speaking style': 'أسلوب الكلام', 'Friendly': 'ودّي', 'Formal': 'رسمي', 'Casual, everyday talk. In Arabic, a Jordanian accent.': 'كلام عادي وبسيط، باللهجة الأردنية.', 'Polite and proper. In Arabic, standard Arabic (فصحى).': 'كلام مهذّب ورسمي، بالعربية الفصحى.', 'No category': 'بلا تصنيف', 'New category': 'تصنيف جديد', 'Delete category {name}': 'احذف التصنيف {name}',
   'Delete “{name}” and its lists?': 'حذف «{name}» وقوائمه؟', 'Delete “{title}” and its items?': 'حذف «{title}» وعناصرها؟',
   'To do: {n}': 'للإنجاز: {n}', 'All done': 'كل شيء منجز', 'More actions for {title}': 'خيارات أخرى لـ {title}', 'Fold list': 'اطوِ القائمة', 'Unfold list': 'افتح القائمة',
   'Shared with family': 'مشتركة مع العائلة', 'People: {n}': 'الأشخاص: {n}', 'Check off {name}': 'أشّر على {name}', 'Usually': 'عادةً', 'Usual amount': 'الكمية المعتادة',

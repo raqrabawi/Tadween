@@ -1,3 +1,4 @@
+import { say } from '../lib/tone'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
@@ -45,7 +46,7 @@ export default function Review() {
     setBusy(true)
     const n = await saveDrafts(chosen, { noteCategory: st.noteCategory })
     setBusy(false)
-    if (!quiet && profile?.speak_replies) speak(t('Done. Saved: {n}.', { n }), profile.voice_style)
+    if (!quiet && profile?.speak_replies) speak(say('saved', { n }), profile.voice_style)
     announce(n ? t('Added: {n}', { n }) : t('Nothing was added'))
     nav(back, { replace: true })
   }
@@ -69,7 +70,7 @@ export default function Review() {
     let talking = !!profile?.speak_replies
     let timeUp = false
     const go = () => { if (!talking && timeUp) save(true) }
-    if (talking && !spoken.current) { spoken.current = true; speak(t('Adding {what}.', { what: summary.replace(/ · /g, isAr ? ' ' : ' at ') }), profile?.voice_style, () => { talking = false; go() }) } else talking = false
+    if (talking && !spoken.current) { spoken.current = true; speak(say('adding', { what: summary.replace(/ · /g, isAr ? ' ' : ' at ') }), profile?.voice_style, () => { talking = false; go() }) } else talking = false
     const start = Date.now(), ms = 3000
     const tick = setInterval(() => {
       const p = Math.max(0, 1 - (Date.now() - start) / ms)
@@ -85,7 +86,7 @@ export default function Review() {
     if (reading) { stopSpeaking(); setReading(false); return }
     const line = chosen.map((d) => { const m = meta(d, d.kind === 'item' ? listFor(d.listHint) : undefined); return `${m.kind}: ${m.title}, ${m.detail}` }).join('. ')
     setReading(true)
-    speak(line || t('Nothing selected.'), profile?.voice_style, () => setReading(false))
+    speak(line || say('nothing'), profile?.voice_style, () => setReading(false))
   }
 
   if (!text) {

@@ -1,3 +1,4 @@
+import { say, sayHello } from '../lib/tone'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
@@ -32,7 +33,7 @@ export default function Setup() {
   }
   const sample = () => {
     setPlaying(true)
-    speak(t(new Date().getHours() < 12 ? 'Good morning, {name}. I’m Tadween. Just tell me what’s on your mind.' : 'Good evening, {name}. I’m Tadween. Just tell me what’s on your mind.', { name: name || t('there') }), profile?.voice_style, () => setPlaying(false))
+    speak(sayHello(name || t('there')) + ' ' + say('intro'), profile?.voice_style, () => setPlaying(false))
   }
   const finish = async () => {
     await updateProfile({ name: name.trim() || profile?.name || t('Friend'), onboarded: true })

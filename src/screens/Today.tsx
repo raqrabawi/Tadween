@@ -1,3 +1,4 @@
+import { say, sayHello } from '../lib/tone'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
@@ -31,10 +32,11 @@ export default function Today() {
 
   const brief = () => {
     if (briefing) { stopSpeaking(); setBriefing(false); return }
-    const parts = [`${greeting().replace(',', '')} ${first}.`]
-    parts.push(todays.length ? t('Events today: {n}', { n: todays.length }) + (upcoming ? t(', next is {title} at {time}.', { title: upcoming.title, time: hm(upcoming.starts_at) }) : '.') : t('Your calendar is clear today.'))
-    if (openTasks.length) parts.push(t('Open tasks: {n}, starting with {title}.', { n: openTasks.length, title: openTasks[0].title }))
-    if (shopOpen) parts.push(t('And {n} on {list}.', { n: shopOpen, list: shopping?.title ?? '' }))
+    // Spoken in the chosen speaking style (friendly, or formal); friendly Arabic is Jordanian
+    const parts = [sayHello(first)]
+    parts.push(todays.length ? say('events', { n: todays.length }) + (upcoming ? say('next', { title: upcoming.title, time: hm(upcoming.starts_at) }) : '.') : say('clear'))
+    if (openTasks.length) parts.push(say('tasks', { n: openTasks.length, title: openTasks[0].title }))
+    if (shopOpen) parts.push(say('shop', { n: shopOpen, list: shopping?.title ?? '' }))
     setBriefing(true)
     speak(parts.join(' '), profile?.voice_style, () => setBriefing(false))
   }
