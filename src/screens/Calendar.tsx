@@ -156,7 +156,10 @@ export default function Calendar() {
             </div>
           </div>
         )}
-        {view === 'Day' && (
+        {view === 'Day' && !dayEvents.length && !dayRems.length && (
+          <div className="card empty"><span className="ttl">{t('Nothing here')}</span><span className="sub">{t('Tap the mic and say what’s coming up.')}</span></div>
+        )}
+        {view === 'Day' && (dayEvents.length > 0 || dayRems.length > 0) && (
           <div key={day.toDateString()} className="cal-tl card" style={{ height: hours.length * HOUR }}>
             {hours.map((h) => (
               <div key={h} className="cal-hr" style={{ top: (h - startH) * HOUR }}>
