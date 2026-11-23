@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from './lib/store'
-import { Spinner, TabBar, GlobalToast } from './components/ui'
+import { TabBar, GlobalToast } from './components/ui'
+import { PageSkeleton } from './components/Skeleton'
 import { SavePrompt } from './components/SignIn'
 import Today from './screens/Today'
 import Calendar from './screens/Calendar'
@@ -41,7 +42,7 @@ export default function App() {
   const [onboard, setOnboard] = useState(needsOnboarding)
 
   const splashEl = splash && <Splash ready={ready} onGone={() => setSplash(false)} />
-  if (!ready) return <>{splash ? null : <div className="app"><div className="screen"><Spinner /></div></div>}{splashEl}</>
+  if (!ready) return <>{splash ? null : <div className="app"><PageSkeleton /></div>}{splashEl}</>
 
   if (!guest && profile && !profile.onboarded && loc.pathname !== '/setup') return <Navigate to="/setup" replace />
 
@@ -50,7 +51,7 @@ export default function App() {
     <div className="app">
       {/* First launch: only onboarding is drawn; the app mounts when it's done (faster first paint) */}
       {!(onboard && !session) && <>
-      <Suspense fallback={<div className="screen"><Spinner /></div>}>
+      <Suspense fallback={<PageSkeleton />}>
       <Routes>
         <Route path="/" element={<Today />} />
         <Route path="/calendar" element={<Calendar />} />

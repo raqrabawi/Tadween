@@ -5,11 +5,12 @@ import { haptic } from '../lib/a11y'
 import { speak, stopSpeaking } from '../lib/voice'
 import { greeting, hm, relTime, sameDay } from '../lib/dates'
 import { I } from '../components/Icon'
+import { PageSkeleton } from '../components/Skeleton'
 import { Avatar } from '../components/ui'
 import { isAr, LOC, t } from '../lib/i18n'
 
 export default function Today() {
-  const { profile, events, reminders, lists, items, members, toggleReminder } = useStore()
+  const { profile, events, reminders, lists, items, members, toggleReminder, firstLoad } = useStore()
   const [briefing, setBriefing] = useState(false)
   const now = new Date()
 
@@ -99,6 +100,9 @@ export default function Today() {
     const moved = (Math.round(-drag / step) || (Math.abs(drag) > 50 ? (drag < 0 ? 1 : -1) : 0)) * dir
     go(top + moved)
   }
+
+  // First load after signing in on a new device: show the page's shape while data arrives
+  if (firstLoad) return <PageSkeleton />
 
   return (
     <main className="screen">

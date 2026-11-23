@@ -4,6 +4,7 @@ import { useStore } from '../lib/store'
 import { haptic } from '../lib/a11y'
 import type { List } from '../lib/types'
 import { I } from '../components/Icon'
+import { PageSkeleton } from '../components/Skeleton'
 import { Tabs } from '../components/Tabs'
 import { CategoryAdd } from '../components/CategoryAdd'
 import { Avatar, Sheet, Switch, announce } from '../components/ui'
@@ -114,7 +115,7 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
 }
 
 export default function Lists() {
-  const { categories, lists, items, addCategory, deleteCategory, renameCategory, addList, addItem, updateList, deleteList, family, guest, setSavePrompt } = useStore()
+  const { categories, lists, items, addCategory, deleteCategory, renameCategory, addList, addItem, updateList, deleteList, family, guest, setSavePrompt, firstLoad } = useStore()
   // 'all' shows every list, including ones with no category
   const [cat, setCat] = useState<string>('all')
   const [act, setAct] = useState<List | null>(null)
@@ -195,6 +196,9 @@ export default function Lists() {
     setItemName(''); setItemQty('')
     setNewItem(false)
   }
+
+  // First load after signing in on a new device: show the page's shape while data arrives
+  if (firstLoad) return <PageSkeleton />
 
   return (
     <main className="screen">

@@ -26,6 +26,8 @@ interface Store {
   reminders: Reminder[]
   notes: Note[]
   loading: boolean
+  /** First load for a signed-in account with nothing on the device yet: show skeletons */
+  firstLoad: boolean
   theme: Mode
   palette: Palette
   setTheme: (t: Mode) => void
@@ -456,10 +458,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const memberFor = useCallback((userId: string | null) => members.find((m) => m.user_id === userId), [members])
 
   const value = useMemo<Store>(() => ({
-    ready, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
+    ready, firstLoad: !!uid && loading && !profile, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, renameCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
-  }), [ready, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
+  }), [ready, uid, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
     setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, renameCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 

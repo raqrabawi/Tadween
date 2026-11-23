@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { I } from '../components/Icon'
+import { PageSkeleton } from '../components/Skeleton'
 import { Tabs } from '../components/Tabs'
 import { CategoryAdd } from '../components/CategoryAdd'
 import { Fab } from '../components/Fab'
@@ -11,7 +12,7 @@ import { LOC, t } from '../lib/i18n'
 const TONES = ['mint', 'sky', 'sand', 'lilac', 'moss']
 
 export default function Notes() {
-  const { notes, saveNote, noteCategories, addCategory, deleteCategory, renameCategory } = useStore()
+  const { notes, saveNote, noteCategories, addCategory, deleteCategory, renameCategory, firstLoad } = useStore()
   const nav = useNavigate()
   // null = All
   const [cat, setCat] = useState<string | null>(() => { try { return sessionStorage.getItem('tadween-notecat') || null } catch { return null } })
@@ -49,6 +50,9 @@ export default function Notes() {
   const voiceCount = notes.filter((n) => n.kind === 'voice').length
   const cols: (typeof shown)[] = [[], []]
   shown.forEach((n, i) => cols[i % 2].push(n))
+
+  // First load after signing in on a new device: show the page's shape while data arrives
+  if (firstLoad) return <PageSkeleton />
 
   return (
     <main className="screen">

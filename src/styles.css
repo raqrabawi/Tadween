@@ -1070,3 +1070,10 @@ html.light .card.lcard[class*="tone-"],html .light .card.lcard[class*="tone-"]{b
 @media (prefers-reduced-motion:reduce){.lc-fill,.lc-fold{transition:none}}
 
 .sheet{touch-action:pan-y}
+
+/* ---------- Skeleton loading ---------- */
+.sk{display:block;flex:none;max-width:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--ink) 7%,transparent) 25%,color-mix(in srgb,var(--ink) 13%,transparent) 37%,color-mix(in srgb,var(--ink) 7%,transparent) 63%);background-size:400% 100%;animation:skShine 1.4s ease infinite}
+.card .sk{background-color:transparent}
+.sk-page .row > .sk:last-child:not([style*="width"]){flex:1}
+@keyframes skShine{0%{background-position:100% 50%}100%{background-position:0 50%}}
+@media (prefers-reduced-motion:reduce){.sk{animation:none}}

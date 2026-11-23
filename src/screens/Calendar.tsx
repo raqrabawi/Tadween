@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { addDays, hm, sameDay, startOfDay, weekStart } from '../lib/dates'
 import { I } from '../components/Icon'
+import { PageSkeleton } from '../components/Skeleton'
 import { Fab } from '../components/Fab'
 import type { EventRow } from '../lib/types'
 import { isAr, LOC, t } from '../lib/i18n'
@@ -29,7 +30,7 @@ const isoWeek = (d: Date) => {
 const TONE: Record<string, string> = { Work: 'tone-sky', Personal: 'tone-mint', Family: 'tone-sand', Birthday: 'tone-lilac' }
 
 export default function Calendar() {
-  const { events, reminders, toggleReminder } = useStore()
+  const { events, reminders, toggleReminder, firstLoad } = useStore()
   const nav = useNavigate()
   const [day, setDay] = useState(() => startOfDay(new Date()))
   const [view, setView] = useState<View>('Week')
@@ -90,6 +91,9 @@ export default function Calendar() {
   const startH = isToday ? Math.max(0, Math.min(now.getHours(), 20)) : 7
   const hours = Array.from({ length: 24 - startH }, (_, i) => startH + i)
   const topFor = (d: Date) => ((d.getHours() + d.getMinutes() / 60) - startH) * HOUR
+
+  // First load after signing in on a new device: show the page's shape while data arrives
+  if (firstLoad) return <PageSkeleton />
 
   return (
     <main className="screen">
