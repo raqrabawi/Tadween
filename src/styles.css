@@ -4,7 +4,7 @@
 
 :where(*), :where(*)::before, :where(*)::after{box-sizing:border-box}
 html, body, #root{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+body{background:var(--bg);color:var(--ink);font-family:var(--font,Inter,-apple-system,BlinkMacSystemFont,system-ui,sans-serif);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 :where(button){font-family:inherit;color:inherit;border:0;background:none;padding:0;margin:0;cursor:pointer;text-align:inherit;-webkit-appearance:none;appearance:none}
 :where(a){color:inherit;text-decoration:none}
 :where(p, h1, h2, h3){margin:0}
@@ -501,9 +501,12 @@ textarea.inp{resize:none;line-height:28px}
 .classic .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(163,67,44,.1),transparent 70%),var(--bg)}
 .classic.dark .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(198,90,59,.16),transparent 70%),var(--bg)}
 .light.classic .tabbar nav.tb-nav,.classic .light .tabbar nav.tb-nav{background:#FBF8F2}
-/* Diary type: serif headings and titles */
-.classic .h1,.classic .ttl,.classic .hd3 h1,.classic h1,.classic h2{font-family:"New York",ui-serif,"Iowan Old Style",Georgia,"Times New Roman",serif;letter-spacing:-.2px}
-.classic .h1{font-weight:600}
+/* Serif font choices: soften the tight sans letter-spacing on big headings */
+[data-font="lora"] .h1,[data-font="merriweather"] .h1,[data-font="newsreader"] .h1{letter-spacing:-.3px;font-weight:600}
+.font-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;border-radius:18px;background:var(--s2);text-align:left;box-shadow:inset 0 0 0 1.5px transparent;transition:box-shadow .2s;min-width:0}
+.font-opt[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--acc)}
+.font-opt .aa{font-size:26px;line-height:32px;font-weight:600}
+.font-opt small{font-size:12px;color:var(--ink3)}
 
 /* Theme thumb: light and dark halves, each showing structure + action colour */
 .thm-prev{height:56px}

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { FONTS, applyFont, loadFont, storedFont, type Font } from '../lib/theme'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { db } from '../lib/db'
@@ -14,6 +15,8 @@ const PALETTES = [
 export default function Settings() {
   const { profile, family, members, session, theme, setTheme, palette, setPalette, joinFamily, guest, setSavePrompt } = useStore()
   const [sheet, setSheet] = useState<null | 'invite' | 'join'>(null)
+  const [font, setFont] = useState<Font>(storedFont)
+  useEffect(() => { FONTS.forEach((f) => loadFont(f.id)) }, [])  // so each option previews in its own face
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
   const user = session?.user
@@ -62,6 +65,19 @@ export default function Settings() {
         </div>
         <div className="seg mt12" role="group" aria-label="Mode">
           {(['dark', 'light', 'system'] as const).map((m) => <button key={m} className={theme === m ? 'on' : ''} aria-pressed={theme === m} onClick={() => setTheme(m)}>{m === 'dark' ? 'Dark' : m === 'light' ? 'Light' : 'System'}</button>)}
+        </div>
+      </div>
+
+      <p className="cap" style={{ margin: '24px 8px 10px' }}>Font</p>
+      <div className="card" style={{ padding: 14 }}>
+        <div role="radiogroup" aria-label="Font" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+          {FONTS.map((f) => (
+            <button key={f.id} role="radio" aria-checked={font === f.id} className="font-opt" style={{ fontFamily: f.stack }} onClick={() => { setFont(f.id); applyFont(f.id) }}>
+              <span className="spread" style={{ width: '100%' }}><span className="aa">Aa</span>{font === f.id && <span className="thm-ck"><I n="check" s={12} w={3.4} /></span>}</span>
+              <span style={{ fontSize: 15, fontWeight: 600 }}>{f.id}</span>
+              <small>{f.meta}</small>
+            </button>
+          ))}
         </div>
       </div>
 
