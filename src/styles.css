@@ -652,10 +652,10 @@ textarea.inp{resize:none;line-height:28px}
   color-scheme:light;
   --bg:#F5F4ED; --s1:#FFFEF8BD; --s1-solid:#FFFEF8; --s2:#E9ECE3; --s3:#D5DDD3;
   --ink:#273936; --ink2:rgba(39,57,54,.84); --ink3:#52645D; --line:#E2E7DD;
-  --acc:#304440; --on:#FFF8EE; --sea:#304440; --hotInk:#FFF8EE; --em:#B95333;
+  --acc:#283B37; --on:#FFF8EE; --sea:#304440; --hotInk:#FFF8EE; --em:#B95333;
   --cta:#B95333; --ctaFlat:#B95333; --ctaInk:#FFF8EE; --ctaPress:#A04429; --ctaRing:rgba(222,116,73,.45); --ctaEdge:#A04429; --ctaGlow:rgba(185,83,51,.25);
   --grn:#304440; --mint:#627A6B; --teal:#304440; --sun:#8A6420; --honey:#8A6420; --red:#B94F48; --urgent:#B95333;
-  --hot:linear-gradient(135deg,color-mix(in srgb,#304440 90%,transparent),color-mix(in srgb,#304440 78%,#F5F4ED));
+  --hot:linear-gradient(135deg,#263834,color-mix(in srgb,#304440 94%,#F5F4ED));
   --edge:inset 0 1px 0 rgba(255,255,255,.92),inset 0 0 0 1px #FFFFFFD1; --shadow:0 14px 30px rgba(39,57,54,.09);
   --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
   --inkBtn:#304440; --inkBtnText:#FFF8EE;
@@ -669,10 +669,10 @@ textarea.inp{resize:none;line-height:28px}
   color-scheme:dark;
   --bg:#181A19; --s1:#232625D9; --s1-solid:#232625; --s2:#2C302E; --s3:#3A403D;
   --ink:#F2EFE9; --ink2:rgba(242,239,233,.84); --ink3:#B6B9B5; --line:#3A403D;
-  --acc:#6B9C84; --on:#181A19; --sea:#304440; --hotInk:#181A19; --em:#E99168;
+  --acc:#7DB297; --on:#111413; --sea:#304440; --hotInk:#111413; --em:#E99168;
   --cta:#E99168; --ctaFlat:#E99168; --ctaInk:#181A19; --ctaPress:#EFA482; --ctaRing:rgba(233,145,104,.45); --ctaEdge:#EFA482; --ctaGlow:rgba(233,145,104,.28);
   --grn:#86A995; --mint:#86A995; --teal:#85B7B0; --sun:#E9C684; --honey:#E9C684; --red:#F07872; --urgent:#E99168;
-  --hot:linear-gradient(135deg,color-mix(in srgb,#6B9C84 90%,transparent),color-mix(in srgb,#6B9C84 78%,#181A19));
+  --hot:linear-gradient(135deg,#86BC9E,color-mix(in srgb,#7AAE93 94%,#181A19));
   --edge:inset 0 1px 0 rgba(255,255,255,.10),inset 0 0 0 1px #E9E4D92E; --shadow:0 16px 34px rgba(0,0,0,.28);
   --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
   --inkBtn:#F2EFE9; --inkBtnText:#181A19;
