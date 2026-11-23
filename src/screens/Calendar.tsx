@@ -86,9 +86,10 @@ export default function Calendar() {
       ? `${days[0].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })} – ${days[6].toLocaleDateString(LOC, { day: 'numeric', month: 'short' })}`
       : day.toLocaleDateString(LOC, { month: 'long', year: 'numeric' })
 
-  // Day view: an hour-by-hour timeline. Today starts at the current hour; other days at 7:00.
+  // Day view: an hour-by-hour timeline. Every day, today included, starts at 7:00,
+  // or earlier when something is booked before then.
   const HOUR = 64
-  const startH = isToday ? Math.max(0, Math.min(now.getHours(), 20)) : 7
+  const startH = Math.min(7, ...dayEvents.filter((e) => e.source !== 'birthday').map((e) => new Date(e.starts_at).getHours()), ...dayRems.map((r) => new Date(r.remind_at!).getHours()))
   const hours = Array.from({ length: 24 - startH }, (_, i) => startH + i)
   const topFor = (d: Date) => ((d.getHours() + d.getMinutes() / 60) - startH) * HOUR
 
