@@ -24,12 +24,15 @@ function AllInOne() {
   return (
     <div className="ob-ill ob-bento">
       <div className="ob-tile t1"><span className="ob-dot" style={{ background: 'var(--k-event)' }}><I n="cal" s={15} /></span>
-        <div className="ob-week">{[1, 2, 3, 4, 5].map((n, i) => <span key={n} className={i === 2 ? 'on' : ''}>{new Date(2026, 10, 22 + n).toLocaleDateString(LOC, { weekday: 'narrow' })}</span>)}</div>
-        <b>{t('Lunch with Sara')}</b><small>13:00</small></div>
+        <div className="ob-tb">
+          <div className="ob-week">{[1, 2, 3, 4, 5].map((n, i) => <span key={n} className={i === 2 ? 'on' : ''}>{new Date(2026, 10, 22 + n).toLocaleDateString(LOC, { weekday: 'narrow' })}</span>)}</div>
+          <b>{t('Lunch with Sara')}</b><small>13:00</small></div></div>
       <div className="ob-tile t2"><span className="ob-dot" style={{ background: 'var(--k-item)' }}><I n="list" s={15} /></span>
-        {[t('Milk'), t('Bread'), t('Eggs')].map((x, i) => <span key={x} className={i === 0 ? 'ob-li done' : 'ob-li'}><i />{x}</span>)}</div>
-      <div className="ob-tile t3"><span className="ob-dot" style={{ background: 'var(--k-note)' }}><I n="pen" s={15} /></span><b>{t('Trip ideas')}</b><small>{t('Beach, then dinner out')}</small></div>
-      <div className="ob-tile t4"><span className="ob-dot" style={{ background: 'var(--k-reminder)' }}><I n="bell" s={15} /></span><b>{t('Pay the rent')}</b><small>{t('on the 1st')}</small></div>
+        <div className="ob-tb ob-lis">{[t('Milk'), t('Bread'), t('Eggs')].map((x, i) => <span key={x} className={i === 0 ? 'ob-li done' : 'ob-li'}><i />{x}</span>)}</div></div>
+      <div className="ob-tile t3"><span className="ob-dot" style={{ background: 'var(--k-note)' }}><I n="pen" s={15} /></span>
+        <div className="ob-tb"><b>{t('Trip ideas')}</b><small>{t('Beach, then dinner out')}</small></div></div>
+      <div className="ob-tile t4"><span className="ob-dot" style={{ background: 'var(--k-reminder)' }}><I n="bell" s={15} /></span>
+        <div className="ob-tb"><b>{t('Pay the rent')}</b><small>{t('on the 1st')}</small></div></div>
     </div>
   )
 }
