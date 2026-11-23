@@ -230,8 +230,8 @@ textarea.inp{resize:none;line-height:28px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 112px);width:min(440px,calc(100% - 40px));min-height:56px;border-radius:28px;padding:6px 6px 6px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px;font-weight:500;z-index:30}
 
 /* ---------- Sheet ---------- */
-.sheet-wrap{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:480px;max-height:94dvh;overflow:auto;border-radius:32px 32px 0 0;padding:8px 20px calc(env(safe-area-inset-bottom,0px) + 24px);background:radial-gradient(360px 260px at 108% -8%,var(--a1),transparent 68%),var(--bg);box-shadow:inset 0 1px 0 var(--line)}
+.sheet-wrap{position:fixed;inset:0;z-index:40;overscroll-behavior:contain;touch-action:none;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:480px;max-height:94%;overscroll-behavior:contain;overflow:auto;border-radius:32px 32px 0 0;padding:8px 20px calc(env(safe-area-inset-bottom,0px) + 24px);background:radial-gradient(360px 260px at 108% -8%,var(--a1),transparent 68%),var(--bg);box-shadow:inset 0 1px 0 var(--line)}
 .grab{display:block;margin:0 auto;width:40px;height:5px;border-radius:3px;background:var(--ink3);opacity:.6}
 
 .empty{padding:28px 20px;text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
@@ -1068,3 +1068,5 @@ html.light .card.lcard[class*="tone-"],html .light .card.lcard[class*="tone-"]{b
 .lc-done span{display:flex;align-items:center;gap:6px}
 .lc-done button{font-size:13px;font-weight:600;color:var(--acc);text-decoration:underline;text-underline-offset:3px;padding:8px}
 @media (prefers-reduced-motion:reduce){.lc-fill,.lc-fold{transition:none}}
+
+.sheet{touch-action:pan-y}

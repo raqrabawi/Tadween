@@ -38,8 +38,21 @@ export function Spinner() {
 }
 
 export function Sheet({ children, onClose, label }: { children: ReactNode; onClose: () => void; label: string }) {
+  // Keep the sheet inside the part of the screen you can see: when the phone keyboard opens,
+  // the sheet rides up above it instead of sliding with the page behind it.
+  const [box, setBox] = useState<{ top: number; height: number } | null>(null)
+  useEffect(() => {
+    const vv = window.visualViewport
+    const fit = () => { if (vv) setBox({ top: vv.offsetTop, height: vv.height }) }
+    fit()
+    vv?.addEventListener('resize', fit)
+    vv?.addEventListener('scroll', fit)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { vv?.removeEventListener('resize', fit); vv?.removeEventListener('scroll', fit); document.body.style.overflow = prev }
+  }, [])
   return (
-    <div className="sheet-wrap" onClick={onClose}>
+    <div className="sheet-wrap" style={box ? { top: box.top, height: box.height, bottom: 'auto' } : undefined} onClick={onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={label} onClick={(e) => e.stopPropagation()}>
         <span className="grab" aria-hidden="true" />
         {children}

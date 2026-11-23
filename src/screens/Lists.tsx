@@ -60,7 +60,7 @@ function ListCard({ list, onActions, catName }: { list: List; onActions: (l: Lis
         <button className="lc-main lp" {...lp.handlers} onClick={() => { if (lp.fired.current) { lp.fired.current = false; return } setOpen(!open) }} aria-expanded={open} aria-description={t('Long press for more actions')}>
           <span className="lc-ring" aria-hidden="true">
             <svg viewBox="0 0 36 36" width="40" height="40"><circle cx="18" cy="18" r={R} className="lc-track" />{pct > 0 && <circle cx="18" cy="18" r={R} className="lc-fill" strokeDasharray={`${pct * C} ${C}`} />}</svg>
-            <b className="num">{todo.length ? todo.length : mine.length ? <I n="check" s={15} w={3} /> : 0}</b>
+            <b className="num">{todo.length}</b>
           </span>
           <span className="lc-txt">
             <span className="lc-title">{t(list.title)}</span>
