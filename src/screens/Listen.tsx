@@ -48,14 +48,8 @@ export default function Listen() {
   return (
     <div className="lvw" style={{ minHeight: '100dvh', color: 'var(--ink)' }}>
       <main className="screen col" style={{ background: 'transparent' }}>
-        <div className="hd">
-          <Link to={scope === 'calendar' ? '/add?type=Event' : scope === 'lists' ? '/add?type=Shopping' : scope === 'notes' ? '/note/new' : '/add'} className="ib" aria-label="Type instead" onClick={() => v.stop()}><I n="keyboard" s={18} w={1.8} /></Link>
-          <span role="status" className="ib wide num" style={{ height: 40 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: v.listening ? 'var(--red)' : 'var(--ink3)', boxShadow: v.listening ? '0 0 10px var(--red)' : 'none' }} />{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}</span>
-          <span className="bi" style={{ height: 40, borderRadius: 20, padding: '0 12px 0 8px' }}><b>EN</b><b>AR</b>Auto</span>
-        </div>
-
-        <div className="row mt20" style={{ gap: 8, flexWrap: 'wrap' }}>
-          <span className="tag" aria-live="polite"><I n={info.icon} s={14} w={2.2} />{scope === 'all' ? 'Adding anything' : `Adding to ${info.name}`}</span>
+        <div className="row mt8" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <span className="tag" aria-live="polite"><I n={info.icon} s={14} w={2.2} />{scope === 'all' ? 'Adding anything' : `Adding to ${info.name}${scope === 'lists' && listHint ? ` · ${listHint}` : ''}`}</span>
           {page !== 'all' && (
             <button className="tag" style={{ background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => setScope(scope === 'all' ? page : 'all')}>
               {scope === 'all' ? `Only ${SCOPES[page].name}` : 'Anything instead'}
@@ -64,18 +58,15 @@ export default function Listen() {
         </div>
 
         {!text && (
-          <div className="card tight mt16" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <span className="cap">You can say</span>
-            <span className="sub" style={{ fontSize: 14 }}>{info.lead}{scope === 'lists' && listHint ? ` Now: ${listHint}.` : ''}</span>
-            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {info.examples.map((e) => <li key={e} style={{ fontSize: 15, lineHeight: '21px', fontWeight: 600 }}>“{e}”</li>)}
-            </ul>
-          </div>
+          <section className="try" aria-label="You can say">
+            <span className="try-cap"><I n="spark" s={12} />Try saying</span>
+            <ul>{info.examples.map((e) => <li key={e}>“{e}”</li>)}</ul>
+          </section>
         )}
 
         {supported ? (
-          <p style={{ marginTop: 24, fontSize: 27, lineHeight: '36px', fontWeight: 600, letterSpacing: -.5, minHeight: 108 }}>
-            {v.finalText || (!v.interim && <span className="muted">Go ahead — I’m listening…</span>)}
+          <p style={{ marginTop: text ? 24 : 12, fontSize: 27, lineHeight: '36px', fontWeight: 600, letterSpacing: -.5, minHeight: text ? 108 : 36 }}>
+            {v.finalText}
             {v.interim && <span className="muted"> {v.interim}</span>}
             {v.listening && <span className="car" />}
           </p>
@@ -100,6 +91,11 @@ export default function Listen() {
 
         <div className="vwave">
           <VoiceWave level={level} height={220} muted={!v.listening} />
+        </div>
+
+        <div className="hd" style={{ marginTop: 4 }}>
+          <Link to={scope === 'calendar' ? '/add?type=Event' : scope === 'lists' ? '/add?type=Shopping' : scope === 'notes' ? '/note/new' : '/add'} className="ib" aria-label="Type instead" onClick={() => v.stop()}><I n="keyboard" s={18} w={1.8} /></Link>
+          <span role="status" className="ib wide num" style={{ height: 40 }}><span style={{ width: 8, height: 8, borderRadius: 4, background: v.listening ? 'var(--red)' : 'var(--ink3)', boxShadow: v.listening ? '0 0 10px var(--red)' : 'none' }} />{Math.floor(secs / 60)}:{String(secs % 60).padStart(2, '0')}</span>
         </div>
 
         {empty && <p role="status" className="sub" style={{ textAlign: 'center', marginTop: 12 }}>I didn’t catch anything. Tap the mic to try again.</p>}

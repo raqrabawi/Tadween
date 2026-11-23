@@ -420,3 +420,11 @@ textarea.inp{resize:none;line-height:28px}
 .tabbar .mic{top:-28px;width:88px;height:88px;margin-left:-44px;border-radius:44px}
 .tabbar .mic .vorb{width:76px;height:76px;color:#111111}
 .tabbar .mic.cancel .vorb{color:#111111}
+
+/* "Try saying" suggestions: no box, just quiet lines that fade */
+.try{margin-top:28px}
+.try-cap{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--acc)}
+.try ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.try li{font-size:19px;line-height:26px;font-weight:600;letter-spacing:-.3px;color:var(--ink)}
+.try li:nth-child(2){opacity:.55}
+.try li:nth-child(3){opacity:.3}
