@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
+import { LogoMark } from './Logo'
 
-const WAVES = ['M15 25.5c4.8-5.9 10.4-8.8 17-8.8s12.2 2.9 17 8.8', 'M20.8 33c3.2-3.8 6.9-5.7 11.2-5.7s8 1.9 11.2 5.7', 'M26.5 40.5c1.6-1.8 3.4-2.7 5.5-2.7s3.9.9 5.5 2.7']
 
 /**
- * Launch splash: the listening-to-writing mark draws in (waves, then the voice dot, then the pen line),
+ * Launch splash: the T mark builds itself day by day (week, mic head, today, list item, note),
  * the bilingual name rises, and the whole thing fades away. Stays up while the app is still loading.
  */
 export function Splash({ ready, onGone }: { ready: boolean; onGone: () => void }) {
@@ -22,11 +22,7 @@ export function Splash({ ready, onGone }: { ready: boolean; onGone: () => void }
   return (
     <div className={leaving ? 'splash out' : 'splash'} role="status" aria-label="Tadween">
       <div className="splash-glow" aria-hidden="true" />
-      <svg className="splash-mark" width="112" height="112" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-        {WAVES.map((d, i) => <path key={d} d={d} className="sw" style={{ animationDelay: `${i * 0.12}s` }} stroke={dark ? '#DCE8D9' : '#627A6B'} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" pathLength={1} />)}
-        <circle cx="32" cy="48" r="3.8" className="sd" fill={dark ? '#E99168' : '#DE7449'} />
-        <path d="M36 48h13" className="sw pen" stroke={dark ? '#DCE8D9' : '#627A6B'} strokeWidth="3" strokeLinecap="round" pathLength={1} />
-      </svg>
+      <span className="splash-mark"><LogoMark size={112} dark={dark} animate /></span>
       <div className="splash-name">
         <span lang="ar">تدوين</span>
         <span lang="en">Tadween</span>

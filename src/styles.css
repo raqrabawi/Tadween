@@ -739,7 +739,7 @@ textarea.inp{resize:none;line-height:28px}
 .splash.out{opacity:0;transform:scale(1.04);pointer-events:none}
 .splash-glow{position:absolute;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--cta,#DE7449) 22%,transparent),transparent 68%);animation:spGlow 2.4s ease-in-out infinite}
 @keyframes spGlow{50%{transform:scale(1.12);opacity:.7}}
-.splash-mark{position:relative}
+.splash-mark{position:relative;display:inline-flex}
 .splash-mark .sw{stroke-dasharray:1;stroke-dashoffset:1;animation:spDraw .55s cubic-bezier(.4,0,.2,1) forwards}
 .splash-mark .pen{animation-delay:.62s}
 .splash-mark .sd{transform-origin:32px 48px;transform:scale(0);animation:spDot .45s .45s cubic-bezier(.34,1.8,.64,1) forwards}
@@ -1083,3 +1083,8 @@ html.light .card.lcard[class*="tone-"],html .light .card.lcard[class*="tone-"]{b
 .st-tone .tabs > :not(.tab-thumb){min-height:46px;gap:8px}
 .st-tone-hint{margin:0 6px 2px;font-size:13px;line-height:18px}
 .inv-what{margin:10px 6px 0;text-align:center}
+
+/* Logo mark: days pop in one by one (splash) */
+.lp-pop{transform:scale(0);opacity:0;animation:lpPop .5s cubic-bezier(.34,1.6,.64,1) forwards}
+@keyframes lpPop{to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.lp-pop{animation:none;transform:none;opacity:1}}

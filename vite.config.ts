@@ -13,7 +13,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'script-defer',
-      includeAssets: ['icon.svg', 'google.svg'],
+      includeAssets: ['icon.svg', 'google.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Tadween — just say it',
         short_name: 'Tadween',
@@ -27,7 +27,7 @@ export default defineConfig({
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       // Fonts are cached the first time they're used, not all 50+ files up front
