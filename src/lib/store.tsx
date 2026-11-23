@@ -156,7 +156,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setMembers(famMembers.map((m) => ({ ...m, name: prof.data?.find((x) => x.id === m.user_id)?.name })))
     }
     setCategories((cats.data ?? []) as Category[])
-    setLists((ls.data ?? []) as List[])
+    setLists(((ls.data ?? []) as List[]).map((l) => ({ ...l, staples: l.staples ?? [] })))
     setItems((its.data ?? []) as Item[])
     setEvents((evs.data ?? []) as EventRow[])
     setReminders((rems.data ?? []) as Reminder[])
@@ -200,7 +200,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     // Family sync for shared lists: refresh every 15 s and whenever the app comes back into view
     const refresh = async () => {
       const [ls, its] = await Promise.all([db.from('lists').select('*').order('created_at'), db.from('list_items').select('*').order('created_at')])
-      if (ls.data) setLists(ls.data as List[])
+      if (ls.data) setLists((ls.data as List[]).map((l) => ({ ...l, staples: l.staples ?? [] })))
       if (its.data) setItems(its.data as Item[])
     }
     const t = setInterval(() => { if (document.visibilityState === 'visible') refresh() }, 15000)

@@ -38,7 +38,7 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
   const groups: Record<string, typeof todo> = {}
   for (const it of todo) (groups[shared && list.verb === 'buy' ? it.aisle ?? '' : ''] ??= []).push(it)
   const have = new Set(mine.filter((i) => !i.done).map((i) => i.name.toLowerCase()))
-  const staples = list.staples.filter((s) => !have.has(s.toLowerCase()))
+  const staples = (list.staples ?? []).filter((s) => !have.has(s.toLowerCase()))
 
   const lp = useLongPress(() => onActions(list))
   const submit = async () => {
