@@ -161,7 +161,7 @@ export const AR: Record<string, string> = {
   'Continue with Apple': 'المتابعة مع Apple', 'Sign in with Apple': 'تسجيل الدخول مع Apple', 'Sign up with Apple': 'التسجيل مع Apple',
   'Continue with Google': 'المتابعة مع Google', 'Sign in with Google': 'تسجيل الدخول مع Google', 'Sign up with Google': 'التسجيل مع Google',
   'Opening Apple…': 'جارٍ فتح Apple…', 'Opening Google…': 'جارٍ فتح Google…', 'Continue with email': 'المتابعة بالبريد الإلكتروني', 'or with email': 'أو بالبريد الإلكتروني',
-  '{provider} sign-in isn’t switched on yet. Use email for now.': 'تسجيل الدخول عبر {provider} غير مفعّل بعد. استخدم البريد الإلكتروني حاليًا.',
+  '{provider} sign-in isn’t switched on yet.': 'تسجيل الدخول عبر {provider} غير مفعّل بعد.',
   'Can’t reach sign-in right now ({error}). Check your connection and try again.': 'تعذّر الوصول لتسجيل الدخول الآن ({error}). تحقق من اتصالك وحاول مجددًا.',
   'Email': 'البريد الإلكتروني', 'you@example.com': 'you@example.com', 'Your name': 'اسمك', 'Step {n} of 3': 'الخطوة {n} من 3', 'Start your': 'ابدأ',
   'We’ll email you a 6-digit code. No password to remember.': 'سنرسل لك رمزًا من 6 أرقام. لا كلمة مرور لتتذكرها.', 'Send code': 'أرسل الرمز', 'Email me a code': 'أرسل لي رمزًا', 'Sending…': 'جارٍ الإرسال…',

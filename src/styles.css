@@ -699,9 +699,9 @@ textarea.inp{resize:none;line-height:28px}
 .tadween .fld.focus{box-shadow:0 0 0 2px #DE7449}
 .tadween :focus-visible{outline-color:#DE7449}
 /* Voice: terracotta orb with dashed halo */
-.tadween .vorb{background:linear-gradient(135deg,color-mix(in srgb,var(--cta) 92%,white),var(--cta));color:var(--orbInk);
+.tadween .vorb{background:linear-gradient(135deg,color-mix(in srgb,var(--cta) 92%,black),var(--cta));color:var(--ctaInk);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.38),0 10px 22px color-mix(in srgb,var(--cta) 26%,transparent)}
-.tadween .tabbar .mic .vorb{color:var(--orbInk)}
+.tadween .tabbar .mic .vorb{color:var(--ctaInk)}
 .tadween .tabbar .mic .vorb::after{border-color:var(--orbRing)}
 .tadween .ring{border-color:var(--cta)}
 .tadween .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(222,116,73,.13),transparent 70%),var(--bg)}

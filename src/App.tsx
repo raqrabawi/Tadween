@@ -3,7 +3,6 @@ import { useStore } from './lib/store'
 import { Spinner, TabBar, GlobalToast } from './components/ui'
 import { SavePrompt } from './components/SignIn'
 import Welcome from './screens/Welcome'
-import { Login, Register, Verify } from './screens/Auth'
 import Setup from './screens/Setup'
 import Today from './screens/Today'
 import Calendar from './screens/Calendar'
@@ -44,10 +43,8 @@ export default function App() {
         <Route path="/settings/accessibility" element={<Accessibility />} />
         <Route path="/setup" element={<Setup />} />
         <Route path="/welcome" element={session ? <Navigate to="/" replace /> : <Welcome />} />
-        <Route path="/auth/login" element={session ? <Navigate to="/" replace /> : <Login />} />
-        <Route path="/auth/register" element={session ? <Navigate to="/" replace /> : <Register />} />
-        <Route path="/auth/verify" element={session ? <Navigate to="/" replace /> : <Verify />} />
-        <Route path="/auth/email" element={<Navigate to="/auth/register" replace />} />
+        {/* Email sign-in is switched off: Google only (phone codes to come) */}
+        <Route path="/auth/*" element={<Navigate to={session ? '/' : '/welcome'} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       {TAB_ROUTES.includes(loc.pathname) && <TabBar />}
