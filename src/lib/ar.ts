@@ -34,7 +34,7 @@ export const AR: Record<string, string> = {
   'Shop together, live.': 'تسوّقوا معًا، لحظة بلحظة.', 'Shared lists update for everyone instantly, and you can see who added what.': 'القوائم المشتركة تتحدّث للجميع فورًا، وترى من أضاف ماذا.',
   'Private & bilingual': 'خاص وثنائي اللغة', 'Yours, in your language.': 'لك، وبلغتك.', 'No account needed: everything stays on your phone. Back it up to a file, or sign in to sync.': 'بدون حساب: كل شيء يبقى على هاتفك. احفظ نسخة في ملف، أو سجّل الدخول للمزامنة.',
   '“Dentist Monday at 5, remind me the day before”': '«طبيب الأسنان الاثنين الساعة 5، وذكّرني قبلها بيوم»', 'Dentist': 'طبيب الأسنان', 'Mon · 17:00': 'الاثنين · 17:00', 'Sun · 17:00': 'الأحد · 17:00',
-  'Lunch with Sara': 'غداء مع سارة', 'Trip ideas': 'أفكار للرحلة', 'Beach, then dinner out': 'البحر، ثم عشاء برّا', 'Pay the rent': 'دفع الإيجار', 'on the 1st': 'يوم 1 من الشهر',
+  'Lunch with Sara': 'غداء مع سارة', 'Trip ideas': 'أفكار للرحلة', '{n} ideas': '{n} أفكار', 'Beach, then dinner out': 'البحر، ثم عشاء برّا', 'Pay the rent': 'دفع الإيجار', 'on the 1st': 'يوم 1 من الشهر',
   'Olive oil': 'زيت زيتون', 'Tomatoes': 'بندورة', 'Sara added Olive oil': 'سارة أضافت زيت زيتون', 'Backup file': 'ملف احتياطي', 'Sync when you want': 'مزامنة متى شئت',
 
   // Accessibility

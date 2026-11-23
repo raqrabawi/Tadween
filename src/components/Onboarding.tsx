@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
+import type React from 'react'
 import { I } from './Icon'
 import { LogoMark } from './Logo'
 import { signInWithGoogle } from './SignIn'
-import { isAr, LOC, t } from '../lib/i18n'
+import { isAr, t } from '../lib/i18n'
 import { haptic } from '../lib/a11y'
 
 export const ONBOARD_KEY = 'tadween-onboarded'
@@ -20,19 +21,33 @@ function Voice() {
     </div>
   )
 }
+/* One thread through the day: a pen stroke weaves past four kinds of item */
+const THREAD = 'M171 0C60 25 60 70 171 95S282 165 171 190S60 260 171 285S282 355 171 380'
 function AllInOne() {
+  const items = [
+    { k: 'reminder', ic: 'bell', time: '08:00', type: t('Reminder'), title: t('Pay the rent'), body: <small>{t('on the 1st')}</small> },
+    { k: 'event', ic: 'cal', time: '13:00', type: t('Event'), title: t('Lunch with Sara'), body: <span className="ob-av">S</span> },
+    { k: 'item', ic: 'list', time: '17:30', type: t('List'), title: t('Groceries'), body: <span className="ob-prog"><i /><small>2/5</small></span> },
+    { k: 'note', ic: 'pen', time: '21:00', type: t('Note'), title: t('Trip ideas'), body: <small>{t('{n} ideas', { n: 3 })}</small> },
+  ]
   return (
-    <div className="ob-ill ob-bento">
-      <div className="ob-tile t1"><span className="ob-dot" style={{ background: 'var(--k-event)' }}><I n="cal" s={15} /></span>
-        <div className="ob-tb">
-          <div className="ob-week">{[1, 2, 3, 4, 5].map((n, i) => <span key={n} className={i === 2 ? 'on' : ''}>{new Date(2026, 10, 22 + n).toLocaleDateString(LOC, { weekday: 'narrow' })}</span>)}</div>
-          <b>{t('Lunch with Sara')}</b><small>13:00</small></div></div>
-      <div className="ob-tile t2"><span className="ob-dot" style={{ background: 'var(--k-item)' }}><I n="list" s={15} /></span>
-        <div className="ob-tb ob-lis">{[t('Milk'), t('Bread'), t('Eggs')].map((x, i) => <span key={x} className={i === 0 ? 'ob-li done' : 'ob-li'}><i />{x}</span>)}</div></div>
-      <div className="ob-tile t3"><span className="ob-dot" style={{ background: 'var(--k-note)' }}><I n="pen" s={15} /></span>
-        <div className="ob-tb"><b>{t('Trip ideas')}</b><small>{t('Beach, then dinner out')}</small></div></div>
-      <div className="ob-tile t4"><span className="ob-dot" style={{ background: 'var(--k-reminder)' }}><I n="bell" s={15} /></span>
-        <div className="ob-tb"><b>{t('Pay the rent')}</b><small>{t('on the 1st')}</small></div></div>
+    <div className="ob-ill ob-thread">
+      <svg className="ob-path" viewBox="0 0 342 380" preserveAspectRatio="none" aria-hidden="true">
+        <path d={THREAD} pathLength={1} />
+      </svg>
+      {items.map((x, i) => (
+        <div key={x.k} className={'ob-stop s' + i} style={{ '--kc': `var(--k-${x.k})` } as React.CSSProperties}>
+          <span className="ob-node" />
+          <div className="ob-card">
+            <span className="ob-dot"><I n={x.ic} s={15} /></span>
+            <div className="ob-cb">
+              <span className="ob-meta">{x.type} · {x.time}</span>
+              <b>{x.title}</b>
+            </div>
+            <div className="ob-cx">{x.body}</div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
