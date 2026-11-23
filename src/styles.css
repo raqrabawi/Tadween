@@ -246,7 +246,7 @@ textarea.inp{resize:none;line-height:28px}
   --bg:#FAF8F5; --s1:#FFFFFF; --s1-solid:#FFFFFF; --s2:#F3EFEA; --s3:#E8E4DD;
   --ink:#23272A; --ink2:rgba(35,39,42,.82); --ink3:#646E73; --line:#E8E4DD;
   --acc:#3D6B5E; --on:#FFFFFF; --sea:#3D6B5E; --hotInk:#FFFFFF; --em:#3D6B5E;
-  --cta:#E08E26; --ctaFlat:#E08E26; --ctaInk:#1E201F; --ctaPress:#C97B18; --ctaRing:rgba(224,142,38,.4); --ctaEdge:#C97B18; --ctaGlow:rgba(224,142,38,.3);
+  --cta:#E08E26; --ctaFlat:#E08E26; --ctaInk:#FFFFFF; --ctaPress:#C97B18; --ctaRing:rgba(224,142,38,.4); --ctaEdge:#C97B18; --ctaGlow:rgba(224,142,38,.3);
   --grn:#3D6B5E; --mint:#3D6B5E; --teal:#3D6B5E; --sun:#9A5A0A; --honey:#9A5A0A; --red:#B8573A; --urgent:#D97757;
   --hot:linear-gradient(160deg,#4A7C6E 0%,#3D6B5E 55%,#33594E 100%);
   --edge:inset 0 0 0 1px #E8E4DD; --shadow:0 1px 2px rgba(35,39,42,.04);
@@ -254,7 +254,7 @@ textarea.inp{resize:none;line-height:28px}
   --inkBtn:#23272A; --inkBtnText:#FAF8F5;
   --field:#FFFFFF; --fieldSep:#E8E4DD;
   --swOn:#3D6B5E; --swOff:#E8E4DD; --segTrack:#F3EFEA; --segOn:#FFFFFF;
-  --orbHi:#FDE9C6; --orbMid:#F0A843; --orbLo:#E08E26; --orbDeep:#A8620F; --orbInk:#1E201F; --orbRing:rgba(224,142,38,.45);
+  --orbHi:#FDE9C6; --orbMid:#F0A843; --orbLo:#E08E26; --orbDeep:#A8620F; --orbInk:#FFFFFF; --orbRing:rgba(224,142,38,.45);
   --k-event:#D6E6F2; --k-reminder:#F6ECC9; --k-item:#CFE3DB; --k-note:#E4DFF2; --k-task:#F7DFD4;
 }
 .marigold.dark,.marigold .dark{
@@ -262,7 +262,7 @@ textarea.inp{resize:none;line-height:28px}
   --bg:#181A19; --s1:#232625; --s1-solid:#232625; --s2:#2C302E; --s3:#343836;
   --ink:#F2EFE9; --ink2:rgba(242,239,233,.82); --ink3:#9CA3A8; --line:#343836;
   --acc:#5C9484; --on:#181A19; --sea:#3D6B5E; --hotInk:#F2EFE9; --em:#5C9484;
-  --cta:#F0A843; --ctaFlat:#F0A843; --ctaInk:#181A19; --ctaPress:#F5B861; --ctaRing:rgba(240,168,67,.45); --ctaEdge:#F5B861; --ctaGlow:rgba(240,168,67,.3);
+  --cta:#F0A843; --ctaFlat:#F0A843; --ctaInk:#FFFFFF; --ctaPress:#F5B861; --ctaRing:rgba(240,168,67,.45); --ctaEdge:#F5B861; --ctaGlow:rgba(240,168,67,.3);
   --grn:#5C9484; --mint:#5C9484; --teal:#5C9484; --sun:#F0A843; --honey:#F0A843; --red:#E38E71; --urgent:#E38E71;
   --hot:linear-gradient(160deg,#3F6F62 0%,#335A4F 55%,#2A4A41 100%);
   --edge:inset 0 0 0 1px #343836; --shadow:0 1px 2px rgba(0,0,0,.25);
@@ -270,7 +270,7 @@ textarea.inp{resize:none;line-height:28px}
   --inkBtn:#F2EFE9; --inkBtnText:#181A19;
   --field:#2C302E; --fieldSep:#343836;
   --swOn:#5C9484; --swOff:#3A3F3C; --segTrack:#2C302E; --segOn:#434946;
-  --orbHi:#FDE9C6; --orbMid:#F0A843; --orbLo:#E08E26; --orbDeep:#9A5A0A; --orbInk:#181A19; --orbRing:rgba(240,168,67,.45);
+  --orbHi:#FDE9C6; --orbMid:#F0A843; --orbLo:#E08E26; --orbDeep:#9A5A0A; --orbInk:#FFFFFF; --orbRing:rgba(240,168,67,.45);
   --k-event:#D6E6F2; --k-reminder:#F6ECC9; --k-item:#CFE3DB; --k-note:#E4DFF2; --k-task:#F7DFD4;
 }
 /* Family pastels for the five card tones */
@@ -418,8 +418,8 @@ textarea.inp{resize:none;line-height:28px}
 .tabbar nav a.tb-link.on .tb-lbl{color:var(--acc);font-weight:700}
 .tabbar nav.tb-nav{-webkit-mask:radial-gradient(circle 46px at 50% 0,transparent 45px,#000 46px);mask:radial-gradient(circle 46px at 50% 0,transparent 45px,#000 46px)}
 .tabbar .mic{top:-28px;width:88px;height:88px;margin-left:-44px;border-radius:44px}
-.tabbar .mic .vorb{width:76px;height:76px;color:#111111}
-.tabbar .mic.cancel .vorb{color:#111111}
+.tabbar .mic .vorb{width:76px;height:76px;color:#FFFFFF}
+.tabbar .mic.cancel .vorb{color:#FFFFFF}
 
 /* "Try saying" suggestions: no box, just quiet lines that fade */
 .try{margin-top:28px}
