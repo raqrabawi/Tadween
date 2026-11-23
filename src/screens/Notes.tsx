@@ -11,11 +11,11 @@ import { LOC, t } from '../lib/i18n'
 const TONES = ['mint', 'sky', 'sand', 'lilac', 'moss']
 
 export default function Notes() {
-  const { notes, saveNote, noteCategories, addCategory, deleteCategory } = useStore()
+  const { notes, saveNote, noteCategories, addCategory, deleteCategory, renameCategory } = useStore()
   const nav = useNavigate()
   // null = All
   const [cat, setCat] = useState<string | null>(() => { try { return sessionStorage.getItem('tadween-notecat') || null } catch { return null } })
-  const [editing, setEditing] = useState(false)
+  const [renaming, setRenaming] = useState(false)
   const [adding, setAdding] = useState(false)
   const [catName, setCatName] = useState('')
   const current = noteCategories.find((c) => c.id === cat) ?? null
@@ -34,6 +34,15 @@ export default function Notes() {
     setAdding(false); setCatName('')
     if (c) setCat(c.id)
   }
+  const saveRename = async () => {
+    const name = catName.trim()
+    if (current && name && name !== t(current.name)) await renameCategory(current.id, name)
+    setRenaming(false); setCatName('')
+  }
+  const removeCat = () => {
+    if (!current || !confirm(t('Delete “{name}”? Its notes stay, under All.', { name: t(current.name) }))) return
+    void deleteCategory(current.id); setCat(null)
+  }
   const now = new Date()
   const shown = notes.filter((n) => !current || n.category_id === current.id)
   const countIn = (id: string) => notes.filter((n) => n.category_id === id).length
@@ -49,27 +58,27 @@ export default function Notes() {
           <h1 className="h1">{t('Notes')}</h1>
         </div>
         <div className="row" style={{ gap: 8 }}>
-          <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? t('Done') : t('Edit')}</button>
           <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
         </div>
       </div>
 
       <div className="rowhead">
         <span className="cap" id="ncats-label">{t('Categories')}</span>
-        {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />{t('Add category')}</button>}
+        <div className="cat-tools">
+          <button className="ib sm" aria-label={t('Add category')} onClick={() => { setRenaming(false); setAdding(true) }}><I n="plus" s={15} w={2.4} /></button>
+          <button className="ib sm" aria-label={current ? t('Rename category {name}', { name: current.name }) : t('Pick a category to rename')} disabled={!current} onClick={() => { if (!current) return; setAdding(false); setCatName(t(current.name)); setRenaming(true) }}><I n="pen" s={15} w={2.2} /></button>
+          <button className="ib sm danger" aria-label={current ? t('Delete category {name}', { name: current.name }) : t('Pick a category to delete')} disabled={!current} onClick={removeCat}><I n="trash" s={15} w={2.2} /></button>
+        </div>
       </div>
       <div className="tabs-wrap">
-        <Tabs active={`${current?.id ?? ''}|${editing}|${adding}`} className="scroll" role="tablist" aria-labelledby="ncats-label">
-          {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat(null)}>{t('All')}<span className="n">{notes.length}</span></button>}
-          {noteCategories.map((c) => editing ? (
-            <span key={c.id} className="chip" style={{ paddingRight: 10 }}>{t(c.name)}
-              <button aria-label={t('Delete category {name}', { name: c.name })} onClick={() => { if (confirm(t('Delete “{name}”? Its notes stay, under All.', { name: c.name }))) { deleteCategory(c.id); if (cat === c.id) setCat(null) } }} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
-            </span>
-          ) : (
+        <Tabs active={`${current?.id ?? ''}|${adding}|${renaming}`} className="scroll" role="tablist" aria-labelledby="ncats-label">
+          <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat(null)}>{t('All')}<span className="n">{notes.length}</span></button>
+          {noteCategories.map((c) => (
             <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{t(c.name)}<span className="n">{countIn(c.id)}</span></button>
           ))}
         </Tabs>
         {adding && <CategoryAdd id="ncatname" value={catName} onChange={setCatName} onDone={saveCat} onCancel={() => { setAdding(false); setCatName('') }} />}
+        {renaming && current && <CategoryAdd id="ncat-rename" rename value={catName} onChange={setCatName} onDone={saveRename} onCancel={() => { setRenaming(false); setCatName('') }} />}
       </div>
 
       {shown.length === 0 ? (

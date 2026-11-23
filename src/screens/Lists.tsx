@@ -125,13 +125,13 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
 }
 
 export default function Lists() {
-  const { categories, lists, items, addCategory, deleteCategory, addList, addItem, updateList, deleteList, family, guest, setSavePrompt } = useStore()
+  const { categories, lists, items, addCategory, deleteCategory, renameCategory, addList, addItem, updateList, deleteList, family, guest, setSavePrompt } = useStore()
   // 'all' shows every list, including ones with no category
   const [cat, setCat] = useState<string>('all')
   const [act, setAct] = useState<List | null>(null)
   const [moving, setMoving] = useState(false)
   const [listCat, setListCat] = useState<string>('')
-  const [editing, setEditing] = useState(false)
+  const [renaming, setRenaming] = useState(false)
   const [adding, setAdding] = useState(false)
   const [catName, setCatName] = useState('')
   const [newList, setNewList] = useState(false)
@@ -156,6 +156,15 @@ export default function Lists() {
     const c = await addCategory(name)
     setAdding(false); setCatName('')
     if (c) setCat(c.id)
+  }
+  const saveRename = async () => {
+    const name = catName.trim()
+    if (current && name && name !== t(current.name)) await renameCategory(current.id, name)
+    setRenaming(false); setCatName('')
+  }
+  const removeCat = () => {
+    if (!current || !confirm(t('Delete “{name}” and its lists?', { name: t(current.name) }))) return
+    void deleteCategory(current.id); setCat('all')
   }
   const openNewList = () => { setListCat(current?.id ?? ''); setNewList(true) }
   const saveList = async () => {
@@ -206,31 +215,31 @@ export default function Lists() {
           <h1 className="h1">{t('Lists')}</h1>
         </div>
         <div className="row" style={{ gap: 8 }}>
-          <button className={editing ? 'ib wide acc' : 'ib wide'} aria-pressed={editing} onClick={() => setEditing(!editing)}>{editing ? t('Done') : t('Edit')}</button>
           <Link to="/settings" className="ib" aria-label={t('Settings')}><I n="gear" s={19} /></Link>
         </div>
       </div>
 
       <div className="rowhead">
         <span className="cap" id="cats-label">{t('Categories')}</span>
-        {!adding && <button className="addmini" onClick={() => setAdding(true)}><I n="plus" s={13} w={2.6} />{t('Add category')}</button>}
+        <div className="cat-tools">
+          <button className="ib sm" aria-label={t('Add category')} onClick={() => { setRenaming(false); setAdding(true) }}><I n="plus" s={15} w={2.4} /></button>
+          <button className="ib sm" aria-label={current ? t('Rename category {name}', { name: current.name }) : t('Pick a category to rename')} disabled={!current} onClick={() => { if (!current) return; setAdding(false); setCatName(t(current.name)); setRenaming(true) }}><I n="pen" s={15} w={2.2} /></button>
+          <button className="ib sm danger" aria-label={current ? t('Delete category {name}', { name: current.name }) : t('Pick a category to delete')} disabled={!current} onClick={removeCat}><I n="trash" s={15} w={2.2} /></button>
+        </div>
       </div>
       <div className="tabs-wrap">
-        <Tabs active={`${current?.id ?? 'all'}|${editing}|${adding}`} className="scroll" role="tablist" aria-labelledby="cats-label">
-          {!editing && <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat('all')}>{t('All')}<span className="n">{lists.length}</span></button>}
-          {categories.map((c) => editing ? (
-            <span key={c.id} className={c.id === current?.id ? 'chip on' : 'chip'} style={{ paddingRight: 10 }}>{t(c.name)}
-              <button aria-label={t('Delete category {name}', { name: c.name })} onClick={() => confirm(t('Delete “{name}” and its lists?', { name: c.name })) && deleteCategory(c.id)} style={{ width: 24, height: 24, borderRadius: 12, background: 'var(--red)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><svg width="10" height="10" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" strokeWidth="4" strokeLinecap="round" /></svg></button>
-            </span>
-          ) : (
+        <Tabs active={`${current?.id ?? 'all'}|${adding}|${renaming}`} className="scroll" role="tablist" aria-labelledby="cats-label">
+          <button role="tab" aria-selected={!current} className={!current ? 'chip on' : 'chip'} onClick={() => setCat('all')}>{t('All')}<span className="n">{lists.length}</span></button>
+          {categories.map((c) => (
             <button key={c.id} role="tab" aria-selected={c.id === current?.id} className={c.id === current?.id ? 'chip on' : 'chip'} onClick={() => setCat(c.id)}>{t(c.name)}<span className="n">{openCount(c.id)}</span></button>
           ))}
         </Tabs>
         {adding && <CategoryAdd id="catname" value={catName} onChange={setCatName} onDone={saveCat} onCancel={() => { setAdding(false); setCatName('') }} />}
+        {renaming && current && <CategoryAdd id="cat-rename" rename value={catName} onChange={setCatName} onDone={saveRename} onCancel={() => { setRenaming(false); setCatName('') }} />}
       </div>
 
       <div className="stack mt16" role="tabpanel">
-        {shown.map((l) => <ListCard key={l.id} list={l} editing={editing} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? t('No category')} />)}
+        {shown.map((l) => <ListCard key={l.id} list={l} editing={false} onActions={(x) => { setMoving(false); setAct(x) }} catName={current ? undefined : catOf(l) ?? t('No category')} />)}
         {!shown.length && <div className="card empty"><span className="ttl">{current ? t('No lists in {name} yet', { name: current.name }) : t('No lists yet')}</span><span className="sub">{t('Make one, or just say “add milk to groceries”.')}</span></div>}
         {lists.length > 0 && <p className="sub" style={{ textAlign: 'center', fontSize: 13 }}>{t('Tip: press and hold a list for more actions.')}</p>}
         <button className="btn dash" style={{ height: 56, color: 'var(--ink2)', fontSize: 16 }} onClick={openNewList}><I n="plus" s={18} w={2.4} />{current ? t('New list in {name}', { name: current.name }) : t('New list')}</button>

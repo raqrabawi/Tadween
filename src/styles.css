@@ -955,7 +955,7 @@ select.val option{color:initial}
 .tabs-wrap{position:relative}
 .tabs-cover{position:absolute;inset:0;z-index:3;display:flex;align-items:center;gap:6px;padding:4px 4px 4px 16px;border-radius:999px;
   background:color-mix(in srgb,var(--s1-solid) 92%,transparent);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);
-  box-shadow:inset 0 1px 0 var(--tabEdge),0 0 0 2px var(--acc),0 8px 20px -12px rgba(0,0,0,.3);animation:tcIn .32s cubic-bezier(.22,1.2,.36,1) both}
+  box-shadow:inset 0 0 0 2px var(--acc),inset 0 1px 0 var(--tabEdge),0 8px 20px -12px rgba(0,0,0,.3);animation:tcIn .32s cubic-bezier(.22,1.2,.36,1) both}
 [dir="rtl"] .tabs-cover{padding:4px 16px 4px 4px}
 .tabs-cover .tc-ic{color:var(--acc);flex:none}
 .tabs-cover .inp{flex:1;min-width:0;font-size:16px}
@@ -1016,3 +1016,9 @@ select.val option{color:initial}
 .cal-now span{position:absolute;inset-inline-start:-54px;top:-9px;font-size:11px;font-weight:700;color:var(--cta)}
 .cal-allday{position:absolute;top:8px;inset-inline-end:10px;display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--ti,#E6DDF0);font-size:12px;font-weight:600;color:#1B2230}
 @media (prefers-reduced-motion:reduce){.cal-week,.cal-month,.cal-tl,.cal-nav-txt{animation:none}}
+
+/* Category tools: add / rename / delete, small icon buttons beside the "Categories" label */
+.cat-tools{display:flex;gap:6px}
+.cat-tools .ib.sm{width:36px;height:36px}
+.cat-tools .ib.sm:disabled{opacity:.35;pointer-events:none}
+.cat-tools .ib.sm.danger{color:var(--red)}

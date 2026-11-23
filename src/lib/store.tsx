@@ -34,6 +34,7 @@ interface Store {
   reload: () => Promise<void>
   addCategory: (name: string, scope?: 'lists' | 'notes') => Promise<Category | null>
   deleteCategory: (id: string) => Promise<void>
+  renameCategory: (id: string, name: string) => Promise<void>
   updateList: (id: string, patch: Partial<Pick<List, 'category_id' | 'family_id' | 'title'>>) => Promise<void>
   addList: (categoryId: string | null, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => Promise<void>
   deleteList: (id: string) => Promise<void>
@@ -314,6 +315,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     await db.from('categories').delete().eq('id', id)
   }, [uid, nudge])
 
+  const renameCategory = useCallback(async (id: string, name: string) => {
+    setCategories((c) => c.map((x) => (x.id === id ? { ...x, name } : x)))
+    if (!uid) { nudge(); return }
+    await db.from('categories').update({ name }).eq('id', id)
+  }, [uid, nudge])
+
   const addList = useCallback(async (categoryId: string | null, title: string, opts?: { shared?: boolean; tone?: Tone; verb?: string }) => {
     const tone = opts?.tone ?? TONES[lists.length % TONES.length]
     if (!uid) {
@@ -450,10 +457,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Store>(() => ({
     ready, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
-    setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
+    setTheme, setPalette, updateProfile, reload: loadAll, addCategory, deleteCategory, renameCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor
   }), [ready, offline, guest, savePrompt, setSavePrompt, authError, session, profile, family, members, categories, noteCategories, lists, items, events, reminders, notes, loading, theme, palette,
-    setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
+    setTheme, setPalette, updateProfile, loadAll, addCategory, deleteCategory, renameCategory, addList, updateList, deleteList, addItem, toggleItem, resetDone,
     addEvent, addReminder, toggleReminder, saveNote, deleteNote, saveDrafts, joinFamily, memberFor])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
