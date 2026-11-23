@@ -9,7 +9,7 @@ import { Avatar, Sheet, Switch } from '../components/ui'
 const PALETTES = [
   { id: 'marigold' as const, label: 'Marigold', meta: 'Sage & sun', light: ['#FAF8F5', '#3D6B5E', '#E08E26'], dark: ['#181A19', '#5C9484', '#F0A843'] },
   { id: 'linen' as const, label: 'Linen', meta: 'Teal & seafoam', light: ['#F5F2EC', '#075056', '#177A61'], dark: ['#0F181D', '#7CC6CA', '#5BE3BE'] },
-  { id: 'classic' as const, label: 'Classic', meta: 'Ink & cobalt', light: ['#F6F6F3', '#1F2733', '#2F5BEA'], dark: ['#0F1115', '#D5DBE6', '#4C6EF5'] }
+  { id: 'classic' as const, label: 'Classic', meta: 'Paper & ink', light: ['#F3EDE2', '#5B4332', '#A3432C'], dark: ['#1D1915', '#D9C4A6', '#C65A3B'] }
 ]
 
 export default function Settings() {

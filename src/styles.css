@@ -446,57 +446,59 @@ textarea.inp{resize:none;line-height:28px}
 .addfield{background:#FFFFFF;box-shadow:inset 0 0 0 1px rgba(22,35,42,.08)}
 .dark .addfield{background:var(--s2);box-shadow:none}
 
-/* ── Palette: Classic — Ink & Cobalt. Paper neutrals, charcoal structure, cobalt actions ── */
+/* ── Palette: Classic — Paper & Ink. A notebook/diary feel: cream pages, sepia ink, leather structure, ribbon-red actions, serif headings ── */
 .classic.light,.classic .light{
   color-scheme:light;
-  --bg:#F6F6F3; --s1:#FFFFFF; --s1-solid:#FFFFFF; --s2:#EEEEEA; --s3:#E2E2DD;
-  --ink:#1B1F27; --ink2:rgba(27,31,39,.82); --ink3:#5F6570; --line:#E2E2DD;
-  --acc:#1F2733; --on:#FFFFFF; --sea:#1F2733; --hotInk:#FFFFFF; --em:#2F5BEA;
-  --cta:#2F5BEA; --ctaFlat:#2F5BEA; --ctaInk:#FFFFFF; --ctaPress:#2449C9; --ctaRing:rgba(47,91,234,.35); --ctaEdge:#2449C9; --ctaGlow:rgba(47,91,234,.28);
-  --grn:#1F2733; --mint:#2F5BEA; --teal:#1F2733; --sun:#9A5A0A; --honey:#9A5A0A; --red:#C2362B; --urgent:#C2362B;
-  --hot:linear-gradient(160deg,#2E3746 0%,#1F2733 55%,#171D26 100%);
-  --edge:inset 0 0 0 1px #E2E2DD; --shadow:0 1px 2px rgba(27,31,39,.04);
+  --bg:#F3EDE2; --s1:#FBF8F2; --s1-solid:#FBF8F2; --s2:#EBE3D5; --s3:#E0D6C5;
+  --ink:#2E2721; --ink2:rgba(46,39,33,.82); --ink3:#6E6257; --line:#E0D6C5;
+  --acc:#5B4332; --on:#FBF8F2; --sea:#5B4332; --hotInk:#F7EFE2; --em:#A3432C;
+  --cta:#A3432C; --ctaFlat:#A3432C; --ctaInk:#FFFFFF; --ctaPress:#8C3824; --ctaRing:rgba(163,67,44,.32); --ctaEdge:#8C3824; --ctaGlow:rgba(163,67,44,.25);
+  --grn:#5E6E4C; --mint:#5E6E4C; --teal:#5B4332; --sun:#8A5A12; --honey:#8A5A12; --red:#A3432C; --urgent:#A3432C;
+  --hot:#5B4332;
+  --edge:inset 0 0 0 1px #E0D6C5; --shadow:0 1px 2px rgba(60,40,20,.05);
   --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
-  --inkBtn:#1B1F27; --inkBtnText:#FFFFFF;
-  --field:#FFFFFF; --fieldSep:#E2E2DD;
-  --swOn:#2F5BEA; --swOff:#E2E2DD; --segTrack:#EEEEEA; --segOn:#FFFFFF;
-  --orbInk:#FFFFFF; --orbRing:rgba(47,91,234,.35);
-  --k-event:#D9E3FB; --k-reminder:#F4E8CC; --k-item:#D4ECE3; --k-note:#E5E0F6; --k-task:#F5DCDA;
+  --inkBtn:#2E2721; --inkBtnText:#FBF8F2;
+  --field:#FBF8F2; --fieldSep:#E0D6C5;
+  --swOn:#5B4332; --swOff:#E0D6C5; --segTrack:#EBE3D5; --segOn:#FBF8F2;
+  --orbInk:#FFFFFF; --orbRing:rgba(163,67,44,.3);
+  --k-event:#D9E1E6; --k-reminder:#F1E4C3; --k-item:#DCE3D0; --k-note:#E4DCE6; --k-task:#F0D9CF;
 }
 .classic.dark,.classic .dark{
   color-scheme:dark;
-  --bg:#0F1115; --s1:#181B22; --s1-solid:#181B22; --s2:#20242D; --s3:#2A2F3A;
-  --ink:#ECEEF3; --ink2:rgba(236,238,243,.82); --ink3:#9AA1AE; --line:#2A2F3A;
-  --acc:#D5DBE6; --on:#0F1115; --sea:#1F2733; --hotInk:#ECEEF3; --em:#7D98FF;
-  --cta:#4C6EF5; --ctaFlat:#4C6EF5; --ctaInk:#FFFFFF; --ctaPress:#5F7DF7; --ctaRing:rgba(76,110,245,.45); --ctaEdge:#5F7DF7; --ctaGlow:rgba(76,110,245,.3);
-  --grn:#7D98FF; --mint:#7D98FF; --teal:#7D98FF; --sun:#E8B45C; --honey:#E8B45C; --red:#FF7B6B; --urgent:#FF7B6B;
-  --hot:linear-gradient(160deg,#2A3140 0%,#212734 55%,#1A1F29 100%);
-  --edge:inset 0 0 0 1px #2A2F3A; --shadow:0 1px 2px rgba(0,0,0,.25);
+  --bg:#1D1915; --s1:#27221C; --s1-solid:#27221C; --s2:#302A23; --s3:#3A332B;
+  --ink:#EFE6D8; --ink2:rgba(239,230,216,.82); --ink3:#A89B8A; --line:#3A332B;
+  --acc:#D9C4A6; --on:#1D1915; --sea:#5B4332; --hotInk:#F2E8D9; --em:#E08A68;
+  --cta:#C65A3B; --ctaFlat:#C65A3B; --ctaInk:#FFFFFF; --ctaPress:#D26A4A; --ctaRing:rgba(198,90,59,.42); --ctaEdge:#D26A4A; --ctaGlow:rgba(198,90,59,.28);
+  --grn:#A9B88F; --mint:#A9B88F; --teal:#D9C4A6; --sun:#E2B66A; --honey:#E2B66A; --red:#E08A68; --urgent:#E08A68;
+  --hot:#4A372A;
+  --edge:inset 0 0 0 1px #3A332B; --shadow:0 1px 2px rgba(0,0,0,.25);
   --a1:transparent; --a2:transparent; --a3:transparent; --dot:transparent;
-  --inkBtn:#ECEEF3; --inkBtnText:#0F1115;
-  --field:#20242D; --fieldSep:#2A2F3A;
-  --swOn:#4C6EF5; --swOff:#363C48; --segTrack:#20242D; --segOn:#363C48;
-  --orbInk:#FFFFFF; --orbRing:rgba(76,110,245,.45);
-  --k-event:#D9E3FB; --k-reminder:#F4E8CC; --k-item:#D4ECE3; --k-note:#E5E0F6; --k-task:#F5DCDA;
+  --inkBtn:#EFE6D8; --inkBtnText:#1D1915;
+  --field:#302A23; --fieldSep:#3A332B;
+  --swOn:#C65A3B; --swOff:#443C33; --segTrack:#302A23; --segOn:#463E34;
+  --orbInk:#FFFFFF; --orbRing:rgba(198,90,59,.42);
+  --k-event:#D9E1E6; --k-reminder:#F1E4C3; --k-item:#DCE3D0; --k-note:#E4DCE6; --k-task:#F0D9CF;
 }
-.classic .tone-mint{--tc:212,236,227;--ti:#D4ECE3}
-.classic .tone-sky{--tc:217,227,251;--ti:#D9E3FB}
-.classic .tone-sand{--tc:244,232,204;--ti:#F4E8CC}
-.classic .tone-lilac{--tc:229,224,246;--ti:#E5E0F6}
-.classic .tone-moss{--tc:245,220,218;--ti:#F5DCDA}
+.classic .tone-mint{--tc:220,227,208;--ti:#DCE3D0}
+.classic .tone-sky{--tc:217,225,230;--ti:#D9E1E6}
+.classic .tone-sand{--tc:241,228,195;--ti:#F1E4C3}
+.classic .tone-lilac{--tc:228,220,230;--ti:#E4DCE6}
+.classic .tone-moss{--tc:240,217,207;--ti:#F0D9CF}
 .classic .card,.classic .gl,.classic .tabbar nav{-webkit-backdrop-filter:none;backdrop-filter:none}
-.classic.light .card[class*="tone-"],.classic .light .card[class*="tone-"]{background:color-mix(in srgb,rgb(var(--tc)) 42%,#FFFFFF);box-shadow:inset 0 0 0 1px rgb(var(--tc)),var(--shadow)}
-.classic.dark .card[class*="tone-"],.classic .dark .card[class*="tone-"]{background:linear-gradient(rgba(var(--tc),.12),rgba(var(--tc),.12)),var(--s1);box-shadow:inset 0 0 0 1px rgba(var(--tc),.28),var(--shadow)}
+.classic.light .card[class*="tone-"],.classic .light .card[class*="tone-"]{background:color-mix(in srgb,rgb(var(--tc)) 45%,#FBF8F2);box-shadow:inset 0 0 0 1px rgb(var(--tc)),var(--shadow)}
+.classic.dark .card[class*="tone-"],.classic .dark .card[class*="tone-"]{background:linear-gradient(rgba(var(--tc),.1),rgba(var(--tc),.1)),var(--s1);box-shadow:inset 0 0 0 1px rgba(var(--tc),.24),var(--shadow)}
 .classic.dark [class*="tone-"] .ttl,.classic .dark [class*="tone-"] .ttl{color:rgb(var(--tc))}
-.classic .hot .pw.on{background:#7D98FF}
-.classic .hot .ib{color:#1F2733}
-.classic .vorb{background:radial-gradient(circle at 32% 26%,#8EA6FF 0,#4C6EF5 40%,#2F5BEA 70%,#1F43C4 100%);color:#FFFFFF;
-  box-shadow:inset 0 1px 2px rgba(255,255,255,.45),inset 0 -8px 16px rgba(10,20,80,.25),0 0 0 1px var(--orbRing),0 12px 28px -12px rgba(30,60,180,.55)}
+.classic .hot .pw.on{background:#E2B66A}
+.classic .hot .ib{color:#5B4332}
+.classic .vorb{background:var(--cta);color:#FFFFFF;box-shadow:0 0 0 1px var(--orbRing),0 10px 24px -12px rgba(120,40,20,.55)}
 .classic .tabbar .mic .vorb::after{border-color:var(--orbRing)}
-.classic .ring{border-color:#4C6EF5}
-.classic .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(47,91,234,.14),transparent 70%),var(--bg)}
-.classic.dark .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(76,110,245,.22),transparent 70%),var(--bg)}
-.light.classic .tabbar nav.tb-nav,.classic .light .tabbar nav.tb-nav{background:#FFFFFF}
+.classic .ring{border-color:var(--cta)}
+.classic .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(163,67,44,.1),transparent 70%),var(--bg)}
+.classic.dark .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(198,90,59,.16),transparent 70%),var(--bg)}
+.light.classic .tabbar nav.tb-nav,.classic .light .tabbar nav.tb-nav{background:#FBF8F2}
+/* Diary type: serif headings and titles */
+.classic .h1,.classic .ttl,.classic .hd3 h1,.classic h1,.classic h2{font-family:"New York",ui-serif,"Iowan Old Style",Georgia,"Times New Roman",serif;letter-spacing:-.2px}
+.classic .h1{font-weight:600}
 
 /* Theme thumb: light and dark halves, each showing structure + action colour */
 .thm-prev{height:56px}
