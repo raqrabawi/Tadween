@@ -94,7 +94,7 @@ export default function Today() {
       if (!st.lock && card) go(Number(card.dataset.i))
       return
     }
-    const step = deckW.current * 0.62
+    const step = deckW.current * 0.9
     const dir = isAr ? -1 : 1
     const moved = (Math.round(-drag / step) || (Math.abs(drag) > 50 ? (drag < 0 ? 1 : -1) : 0)) * dir
     go(top + moved)
@@ -121,14 +121,15 @@ export default function Today() {
           <div className={drag ? 'up-deck dragging' : 'up-deck'} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={() => { start.current = null; setDrag(0) }}
             tabIndex={0} onKeyDown={(e) => { if (e.key === 'ArrowRight') go(top + (isAr ? -1 : 1)); if (e.key === 'ArrowLeft') go(top + (isAr ? 1 : -1)) }}>
             {upNext.map((u, i) => {
-              const o = (i - top) * (isAr ? -1 : 1) + drag / (deckW.current * 0.62)
+              const o = (i - top) * (isAr ? -1 : 1) + drag / (deckW.current * 0.9)
               if (Math.abs(i - top) > 2) return null
               const a = Math.min(Math.abs(o), 1.6)
               const isTop = i === top
               const style: React.CSSProperties = {
                 zIndex: 10 - Math.round(a * 3),
-                transform: `translateX(${o * 82}%) scale(${1 - a * 0.12}) rotateY(${-Math.max(-1, Math.min(1, o)) * 10}deg)`,
-                opacity: 1 - Math.min(a, 1) * 0.6
+                // Wide cards; the neighbours just peek in at the edges
+                transform: `translateX(${o * 97}%) scale(${1 - a * 0.06}) rotateY(${-Math.max(-1, Math.min(1, o)) * 6}deg)`,
+                opacity: 1 - Math.min(a, 1) * 0.45
               }
               return (
               <article key={u.key} data-i={i} className={isTop ? 'card hot up-card' : 'card hot up-card side'} style={style} aria-hidden={!isTop} aria-roledescription="slide" aria-label={t('{i} of {n}: {title}', { i: i + 1, n, title: u.title })}>

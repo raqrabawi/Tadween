@@ -41,8 +41,6 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
   const others = members.filter((m) => m.family_id === list.family_id)
   const groups: Record<string, typeof todo> = {}
   for (const it of todo) (groups[shared && list.verb === 'buy' ? it.aisle ?? '' : ''] ??= []).push(it)
-  const have = new Set(mine.filter((i) => !i.done).map((i) => i.name.toLowerCase()))
-  const staples = (list.staples ?? []).filter((s) => !have.has(s.toLowerCase()))
 
   const lp = useLongPress(() => onActions(list))
   const submit = async () => {
@@ -105,13 +103,6 @@ function ListCard({ list, editing, onActions, catName }: { list: List; editing: 
               })}
             </div>
           ))}
-
-          {staples.length > 0 && (
-            <div className="row" style={{ paddingBlock: '10px 2px', paddingInline: '66px 20px', gap: 6, flexWrap: 'wrap' }}>
-              <span className="sub muted" style={{ fontSize: 13 }}>{t('Usually')}</span>
-              {staples.map((s) => <button key={s} className="tag sm" style={{ background: 'transparent', boxShadow: 'inset 0 0 0 1px var(--line)' }} onClick={() => addItem(list.id, s, t('Usual amount'), 'Pantry')}>+ {t(s)}</button>)}
-            </div>
-          )}
 
           <form className="row addfield" style={{ margin: '8px 12px 12px', minHeight: 52, borderRadius: 26, paddingInline: '16px 6px', gap: 10, color: 'var(--ink3)' }} onSubmit={(e) => { e.preventDefault(); submit() }}>
             <I n="plus" s={18} w={2.2} />
