@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from './lib/store'
 import { Spinner, TabBar, GlobalToast } from './components/ui'
 import { SavePrompt } from './components/SignIn'
@@ -26,6 +26,7 @@ const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes']
 export default function App() {
   const { ready, session, profile, guest } = useStore()
   const loc = useLocation()
+  const nav = useNavigate()
 
   const [splash, setSplash] = useState(true)
   const [onboard, setOnboard] = useState(needsOnboarding)
@@ -61,7 +62,7 @@ export default function App() {
       {TAB_ROUTES.includes(loc.pathname) && <TabBar />}
       {!onboard && <SavePrompt />}
       <GlobalToast />
-      {onboard && !session && <Onboarding onDone={() => setOnboard(false)} />}
+      {onboard && !session && <Onboarding live={!splash} onDone={() => { setOnboard(false); if (loc.pathname !== '/') nav('/', { replace: true }) }} />}
     </div>
     {splashEl}
     </>

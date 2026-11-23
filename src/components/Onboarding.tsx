@@ -96,7 +96,7 @@ const SLIDES = [
   { k: 'Private & bilingual', title: 'Yours, in your language.', body: 'No account needed: everything stays on your phone. Back it up to a file, or sign in to sync.', Ill: Private, tone: 'sand' }
 ]
 
-export function Onboarding({ onDone }: { onDone: () => void }) {
+export function Onboarding({ onDone, live = true }: { onDone: () => void; live?: boolean }) {
   const [i, setI] = useState(0)
   const [drag, setDrag] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -126,7 +126,7 @@ export function Onboarding({ onDone }: { onDone: () => void }) {
         onPointerCancel={() => { start.current = null; setDrag(0) }}>
         <div className={drag ? 'ob-rail dragging' : 'ob-rail'} style={{ transform: `translateX(calc(${-i * 100 * dir}% + ${drag}px))` }}>
           {SLIDES.map((s, n) => (
-            <section key={s.k} className={n === i ? 'ob-slide on' : 'ob-slide'} aria-hidden={n !== i} aria-roledescription="slide" aria-label={`${n + 1} / ${SLIDES.length}`}>
+            <section key={s.k} className={n === i && live ? 'ob-slide on' : 'ob-slide'} aria-hidden={n !== i} aria-roledescription="slide" aria-label={`${n + 1} / ${SLIDES.length}`}>
               <s.Ill />
               <div className="ob-copy">
                 <span className="ob-k">{t(s.k)}</span>
