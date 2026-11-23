@@ -393,7 +393,7 @@ textarea.inp{resize:none;line-height:28px}
 .tabbar.tucked{transform:translateX(-50%) translateY(calc(100% + 10px))}
 .tabbar.tucked .mic{transform:translateY(-34px) scale(.86)}
 .tb-shell{position:absolute;left:0;right:0;bottom:0;height:68px;filter:drop-shadow(0 14px 22px rgba(35,39,42,.16)) drop-shadow(0 2px 4px rgba(35,39,42,.08));pointer-events:none}
-.tabbar nav.tb-nav{pointer-events:auto;position:absolute;inset:0;height:68px;border-radius:26px;padding:0 6px;display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:center;background:color-mix(in srgb,var(--s1-solid) 92%,transparent);box-shadow:inset 0 0 0 1px var(--line);
+.tabbar nav.tb-nav{pointer-events:auto;position:absolute;inset:0;height:68px;border-radius:26px;padding:0 6px;display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:center;background:var(--s1-solid);box-shadow:inset 0 0 0 1px var(--line);
   -webkit-mask:radial-gradient(circle 43px at 50% 0,transparent 42px,#000 43px);mask:radial-gradient(circle 43px at 50% 0,transparent 42px,#000 43px)}
 .marigold.light .tabbar nav.tb-nav,.marigold .light .tabbar nav.tb-nav{background:#FFFFFF}
 /* the gliding pill */
@@ -718,7 +718,7 @@ textarea.inp{resize:none;line-height:28px}
 .tadween .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(222,116,73,.13),transparent 70%),var(--bg)}
 .tadween.dark .lvw{background:radial-gradient(420px 380px at 50% 74%,rgba(233,145,104,.18),transparent 70%),var(--bg)}
 /* Tab bar: glass with a soft selected surface */
-.tadween .tabbar nav.tb-nav{background:color-mix(in srgb,var(--s1-solid) 92%,transparent);-webkit-backdrop-filter:var(--glass-filter);backdrop-filter:var(--glass-filter);box-shadow:inset 0 0 0 1px var(--line)}
+.tadween .tabbar nav.tb-nav{background:var(--s1-solid);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:inset 0 0 0 1px var(--line)}
 .tadween .tb-link.on{color:var(--acc)}
 /* Arabic letterforms stay untracked */
 [dir="rtl"].tadween .h1,[dir="rtl"] .tadween .h1{letter-spacing:0}

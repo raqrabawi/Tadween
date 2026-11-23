@@ -1,5 +1,6 @@
 import { isAr } from './i18n'
 import { getTone } from './tone'
+import { db } from './db'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /* Speech in the browser:
@@ -83,7 +84,52 @@ const STYLE: Record<string, { rate: number; pitch: number }> = {
   Bright: { rate: 1.08, pitch: 1.12 }
 }
 
+/* Natural "AI" voice: a cloud voice (Azure neural, Jordanian Arabic) through the `tts` Neon function.
+   Used when you're signed in and the voice service is set up; otherwise the phone's own voice speaks. */
+const TTS_URL = 'https://br-lucky-boat-b9q7v5vp-tts.compute.c-7.eu-central-1.aws.neon.tech/'
+const clips = new Map<string, string>() // text → audio URL, so repeated lines don't cost again
+let aiOff = false // set when the service says it isn't set up, so we stop asking this session
+// One audio element, unlocked during the tap so iPhones let it play once the clip arrives
+let player: HTMLAudioElement | null = null
+const SILENT = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC1CQEwTJ9mjRvBA4UOLD8nKVOWfh+UlK3z/177OXrfOdKl7pyn3Xf//WreyTRUoAWgBgkOAGbZHBgG1OF6zM82DWbZaUmMBptgQhGjsyYqc9ae9XFz280948NMBWInljyzsNRFLPWdnZGWrddDsjK1unuSrVN9jJsK8KuQtQCtMBjCEtImISdNKJOopIpBFpNSMbIHCSRpRR5iakjTiyzLhchUUBwCgyKiweBv/7UsQbg8isVNoMPMjAAAA0gAAABEVFGmgqK////9bP/6XCykxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'
+let turn = 0
+
+async function aiSpeak(text: string, myTurn: number, onEnd?: () => void): Promise<boolean> {
+  if (aiOff) return false
+  try {
+    const key = `${isAr ? 'ar' : 'en'}|${getTone()}|${text}`
+    let url = clips.get(key)
+    if (!url) {
+      const { data } = await db.auth.getSession()
+      const token = (data?.session as { access_token?: string } | null)?.access_token
+      if (!token) return false
+      const r = await fetch(TTS_URL, { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ text, lang: isAr ? 'ar' : 'en', tone: getTone() }) })
+      if (r.status === 503) { aiOff = true; return false }
+      if (!r.ok) return false
+      url = URL.createObjectURL(await r.blob())
+      if (clips.size > 40) { const [k, u] = clips.entries().next().value as [string, string]; URL.revokeObjectURL(u); clips.delete(k) }
+      clips.set(key, url)
+    }
+    if (myTurn !== turn) return true // stopped or replaced while loading
+    if (!player) player = new Audio()
+    player.src = url
+    player.onended = () => onEnd?.()
+    player.onerror = () => onEnd?.()
+    await player.play()
+    return true
+  } catch { return false }
+}
+
 export function speak(text: string, style = 'Warm', onEnd?: () => void) {
+  const myTurn = ++turn
+  if (!player) player = new Audio()
+  player.pause(); player.onended = null; player.onerror = null
+  player.src = SILENT; player.play().catch(() => undefined)
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+  void aiSpeak(text, myTurn, onEnd).then((ok) => { if (!ok && myTurn === turn) phoneSpeak(text, style, onEnd) })
+}
+
+function phoneSpeak(text: string, style: string, onEnd?: () => void) {
   if (!('speechSynthesis' in window)) { onEnd?.(); return }
   window.speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(text)
@@ -104,4 +150,4 @@ export function speak(text: string, style = 'Warm', onEnd?: () => void) {
   window.speechSynthesis.speak(u)
 }
 
-export const stopSpeaking = () => { if ('speechSynthesis' in window) window.speechSynthesis.cancel() }
+export const stopSpeaking = () => { turn++; player?.pause(); if ('speechSynthesis' in window) window.speechSynthesis.cancel() }
