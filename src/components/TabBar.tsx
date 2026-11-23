@@ -15,39 +15,35 @@ const TABS = [
 ] as const
 
 /**
- * Tab icons: rounded line drawings that turn duotone when selected — a soft tint of the
- * tab colour plus one terracotta detail (the rising sun, today's square, the ticked box,
- * the handwriting) so the nav carries the brand's voice colour.
+ * Tab icons: minimal 1.7px line icons; the selected tab switches to a solid version of the
+ * same shape (negative space keeps the detail). One colour only, nothing decorative.
  */
+const NAV: Record<string, { off: string[]; on: string[]; onStroke?: string }> = {
+  today: {
+    off: ['M4 10.5L12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5H15v-5h-6v5H5.5A1.5 1.5 0 0 1 4 19z'],
+    on: ['M12 3.2a1 1 0 0 1 .63.22l7.9 6.4c.3.24.47.6.47.98V19a2 2 0 0 1-2 2h-4v-5.5h-6V21H5a2 2 0 0 1-2-2v-8.2c0-.38.17-.74.47-.98l7.9-6.4A1 1 0 0 1 12 3.2z']
+  },
+  calendar: {
+    off: ['M6 4.5h12a2.5 2.5 0 0 1 2.5 2.5v11a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 18V7A2.5 2.5 0 0 1 6 4.5zM3.5 9.5h17M8 2.75v3.5M16 2.75v3.5'],
+    on: ['M6 4h12a3 3 0 0 1 3 3v1.6H3V7a3 3 0 0 1 3-3zM3 10.2h18V18a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z'],
+    onStroke: 'M8 2.5v3M16 2.5v3'
+  },
+  lists: {
+    off: ['M9 6.5h11M9 12h11M9 17.5h11', 'M4.75 5.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM4.75 10.75a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM4.75 16.25a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5z'],
+    on: ['M9 5.3h11a1.2 1.2 0 0 1 0 2.4H9a1.2 1.2 0 0 1 0-2.4zM9 10.8h11a1.2 1.2 0 0 1 0 2.4H9a1.2 1.2 0 0 1 0-2.4zM9 16.3h11a1.2 1.2 0 0 1 0 2.4H9a1.2 1.2 0 0 1 0-2.4zM4.75 4.7a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6zM4.75 10.2a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6zM4.75 15.7a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6z']
+  },
+  notes: {
+    off: ['M7 3.5h10a2.5 2.5 0 0 1 2.5 2.5v12a2.5 2.5 0 0 1-2.5 2.5H7A2.5 2.5 0 0 1 4.5 18V6A2.5 2.5 0 0 1 7 3.5zM8.5 9h7M8.5 12.5h7M8.5 16h4'],
+    on: ['M7 3h10a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zM8.5 8.2v1.6h7V8.2zM8.5 11.7v1.6h7v-1.6zM8.5 15.2v1.6h4v-1.6z']
+  }
+}
 function NavIcon({ name, on }: { name: string; on: boolean }) {
-  const tint = on ? 'currentColor' : 'none'
-  const cta = on ? 'var(--cta)' : 'currentColor'
-  const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  const ic = NAV[name]
   return (
-    <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" {...common}>
-      {name === 'today' && <>
-        <path d="M6.5 18.5a5.5 5.5 0 0 1 11 0z" fill={on ? 'var(--cta)' : 'none'} stroke={cta} />
-        <path d="M12 8.5v2M5.3 11.8l1.4 1.4M18.7 11.8l-1.4 1.4M3 18.5h18M8.5 21.5h7" />
-      </>}
-      {name === 'calendar' && <>
-        <path d="M3.5 10V8.5a3.5 3.5 0 0 1 3.5-3.5h10a3.5 3.5 0 0 1 3.5 3.5V10z" fill={tint} fillOpacity={0.18} stroke="none" />
-        <rect x="3.5" y="5" width="17" height="15.5" rx="3.5" />
-        <path d="M3.5 10h17M8 3v4M16 3v4" />
-        <rect x="13" y="13" width="4" height="4" rx="1.2" fill={on ? 'var(--cta)' : 'none'} stroke={cta} />
-      </>}
-      {name === 'lists' && <>
-        <circle cx="5.5" cy="6.5" r="2.4" fill={on ? 'var(--cta)' : 'none'} stroke={cta} />
-        {on && <path d="M4.4 6.5l.8.8 1.5-1.6" stroke="var(--ctaInk, #fff)" strokeWidth="1.4" />}
-        <circle cx="5.5" cy="12.5" r="2.4" fill={tint} fillOpacity={0.18} />
-        <circle cx="5.5" cy="18.5" r="2.4" fill={tint} fillOpacity={0.18} />
-        <path d="M10.5 6.5h10M10.5 12.5h10M10.5 18.5h6.5" />
-      </>}
-      {name === 'notes' && <>
-        <path d="M6 3.5h9l4.5 4.5v11.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-14a2 2 0 0 1 2-2z" fill={tint} fillOpacity={0.18} />
-        <path d="M15 3.5V8h4.5" />
-        <path d="M7.5 13.2c1.2-1.5 2.4-1.5 3.6 0s2.4 1.5 3.6 0" stroke={cta} />
-        <path d="M7.5 17h5" />
-      </>}
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" strokeLinecap="round" strokeLinejoin="round">
+      {on
+        ? <>{ic.on.map((d) => <path key={d} d={d} fill="currentColor" fillRule="evenodd" />)}{ic.onStroke && <path d={ic.onStroke} fill="none" stroke="currentColor" strokeWidth="2" />}</>
+        : ic.off.map((d, i) => <path key={d} d={d} fill={name === 'lists' && i === 1 ? 'currentColor' : 'none'} stroke={name === 'lists' && i === 1 ? 'none' : 'currentColor'} strokeWidth="1.7" />)}
     </svg>
   )
 }

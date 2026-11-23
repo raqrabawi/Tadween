@@ -405,7 +405,7 @@ textarea.inp{resize:none;line-height:28px}
 .tb-link.on .tb-ic{animation:tbPop .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes tbPop{0%{transform:scale(.6) rotate(-12deg)}60%{transform:scale(1.18) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
 /* tiny sparks when a tab is picked */
-.tb-link.on .tb-ic::before,.tb-link.on .tb-ic::after{content:"";position:absolute;width:4px;height:4px;border-radius:2px;background:var(--cta,var(--acc));top:12px;left:50%;opacity:0;animation:tbSpark .55s ease-out .08s}
+.tb-link.on .tb-ic::before,.tb-link.on .tb-ic::after{display:none;content:"";position:absolute;width:4px;height:4px;border-radius:2px;background:var(--cta,var(--acc));top:12px;left:50%;opacity:0;animation:tbSpark .55s ease-out .08s}
 .tb-link.on .tb-ic::after{animation-name:tbSpark2;background:var(--acc)}
 @keyframes tbSpark{0%{opacity:1;transform:translate(-2px,0) scale(1)}100%{opacity:0;transform:translate(-20px,-12px) scale(.3)}}
 @keyframes tbSpark2{0%{opacity:1;transform:translate(-2px,0) scale(1)}100%{opacity:0;transform:translate(16px,-14px) scale(.3)}}
