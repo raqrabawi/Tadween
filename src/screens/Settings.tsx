@@ -13,7 +13,6 @@ import { SHOW_TONE_PICKER } from '../lib/flags'
 import { loadA11y, saveA11y, SIZES, type A11y } from '../lib/a11y'
 import { PHONE_READY } from '../lib/phone'
 import { PhoneFlow } from '../components/PhoneFlow'
-import { signInWithGoogle } from '../components/SignIn'
 import { downloadBackup, makeBackup, readBackup, restoreBackup } from '../lib/backup'
 
 const PALETTES = [
@@ -57,7 +56,6 @@ export default function Settings() {
   const pickTone = (v: Tone) => { setTone(v); setToneState(v); speak(say('sample'), profile?.voice_style) }
   const pickLang = (l: 'en' | 'ar') => { if (l === lang) return; setLangPick(l); window.setTimeout(() => setLang(l), 380) }
   const speakOn = !!profile?.speak_replies
-  const [signing, setSigning] = useState(false)
   const backup = async () => {
     await downloadBackup(makeBackup({ profile: { name: profile?.name, voice_style: profile?.voice_style, speak_replies: profile?.speak_replies, morning_brief: profile?.morning_brief, close_day: profile?.close_day }, categories: [...categories, ...noteCategories], lists, items, events, reminders, notes }))
     announce(t('Backup saved'))
@@ -98,9 +96,7 @@ export default function Settings() {
                 <span className="ell" style={{ fontSize: 12, opacity: .8 }}>{t('Every device, plus family lists')}</span>
               </span>
             </span>
-            <button className="tag st-invite" disabled={signing} onClick={async () => { setSigning(true); const e = await signInWithGoogle(); if (e) { setSigning(false); announce(e) } }}>
-              <img src={import.meta.env.BASE_URL + 'google.svg'} width={15} height={15} alt="" />{signing ? t('Opening…') : t('Sign in')}
-            </button>
+            <Link to="/auth/email" className="tag st-invite"><I n="user" s={15} />{t('Sign in')}</Link>
           </div>
         ) : (
         <div className="st-fam">

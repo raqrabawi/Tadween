@@ -3,7 +3,7 @@ import { db } from './db'
 /**
  * Phone sign-in (SMS codes) through Neon Auth's Phone Number plugin.
  * Neon only allows phone sign-in for people who already have an account with a verified phone,
- * so the flow is: sign up with Google → add your phone in Settings → next time, sign in with phone.
+ * so the flow is: sign up with email → add your phone in Settings → next time, sign in with phone.
  *
  * Switch PHONE_READY on once the SMS provider keys are set on the `smsotp` Neon function
  * and the phone plugin + send.otp webhook are enabled. Until then the entry points stay hidden.
@@ -45,7 +45,7 @@ const friendly = (e?: { message?: string; status?: number } | null) => {
   const m = (e?.message ?? '').toLowerCase()
   if (e?.status === 429 || /rate|too many/.test(m)) return 'Too many tries. Wait a minute and try again.'
   if (/invalid|incorrect|expired/.test(m)) return 'That code didn’t work. Check it, or send a new one.'
-  if (/not found|no user|not exist/.test(m)) return 'No Tadween account uses this number yet. Sign in with Google, then add your phone in Settings.'
+  if (/not found|no user|not exist/.test(m)) return 'No Tadween account uses this number yet. Sign in with email, then add your phone in Settings.'
   return 'We couldn’t send a code right now. Try again in a moment.'
 }
 

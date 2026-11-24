@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import type React from 'react'
+import { useNavigate } from 'react-router-dom'
 import { I } from './Icon'
 import { LogoMark } from './Logo'
-import { signInWithGoogle } from './SignIn'
 import { isAr, t } from '../lib/i18n'
 import { haptic } from '../lib/a11y'
 
@@ -99,7 +99,7 @@ const SLIDES = [
 export function Onboarding({ onDone, live = true }: { onDone: () => void; live?: boolean }) {
   const [i, setI] = useState(0)
   const [drag, setDrag] = useState(0)
-  const [busy, setBusy] = useState(false)
+  const nav = useNavigate()
   const start = useRef<{ x: number; y: number; lock?: 'x' | 'y' } | null>(null)
   const w = useRef(390)
   const last = i === SLIDES.length - 1
@@ -143,8 +143,8 @@ export function Onboarding({ onDone, live = true }: { onDone: () => void; live?:
         {last ? (
           <div className="stack" style={{ gap: 10, width: '100%' }}>
             <button className="btn pri" onClick={finish}>{t('Start using Tadween')}<I n="next" s={16} w={2.6} /></button>
-            <button className="btn line" disabled={busy} onClick={async () => { setBusy(true); try { localStorage.setItem(ONBOARD_KEY, '1') } catch { /* */ } const e = await signInWithGoogle(); if (e) { setBusy(false); finish() } }}>
-              <img src={import.meta.env.BASE_URL + 'google.svg'} width={18} height={18} alt="" />{busy ? t('Opening…') : t('Sign in with Google')}
+            <button className="btn line" onClick={() => { finish(); nav('/auth/email') }}>
+              <I n="mail" s={17} />{t('Sign in')}
             </button>
           </div>
         ) : (

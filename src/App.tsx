@@ -31,6 +31,7 @@ const Settings = page(() => import('./screens/Settings'))
 const Accessibility = page(() => import('./screens/Accessibility'))
 const PhoneSignIn = page(() => import('./screens/PhoneSignIn'))
 const Join = page(() => import('./screens/Join'))
+const EmailAuth = page(() => import('./screens/EmailAuth'))
 
 const TAB_ROUTES = ['/', '/calendar', '/lists', '/notes', '/settings']
 
@@ -78,7 +79,7 @@ export default function App() {
         <Route path="/setup" element={<Setup />} />
         <Route path="/join/:token" element={<Join />} />
         <Route path="/welcome" element={session ? <Navigate to="/" replace /> : <Welcome />} />
-        {/* Email sign-in is switched off: Google only (phone codes to come) */}
+        <Route path="/auth/email" element={session ? <Navigate to="/" replace /> : <EmailAuth />} />
         {PHONE_READY && <Route path="/auth/phone" element={session ? <Navigate to="/" replace /> : <PhoneSignIn />} />}
         <Route path="/auth/*" element={<Navigate to={session ? '/' : '/welcome'} replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
